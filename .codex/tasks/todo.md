@@ -79,3 +79,33 @@
 - 2026-07-20 13:07 JST: `pnpm install` initially failed with sandbox EPERM creating `/Users/genki.sano/.cache/node/corepack/v1`; reran with approval and succeeded.
 - 2026-07-20 13:08 JST: `pnpm test` succeeded; Vitest reported no test files found and exited 0.
 - 2026-07-20 13:08 JST: `pnpm typecheck` succeeded for `@shared-expense/shared`.
+
+## Task 7: Inventory Existing Repositories Before Porting Business Logic
+
+### Checklist
+
+- [x] Confirm required old repository directories
+- [x] Clone missing old repositories into `../temp`
+- [x] Run required `rg` inventory search
+- [x] Read relevant old source files
+- [x] Create `docs/migration/existing-inventory.md`
+- [x] Run inventory placeholder scan
+- [x] Commit existing MM inventory
+
+### Progress Log
+
+- 2026-07-20 13:17 JST: Started Task 7 in `.worktrees/implementation` before Tasks 2, 4, and 5.
+- 2026-07-20 13:17 JST: Confirmed `../temp/mm-server`, `../temp/mm-client`, and `../temp/mm-gas` were absent.
+- 2026-07-20 13:17 JST: Cloned all three required repositories into `../temp`.
+- 2026-07-20 13:17 JST: Ran the required cross-repository `rg` search and read relevant API, Spreadsheet, GAS, LINE, and settlement source files.
+- 2026-07-20 13:17 JST: Created `docs/migration/existing-inventory.md` from observed source facts only.
+- 2026-07-20 13:17 JST: Prepared commit `docs: inventory existing mm behavior`.
+- 2026-07-20 13:25 JST: Addressed CHANGES_REQUIRED by adding compatibility risks for old Spreadsheet columns, mapper conversion, date conversion, and GAS/Cron cutover.
+
+### Verification Log
+
+- 2026-07-20 13:17 JST: `git clone https://github.com/genki-sano/mm-server ../temp/mm-server` first failed in the sandbox with `Could not resolve host: github.com`; reran with network approval and succeeded.
+- 2026-07-20 13:17 JST: `git clone https://github.com/genki-sano/mm-client ../temp/mm-client` first failed in the sandbox with `Could not resolve host: github.com`; reran with network approval and succeeded.
+- 2026-07-20 13:17 JST: `git clone https://github.com/genki-sano/mm-gas ../temp/mm-gas` first failed in the sandbox with `Could not resolve host: github.com`; reran with network approval and succeeded.
+- 2026-07-20 13:17 JST: `rg -n "router|app\\.|fetch|Spreadsheet|Sheet|LINE|line|cron|trigger|settle|精算|notify|通知" ../temp/mm-server ../temp/mm-client ../temp/mm-gas` succeeded and returned matches across API, client, Spreadsheet, LINE, and GAS code.
+- 2026-07-20 13:17 JST: `rg -n "<[^>]+>|TBD|TODO|Describe|空|未確認" docs/migration/existing-inventory.md` exited 1 with no output, matching the expected no-match result.
