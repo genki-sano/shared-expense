@@ -164,3 +164,55 @@
 - 2026-07-20 13:37 JST: `pnpm test packages/shared/src/domain/user.test.ts` failed as expected; non-household `user_x` returned `user_a` instead of `null`.
 - 2026-07-20 13:38 JST: `pnpm test packages/shared/src/domain/user.test.ts packages/shared/src/domain/settlement.test.ts` passed with 6 tests across 2 files.
 - 2026-07-20 13:38 JST: `pnpm typecheck` passed for `@shared-expense/shared`.
+
+## Task 3: Notification Event and Deduplication Domain
+
+### Checklist
+
+- [x] Write failing notification tests
+- [x] Verify RED with `pnpm test packages/shared/src/domain/notification.test.ts`
+- [x] Implement notification event ID and deduplication domain
+- [x] Export shared notification domain APIs
+- [x] Verify GREEN with targeted notification test
+- [x] Run `pnpm typecheck`
+- [x] Commit notification domain rules
+
+### Progress Log
+
+- 2026-07-20 13:41 JST: Started Task 3 in `.worktrees/implementation`.
+- 2026-07-20 13:42 JST: Added notification domain tests before implementation.
+- 2026-07-20 13:42 JST: Implemented notification event ID builders, delivery deduplication rule, and shared exports.
+- 2026-07-20 13:43 JST: Prepared commit `feat: add notification domain rules`.
+
+## Task 3 Quality Review Fix: Notification Deduplication Key
+
+### Checklist
+
+- [x] Add failing exact-key and mismatch-key notification tests
+- [x] Verify RED with `pnpm test packages/shared/src/domain/notification.test.ts`
+- [x] Add `NotificationDeduplicationKey` and require it in `shouldSendNotification`
+- [x] Filter histories by exact `eventType`, `eventId`, and `sentToUserId`
+- [x] Export `NotificationDeduplicationKey`
+- [x] Verify GREEN with targeted notification test
+- [x] Run `pnpm typecheck`
+- [x] Amend Task 3 commit
+
+### Progress Log
+
+- 2026-07-20 13:47 JST: Started CHANGES_REQUIRED fix for notification deduplication key handling.
+- 2026-07-20 13:47 JST: Added tests for exact-key success/skipped suppression and mismatch-key success history ignoring.
+- 2026-07-20 13:47 JST: Updated `shouldSendNotification` to require a deduplication key and consider only exact matching histories.
+
+### Verification Log
+
+- 2026-07-20 13:41 JST: Baseline `pnpm test packages/shared/src/domain/settlement.test.ts` passed with 3 tests.
+- 2026-07-20 13:42 JST: `pnpm test packages/shared/src/domain/notification.test.ts` failed as expected because `./notification` did not exist.
+- 2026-07-20 13:42 JST: `pnpm test packages/shared/src/domain/notification.test.ts` passed with 7 tests.
+- 2026-07-20 13:42 JST: `pnpm typecheck` passed for `@shared-expense/shared`.
+- 2026-07-20 13:42 JST: Final pre-commit `pnpm test packages/shared/src/domain/notification.test.ts` passed with 7 tests.
+- 2026-07-20 13:42 JST: Final pre-commit `pnpm typecheck` passed for `@shared-expense/shared`.
+- 2026-07-20 13:47 JST: `pnpm test packages/shared/src/domain/notification.test.ts` failed as expected with 3 failing mismatch-key cases: different `eventId`, `sentToUserId`, and `eventType` success histories returned false instead of true.
+- 2026-07-20 13:47 JST: `pnpm test packages/shared/src/domain/notification.test.ts` passed with 12 tests.
+- 2026-07-20 13:48 JST: `pnpm typecheck` passed for `@shared-expense/shared`.
+- 2026-07-20 13:48 JST: Final pre-amend `pnpm test packages/shared/src/domain/notification.test.ts` passed with 12 tests.
+- 2026-07-20 13:48 JST: Final pre-amend `pnpm typecheck` passed for `@shared-expense/shared`.
