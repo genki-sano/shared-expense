@@ -51,3 +51,31 @@
 - Drafted `docs/superpowers/plans/2026-07-20-shared-expense-replacement-implementation.md`.
 - Reviewed the plan with a subagent and fixed execution order, OpenAPI validation, idempotency scope, notification skipped handling, settlement rounding dependency, Spreadsheet mapping dependency, auth error status handling, workspace package exports, and production URL placeholder handling.
 - Created implementation plan commit.
+
+## Task 1: Monorepo Tooling Baseline
+
+### Checklist
+
+- [x] Create root package and workspace config
+- [x] Create base TypeScript and Vitest config
+- [x] Create shared package skeleton
+- [x] Run `pnpm install`
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Commit monorepo tooling baseline
+
+### Progress Log
+
+- 2026-07-20 13:01 JST: Started Task 1 in `.worktrees/implementation`.
+- 2026-07-20 13:01 JST: Created monorepo tooling baseline files.
+- 2026-07-20 13:08 JST: Installed dependencies and ran baseline checks.
+- 2026-07-20 13:09 JST: Committed monorepo tooling baseline.
+
+### Verification Log
+
+- 2026-07-20 13:01 JST: `pnpm install` failed because `pnpm` was not found (`zsh: command not found: pnpm`).
+- 2026-07-20 13:01 JST: `command -v pnpm` exited 1 with no path.
+- 2026-07-20 13:04 JST: Re-ran `pnpm install` after correcting file placement; it failed again with `zsh: command not found: pnpm`.
+- 2026-07-20 13:07 JST: `pnpm install` initially failed with sandbox EPERM creating `/Users/genki.sano/.cache/node/corepack/v1`; reran with approval and succeeded.
+- 2026-07-20 13:08 JST: `pnpm test` succeeded; Vitest reported no test files found and exited 0.
+- 2026-07-20 13:08 JST: `pnpm typecheck` succeeded for `@shared-expense/shared`.
