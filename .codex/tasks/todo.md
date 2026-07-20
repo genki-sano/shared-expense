@@ -109,3 +109,58 @@
 - 2026-07-20 13:17 JST: `git clone https://github.com/genki-sano/mm-gas ../temp/mm-gas` first failed in the sandbox with `Could not resolve host: github.com`; reran with network approval and succeeded.
 - 2026-07-20 13:17 JST: `rg -n "router|app\\.|fetch|Spreadsheet|Sheet|LINE|line|cron|trigger|settle|精算|notify|通知" ../temp/mm-server ../temp/mm-client ../temp/mm-gas` succeeded and returned matches across API, client, Spreadsheet, LINE, and GAS code.
 - 2026-07-20 13:17 JST: `rg -n "<[^>]+>|TBD|TODO|Describe|空|未確認" docs/migration/existing-inventory.md` exited 1 with no output, matching the expected no-match result.
+
+## Task 2: Shared Domain Models and Settlement Calculation
+
+### Checklist
+
+- [x] Write failing settlement tests
+- [x] Verify RED with `pnpm test packages/shared/src/domain/settlement.test.ts`
+- [x] Implement Expense, User, HouseholdUsers, partner lookup, and settlement domain
+- [x] Export shared settlement domain APIs
+- [x] Verify GREEN with targeted settlement test
+- [x] Run `pnpm typecheck`
+- [x] Commit shared settlement domain
+
+### Progress Log
+
+- 2026-07-20 13:29 JST: Started Task 2 in `.worktrees/implementation`.
+- 2026-07-20 13:29 JST: Confirmed inventory states monthly settlement uses `Math.ceil(Math.abs(womanPrice - manPrice) / 2)`.
+- 2026-07-20 13:29 JST: Added settlement tests before implementation.
+- 2026-07-20 13:31 JST: Implemented shared expense/user/settlement domain types and exports.
+- 2026-07-20 13:32 JST: Committed shared settlement domain.
+
+### Verification Log
+
+- 2026-07-20 13:30 JST: `pnpm test packages/shared/src/domain/settlement.test.ts` failed as expected because `./settlement` did not exist.
+- 2026-07-20 13:31 JST: `pnpm test packages/shared/src/domain/settlement.test.ts` passed with 3 tests.
+- 2026-07-20 13:31 JST: `pnpm typecheck` failed because `users.map` widened tuple totals to an array, making destructured entries possibly undefined.
+- 2026-07-20 13:31 JST: Re-ran `pnpm test packages/shared/src/domain/settlement.test.ts`; it passed with 3 tests.
+- 2026-07-20 13:31 JST: Re-ran `pnpm typecheck`; it passed for `@shared-expense/shared`.
+- 2026-07-20 13:32 JST: Final pre-commit `pnpm test packages/shared/src/domain/settlement.test.ts` passed with 3 tests.
+- 2026-07-20 13:32 JST: Final pre-commit `pnpm typecheck` passed for `@shared-expense/shared`.
+- 2026-07-20 13:32 JST: `git commit -m "feat: add shared settlement domain"` created the Task 2 commit.
+
+## Task 2 Quality Review Fix: Partner Lookup Membership Guard
+
+### Checklist
+
+- [x] Add failing `findPartnerUser` tests
+- [x] Verify RED with `pnpm test packages/shared/src/domain/user.test.ts`
+- [x] Fix `findPartnerUser` to return `null` for non-household actors
+- [x] Verify GREEN with user and settlement domain tests
+- [x] Run `pnpm typecheck`
+- [x] Amend Task 2 commit
+
+### Progress Log
+
+- 2026-07-20 13:34 JST: Started CHANGES_REQUIRED fix for `findPartnerUser` membership handling.
+- 2026-07-20 13:34 JST: Added user domain tests before changing implementation.
+- 2026-07-20 13:38 JST: Updated `findPartnerUser` to check actor membership before returning a partner.
+- 2026-07-20 13:39 JST: Prepared Task 2 amend with the quality review fix.
+
+### Verification Log
+
+- 2026-07-20 13:37 JST: `pnpm test packages/shared/src/domain/user.test.ts` failed as expected; non-household `user_x` returned `user_a` instead of `null`.
+- 2026-07-20 13:38 JST: `pnpm test packages/shared/src/domain/user.test.ts packages/shared/src/domain/settlement.test.ts` passed with 6 tests across 2 files.
+- 2026-07-20 13:38 JST: `pnpm typecheck` passed for `@shared-expense/shared`.
