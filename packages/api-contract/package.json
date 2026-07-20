@@ -1,0 +1,13 @@
+{
+  "name": "@shared-expense/api-contract",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "redocly lint openapi.yaml",
+    "build": "pnpm lint",
+    "typecheck": "pnpm lint"
+  },
+  "devDependencies": {
+    "@redocly/cli": "^1.34.0"
+  }
+}
