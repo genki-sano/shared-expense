@@ -16,6 +16,10 @@
 - [x] Write approved spec
 - [x] Self-review spec
 - [x] Ask user to review spec before implementation planning
+- [x] Receive user approval for the written spec
+- [x] Draft implementation plan for first replacement slice
+- [x] Review implementation plan
+- [x] Commit implementation plan
 
 ## Notes
 
@@ -43,3 +47,7 @@
 - Used a subagent design review and addressed findings around OpenAPI mismatch, initial Settlement scope, idempotency, version conflicts, notification event IDs, monthly reminder recipients, LIFF token validation, and cutover ordering.
 - Initialized Git repository because the workspace did not have `.git`.
 - Created initial design commit.
+- User approved the written spec.
+- Drafted `docs/superpowers/plans/2026-07-20-shared-expense-replacement-implementation.md`.
+- Reviewed the plan with a subagent and fixed execution order, OpenAPI validation, idempotency scope, notification skipped handling, settlement rounding dependency, Spreadsheet mapping dependency, auth error status handling, workspace package exports, and production URL placeholder handling.
+- Created implementation plan commit.
