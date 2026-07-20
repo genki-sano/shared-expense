@@ -908,7 +908,7 @@ Expected: FAIL because `./liff-token` does not exist.
 
 - [ ] **Step 3: Implement auth boundary**
 
-Create `apps/api/package.json`:
+Create `apps/api/package.json`. Do not add `@hono/node-server` in this task because the API targets Cloudflare Workers and the current app shell does not need a Node server runtime:
 
 ```json
 {
@@ -920,7 +920,6 @@ Create `apps/api/package.json`:
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@hono/node-server": "^1.14.0",
     "@shared-expense/shared": "workspace:*",
     "hono": "^4.8.0"
   }
