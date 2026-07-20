@@ -216,3 +216,74 @@
 - 2026-07-20 13:48 JST: `pnpm typecheck` passed for `@shared-expense/shared`.
 - 2026-07-20 13:48 JST: Final pre-amend `pnpm test packages/shared/src/domain/notification.test.ts` passed with 12 tests.
 - 2026-07-20 13:48 JST: Final pre-amend `pnpm typecheck` passed for `@shared-expense/shared`.
+
+## Task 4: OpenAPI Contract Update
+
+### Checklist
+
+- [x] Create `packages/api-contract/package.json`
+- [x] Run `pnpm install` to update `pnpm-lock.yaml`
+- [x] Remove production placeholder server from OpenAPI
+- [x] Remove `userId` from `CreateExpenseRequest`
+- [x] Add expense `version`, mutation idempotency headers, update conflict response, and settlement API schemas
+- [x] Verify contract grep, OpenAPI lint, and root typecheck
+- [x] Commit OpenAPI contract update
+
+### Progress Log
+
+- 2026-07-20 13:51 JST: Started Task 4 in `.worktrees/implementation`.
+- 2026-07-20 13:51 JST: Confirmed `@shared-expense/api-contract` package did not exist yet.
+- 2026-07-20 13:51 JST: Created contract package and updated `openapi.yaml` for local-only server, actor-derived create requests, expense versioning, idempotent mutations, conflict response, and monthly settlements.
+- 2026-07-20 13:52 JST: Updated `pnpm-lock.yaml` with `@redocly/cli`.
+
+### Verification Log
+
+- 2026-07-20 13:51 JST: Baseline `pnpm --filter @shared-expense/api-contract lint` exited with "No projects matched the filters", confirming the contract package was missing before this task.
+- 2026-07-20 13:52 JST: Initial `CI=true pnpm install --no-frozen-lockfile` failed in sandbox with `getaddrinfo ENOTFOUND registry.npmjs.org`; reran with network approval and succeeded.
+- 2026-07-20 13:52 JST: `rg -n "settlements|Idempotency-Key|409|version|userId|api.example.com" packages/api-contract/openapi.yaml` showed `settlements`, `Idempotency-Key`, `409`, and `version`; it showed no `api.example.com`.
+- 2026-07-20 13:52 JST: `pnpm --filter @shared-expense/api-contract lint` succeeded; Redocly reported a valid OpenAPI document with warnings for missing `info.license` and localhost server URL.
+- 2026-07-20 13:52 JST: Checked `CreateExpenseRequest` block directly and confirmed `userId` is absent from both `required` and `properties`.
+- 2026-07-20 13:52 JST: `pnpm typecheck` succeeded for `@shared-expense/api-contract` and `@shared-expense/shared`; Redocly repeated the same two warnings.
+
+## Task 4 Spec Review Fix: Household Forbidden Response
+
+### Checklist
+
+- [x] Add `components.responses.Forbidden`
+- [x] Add `403` response to all Expense operations
+- [x] Add `403` response to Settlement summary operation
+- [x] Verify OpenAPI grep, contract lint, and root typecheck
+- [x] Amend Task 4 commit
+
+### Progress Log
+
+- 2026-07-20 13:59 JST: Started CHANGES_REQUIRED fix for missing `403 Forbidden` response when a valid token does not resolve to a household user.
+- 2026-07-20 13:59 JST: Added shared `Forbidden` response and referenced it from all Expense and Settlement operations.
+
+### Verification Log
+
+- 2026-07-20 13:59 JST: Baseline `rg -n "Forbidden|403|Unauthorized|/api/expenses|/api/settlements" packages/api-contract/openapi.yaml` showed `401` responses but no `403` or `Forbidden`.
+- 2026-07-20 13:59 JST: `rg -n "403|Forbidden" packages/api-contract/openapi.yaml` succeeded and showed 5 operation-level `403` responses plus `components.responses.Forbidden`.
+- 2026-07-20 13:59 JST: `pnpm --filter @shared-expense/api-contract lint` succeeded; Redocly reported a valid OpenAPI document with the existing warnings for missing `info.license` and localhost server URL.
+- 2026-07-20 13:59 JST: `pnpm typecheck` succeeded for `@shared-expense/api-contract` and `@shared-expense/shared`; Redocly repeated the same two warnings.
+
+## Task 4 Quality Review Fix: Required Idempotency and No-op Update Guard
+
+### Checklist
+
+- [x] Make `components.parameters.IdempotencyKey` required
+- [x] Change `UpdateExpenseRequest.minProperties` to 2
+- [x] Verify OpenAPI grep, contract lint, and root typecheck
+- [x] Amend Task 4 commit
+
+### Progress Log
+
+- 2026-07-20 14:04 JST: Started CHANGES_REQUIRED fix for required mutation idempotency and no-op update prevention.
+- 2026-07-20 14:04 JST: Updated `Idempotency-Key` to be required for POST/PUT/DELETE references and changed `UpdateExpenseRequest.minProperties` to 2 because `version` alone is not a meaningful update.
+
+### Verification Log
+
+- 2026-07-20 14:04 JST: Baseline `rg -n "IdempotencyKey|required: false|required: true|minProperties" packages/api-contract/openapi.yaml` showed `components.parameters.IdempotencyKey.required: false` and `UpdateExpenseRequest.minProperties: 1`.
+- 2026-07-20 14:04 JST: `rg -n "IdempotencyKey|required: true|minProperties: 2" packages/api-contract/openapi.yaml` succeeded and showed `IdempotencyKey.required: true` plus `UpdateExpenseRequest.minProperties: 2`.
+- 2026-07-20 14:04 JST: `pnpm --filter @shared-expense/api-contract lint` succeeded; Redocly reported a valid OpenAPI document with the existing warnings for missing `info.license` and localhost server URL.
+- 2026-07-20 14:04 JST: `pnpm typecheck` succeeded for `@shared-expense/api-contract` and `@shared-expense/shared`; Redocly repeated the same two warnings.

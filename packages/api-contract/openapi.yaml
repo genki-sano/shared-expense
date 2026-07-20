@@ -6,13 +6,13 @@ info:
     LINE/LIFF 前提の家計管理 API（初期スコープ）。
     本仕様は Expense CRUD と月次一覧取得を対象とする。
 servers:
-  - url: https://api.example.com
-    description: Production (placeholder)
   - url: http://localhost:8787
     description: Local development
 tags:
   - name: Expenses
     description: Expense resource operations
+  - name: Settlements
+    description: Monthly settlement operations
 security:
   - bearerAuth: []
 paths:
@@ -42,6 +42,8 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/InternalServerError'
     post:
@@ -49,6 +51,8 @@ paths:
         - Expenses
       summary: 支払いを作成
       operationId: createExpense
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
@@ -66,6 +70,8 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /api/expenses/{id}:
@@ -76,6 +82,7 @@ paths:
       operationId: updateExpense
       parameters:
         - $ref: '#/components/parameters/ExpenseId'
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
@@ -93,8 +100,12 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
         '500':
           $ref: '#/components/responses/InternalServerError'
     delete:
@@ -104,13 +115,46 @@ paths:
       operationId: deleteExpense
       parameters:
         - $ref: '#/components/parameters/ExpenseId'
+        - $ref: '#/components/parameters/IdempotencyKey'
       responses:
         '204':
           description: 削除成功
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/settlements:
+    get:
+      tags:
+        - Settlements
+      summary: 月次精算サマリを取得
+      operationId: getSettlementByMonth
+      parameters:
+        - name: month
+          in: query
+          required: true
+          description: 対象年月（YYYY-MM）
+          schema:
+            type: string
+            pattern: '^\d{4}-\d{2}$'
+            example: '2026-06'
+      responses:
+        '200':
+          description: 取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettlementSummaryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/InternalServerError'
 components:
@@ -127,6 +171,15 @@ components:
       description: Expense ID
       schema:
         type: string
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Retry-safe mutation key used to deduplicate retried create, update, and delete requests.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 255
   responses:
     BadRequest:
       description: リクエスト不正
@@ -148,6 +201,15 @@ components:
           example:
             message: Unauthorized
             details: {}
+    Forbidden:
+      description: 権限エラー
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: Forbidden
+            details: {}
     NotFound:
       description: 対象なし
       content:
@@ -158,6 +220,18 @@ components:
             message: Expense not found
             details:
               id: "exp_123"
+    Conflict:
+      description: 更新競合
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: Expense version conflict
+            details:
+              id: "exp_123"
+              expectedVersion: 3
+              actualVersion: 4
     InternalServerError:
       description: サーバーエラー
       content:
@@ -177,6 +251,7 @@ components:
         - date
         - price
         - category
+        - version
       properties:
         id:
           type: string
@@ -199,18 +274,18 @@ components:
           type: string
           nullable: true
           example: lunch
+        version:
+          type: integer
+          minimum: 1
+          example: 1
     CreateExpenseRequest:
       type: object
       additionalProperties: false
       required:
-        - userId
         - date
         - price
         - category
       properties:
-        userId:
-          type: string
-          example: user_1
         date:
           type: string
           format: date
@@ -229,6 +304,8 @@ components:
     UpdateExpenseRequest:
       type: object
       additionalProperties: false
+      required:
+        - version
       properties:
         date:
           type: string
@@ -245,7 +322,11 @@ components:
           type: string
           nullable: true
           example: lunch
-      minProperties: 1
+        version:
+          type: integer
+          minimum: 1
+          example: 1
+      minProperties: 2
     ListExpensesResponse:
       type: object
       additionalProperties: false
@@ -256,6 +337,72 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Expense'
+    SettlementSummaryResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - month
+        - householdTotal
+        - userTotals
+        - difference
+        - settlement
+      properties:
+        month:
+          type: string
+          pattern: '^\d{4}-\d{2}$'
+          example: '2026-06'
+        householdTotal:
+          type: integer
+          minimum: 0
+          example: 14000
+        userTotals:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserMonthlyTotal'
+        difference:
+          type: integer
+          minimum: 0
+          example: 6000
+        settlement:
+          $ref: '#/components/schemas/MonthlySettlement'
+    UserMonthlyTotal:
+      type: object
+      additionalProperties: false
+      required:
+        - userId
+        - displayName
+        - total
+      properties:
+        userId:
+          type: string
+          example: user_1
+        displayName:
+          type: string
+          example: A
+        total:
+          type: integer
+          minimum: 0
+          example: 10000
+    MonthlySettlement:
+      type: object
+      additionalProperties: false
+      required:
+        - fromUserId
+        - toUserId
+        - amount
+      properties:
+        fromUserId:
+          type: string
+          nullable: true
+          example: user_2
+        toUserId:
+          type: string
+          nullable: true
+          example: user_1
+        amount:
+          type: integer
+          minimum: 0
+          example: 3000
     ErrorResponse:
       type: object
       additionalProperties: false
