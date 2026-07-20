@@ -344,3 +344,58 @@
 - 2026-07-20 14:18 JST: `pnpm test packages/integrations/src/spreadsheet/expense-row.test.ts` failed as expected with 6 failing cases that did not throw before the fix.
 - 2026-07-20 14:19 JST: `pnpm test packages/integrations/src/spreadsheet/expense-row.test.ts` passed with 10 tests.
 - 2026-07-20 14:19 JST: `pnpm typecheck` passed for `@shared-expense/api-contract`, `@shared-expense/shared`, and `@shared-expense/integrations`. Redocly repeated existing warnings for missing `info.license` and localhost server URL.
+
+## Task 6: API Application Skeleton and LIFF Auth Boundary
+
+### Checklist
+
+- [x] Write failing LIFF auth boundary tests
+- [x] Verify RED with `pnpm test apps/api/src/auth/liff-token.test.ts`
+- [x] Create API package and TypeScript config
+- [x] Implement LIFF token auth boundary
+- [x] Add minimal Hono app and default export
+- [x] Run `pnpm install`
+- [x] Verify GREEN with targeted auth test
+- [x] Run `pnpm typecheck`
+- [x] Commit API auth boundary
+
+### Quality Review Fix Checklist
+
+- [x] Change LIFF token test claims to a fresh factory
+- [x] Add failing test for `verifyToken` non-AuthError normalization
+- [x] Verify RED with `pnpm test apps/api/src/auth/liff-token.test.ts`
+- [x] Convert `verifyToken` failures to `AuthError(401, "invalid_token", "Invalid LIFF token")`
+- [x] Preserve existing `AuthError` failures from `verifyToken`
+- [x] Verify GREEN with targeted auth test
+- [x] Run `pnpm typecheck`
+- [x] Amend Task 6 commit
+
+### Progress Log
+
+- 2026-07-20 14:23 JST: Started Task 6 in `.worktrees/implementation`.
+- 2026-07-20 14:23 JST: Added LIFF auth boundary tests before implementation.
+- 2026-07-20 14:24 JST: Created API package skeleton, LIFF auth boundary, minimal Hono app, and default app export.
+- 2026-07-20 14:26 JST: Installed API dependencies and updated workspace lockfile.
+- 2026-07-20 14:26 JST: Ran targeted auth test and root typecheck successfully.
+- 2026-07-20 14:27 JST: Created commit `feat: add api auth boundary`; amended it to force-add auth files ignored by the global `**/*token*` rule.
+- 2026-07-20 14:35 JST: Started CHANGES_REQUIRED fix for LIFF auth token verification error normalization and flaky fixed-exp test claims.
+- 2026-07-20 14:35 JST: Changed `validClaims` to a factory and added a failing `verifyToken` throw normalization test before implementation.
+- 2026-07-20 14:35 JST: Wrapped `verifyToken` in `try/catch`, preserving existing `AuthError` and converting other thrown errors to `invalid_token`.
+
+### Verification Log
+
+- 2026-07-20 14:23 JST: `pnpm test apps/api/src/auth/liff-token.test.ts` failed as expected because `./liff-token` did not exist.
+- 2026-07-20 14:25 JST: `pnpm install` exited after showing an interactive node_modules reinstall prompt, so non-interactive install was required.
+- 2026-07-20 14:25 JST: `CI=true pnpm install` failed with `ERR_PNPM_OUTDATED_LOCKFILE` because `apps/api/package.json` was not reflected in `pnpm-lock.yaml`.
+- 2026-07-20 14:26 JST: `CI=true pnpm install --no-frozen-lockfile` failed in the sandbox with `getaddrinfo ENOTFOUND registry.npmjs.org`; reran with network approval and succeeded.
+- 2026-07-20 14:26 JST: `pnpm test apps/api/src/auth/liff-token.test.ts` passed with 5 tests.
+- 2026-07-20 14:26 JST: `pnpm typecheck` passed for `@shared-expense/api-contract`, `@shared-expense/shared`, `@shared-expense/integrations`, and `@shared-expense/api`; Redocly repeated existing warnings for missing `info.license` and localhost server URL.
+- 2026-07-20 14:27 JST: Final pre-commit `pnpm test apps/api/src/auth/liff-token.test.ts` passed with 5 tests.
+- 2026-07-20 14:27 JST: Final pre-commit `pnpm typecheck` passed for `@shared-expense/api-contract`, `@shared-expense/shared`, `@shared-expense/integrations`, and `@shared-expense/api`; Redocly repeated existing warnings for missing `info.license` and localhost server URL.
+- 2026-07-20 14:28 JST: Post-amend `pnpm test apps/api/src/auth/liff-token.test.ts` passed with 5 tests.
+- 2026-07-20 14:28 JST: Post-amend `pnpm typecheck` passed for `@shared-expense/api-contract`, `@shared-expense/shared`, `@shared-expense/integrations`, and `@shared-expense/api`; Redocly repeated existing warnings for missing `info.license` and localhost server URL.
+- 2026-07-20 14:34 JST: `pnpm test apps/api/src/auth/liff-token.test.ts` failed as expected with 1 failing test; `Error: bad token` was not normalized to `AuthError(401, "invalid_token", "Invalid LIFF token")`.
+- 2026-07-20 14:34 JST: `pnpm test apps/api/src/auth/liff-token.test.ts` passed with 6 tests.
+- 2026-07-20 14:34 JST: `pnpm typecheck` passed for `@shared-expense/api-contract`, `@shared-expense/shared`, `@shared-expense/integrations`, and `@shared-expense/api`; Redocly repeated existing warnings for missing `info.license` and localhost server URL.
+- 2026-07-20 14:35 JST: Final pre-amend `pnpm test apps/api/src/auth/liff-token.test.ts` passed with 6 tests.
+- 2026-07-20 14:35 JST: Final pre-amend `pnpm typecheck` passed for `@shared-expense/api-contract`, `@shared-expense/shared`, `@shared-expense/integrations`, and `@shared-expense/api`; Redocly repeated existing warnings for missing `info.license` and localhost server URL.
