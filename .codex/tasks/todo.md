@@ -287,3 +287,60 @@
 - 2026-07-20 14:04 JST: `rg -n "IdempotencyKey|required: true|minProperties: 2" packages/api-contract/openapi.yaml` succeeded and showed `IdempotencyKey.required: true` plus `UpdateExpenseRequest.minProperties: 2`.
 - 2026-07-20 14:04 JST: `pnpm --filter @shared-expense/api-contract lint` succeeded; Redocly reported a valid OpenAPI document with the existing warnings for missing `info.license` and localhost server URL.
 - 2026-07-20 14:04 JST: `pnpm typecheck` succeeded for `@shared-expense/api-contract` and `@shared-expense/shared`; Redocly repeated the same two warnings.
+
+## Task 5: Spreadsheet Repository Interfaces and Row Mapping
+
+### Checklist
+
+- [x] Write failing legacy payments row mapping tests
+- [x] Verify RED with `pnpm test packages/integrations/src/spreadsheet/expense-row.test.ts`
+- [x] Create integrations package skeleton
+- [x] Implement legacy payments A-K row mapper
+- [x] Export integrations APIs
+- [x] Verify GREEN with targeted expense row test
+- [x] Run `pnpm typecheck`
+- [x] Commit spreadsheet expense row mapping
+
+### Progress Log
+
+- 2026-07-20 14:08 JST: Started Task 5 in `.worktrees/implementation`.
+- 2026-07-20 14:08 JST: Confirmed plan Task 5's provisional mapper is superseded by inventory compatibility requirements for legacy `payments` A-K columns.
+- 2026-07-20 14:08 JST: Added tests for legacy `payments` row to `Expense`, memo preservation, `Expense` to legacy row, and unknown `userId` rejection before implementation.
+- 2026-07-20 14:09 JST: Created `@shared-expense/integrations` package skeleton and implemented legacy `payments` A-K mapper with injected user conversion functions.
+- 2026-07-20 14:11 JST: Re-ran `pnpm install --force` with network approval after sandbox DNS failure to restore dependencies and workspace links for the new package.
+- 2026-07-20 14:12 JST: Included `pnpm-lock.yaml` because the new workspace package adds a lockfile importer for `packages/integrations`.
+
+### Verification Log
+
+- 2026-07-20 14:08 JST: `pnpm test packages/integrations/src/spreadsheet/expense-row.test.ts` failed as expected because `./expense-row` did not exist.
+- 2026-07-20 14:09 JST: `pnpm test packages/integrations/src/spreadsheet/expense-row.test.ts` passed with 4 tests.
+- 2026-07-20 14:10 JST: Initial `pnpm typecheck` failed because the newly added workspace package did not yet have a local link for `@shared-expense/shared`.
+- 2026-07-20 14:11 JST: `pnpm install --force` first failed in the sandbox with `getaddrinfo ENOTFOUND registry.npmjs.org`; reran with network approval and succeeded.
+- 2026-07-20 14:11 JST: Re-ran `pnpm test packages/integrations/src/spreadsheet/expense-row.test.ts`; it passed with 4 tests.
+- 2026-07-20 14:11 JST: Re-ran `pnpm typecheck`; it passed for `@shared-expense/api-contract`, `@shared-expense/shared`, and `@shared-expense/integrations`. Redocly repeated existing warnings for missing `info.license` and localhost server URL.
+
+## Task 5 Quality Review Fix: Strict Legacy Row Validation
+
+### Checklist
+
+- [x] Add failing tests for unknown legacy userType, invalid price, invalid legacy date, and invalid ISO expense date
+- [x] Verify RED with `pnpm test packages/integrations/src/spreadsheet/expense-row.test.ts`
+- [x] Change `UserTypeToUserId` to return `string | null`
+- [x] Reject unknown legacy userType in `expenseFromLegacyPaymentRow`
+- [x] Reject non-integer or unsafe legacy payment prices
+- [x] Reject non-date-only legacy and ISO date formats
+- [x] Verify GREEN with targeted expense row test
+- [x] Run `pnpm typecheck`
+- [x] Amend Task 5 commit
+
+### Progress Log
+
+- 2026-07-20 14:18 JST: Started CHANGES_REQUIRED fix for strict boundary validation in the legacy Spreadsheet row mapper.
+- 2026-07-20 14:18 JST: Added tests before implementation for unknown `userType`, invalid price strings, legacy date with timestamp, and ISO datetime input.
+- 2026-07-20 14:19 JST: Updated mapper validation so unknown user mappings return errors instead of becoming normal data, prices must be digit-only safe integers, and dates must be date-only strings.
+
+### Verification Log
+
+- 2026-07-20 14:18 JST: `pnpm test packages/integrations/src/spreadsheet/expense-row.test.ts` failed as expected with 6 failing cases that did not throw before the fix.
+- 2026-07-20 14:19 JST: `pnpm test packages/integrations/src/spreadsheet/expense-row.test.ts` passed with 10 tests.
+- 2026-07-20 14:19 JST: `pnpm typecheck` passed for `@shared-expense/api-contract`, `@shared-expense/shared`, and `@shared-expense/integrations`. Redocly repeated existing warnings for missing `info.license` and localhost server URL.
