@@ -1,5 +1,51 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Run API and web together for local dev
+
+### Checklist
+
+- [x] Investigate why sample data still renders
+- [x] Present local dev design and receive approval
+- [x] Add failing dev configuration tests
+- [x] Verify RED with targeted test
+- [x] Implement API local dev env loader and server
+- [x] Update root/API dev scripts
+- [x] Set ignored local web API URL
+- [x] Verify targeted tests pass
+- [x] Avoid sample fallback when configured API fails
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Verify local API/web dev behavior
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-25 21:45 JST: Root cause identified: web fell back to sample data because `NEXT_PUBLIC_API_BASE_URL` was empty and root `pnpm dev` only started the web app.
+- 2026-07-25 21:46 JST: User approved adding a local API dev server and running API/web together from root `pnpm dev`.
+- 2026-07-25 21:48 JST: Implemented local API env loader, Node HTTP Hono dev server, parallel root dev script, API dev script, and ignored `.env.local` API URL.
+- 2026-07-25 21:50 JST: Switched API dev execution to `tsx src/dev.ts` after `node dist/dev.js` failed on extensionless ESM imports emitted by the current TypeScript config.
+- 2026-07-25 21:53 JST: Changed page data loading so configured API failures show an error/empty state instead of falling back to sample expenses.
+- 2026-07-25 21:55 JST: Updated root `pnpm dev` to pass web preview env directly because Next.js does not read the repo-root `.env.local` when started from `apps/web`.
+- 2026-07-25 21:57 JST: Committed changes as `fix: run api in local dev`.
+
+### Verification Log
+
+- 2026-07-25 21:46 JST: `pnpm test apps/web-dev-config.test.ts apps/api/src/dev-env.test.ts` failed as expected because root `dev`, API `dev`, and `dev-env` did not exist yet.
+- 2026-07-25 21:48 JST: `pnpm test apps/web-dev-config.test.ts apps/api/src/dev-env.test.ts` passed with 7 tests across 2 files.
+- 2026-07-25 21:48 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-25 21:50 JST: `pnpm --filter @shared-expense/api dev` initially failed with `ERR_MODULE_NOT_FOUND` for `dist/app`, confirming the compiled dev entry could not run directly under Node ESM.
+- 2026-07-25 21:52 JST: `curl -sL http://localhost:8787/health` returned `{"ok":true}` from the API dev server.
+- 2026-07-25 21:52 JST: `curl -sL -H 'Authorization: Bearer local-dev' 'http://localhost:8787/api/expenses?date=2026-07'` returned `Internal Server Error`; API log showed `Failed to read Google Sheets values: 403`, indicating the service account still lacks Spreadsheet read access.
+- 2026-07-25 21:52 JST: `pnpm test apps/web/src/features/expenses/page-data.test.ts` failed as expected because `./page-data` did not exist yet.
+- 2026-07-25 21:54 JST: `pnpm test apps/web-dev-config.test.ts` failed as expected because root `dev` did not yet pass `NEXT_PUBLIC_API_BASE_URL` and `NEXT_PUBLIC_DEV_LIFF_ID_TOKEN`.
+- 2026-07-25 21:54 JST: `pnpm test apps/web-dev-config.test.ts apps/api/src/dev-env.test.ts apps/web/src/features/expenses/page-data.test.ts` passed with 9 tests across 3 files.
+- 2026-07-25 21:55 JST: `pnpm test` passed with 58 tests across 14 files.
+- 2026-07-25 21:55 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-25 21:55 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+- 2026-07-25 21:56 JST: `pnpm dev` started API at `http://localhost:8787` and web at `http://localhost:3000`.
+- 2026-07-25 21:56 JST: `curl -sL http://localhost:3000` returned HTML without the `Sample` badge or sample rows; it showed `APIから取得できません。APIの起動状態とSpreadsheet権限を確認してください` because the API still receives Google Sheets 403.
+
 ## Task: Switch Google Sheets auth to service account
 
 ### Checklist

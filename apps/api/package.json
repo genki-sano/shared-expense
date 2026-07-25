@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "tsx src/dev.ts",
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
@@ -10,5 +11,8 @@
     "@shared-expense/integrations": "workspace:*",
     "@shared-expense/shared": "workspace:*",
     "hono": "^4.8.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.6"
   }
 }

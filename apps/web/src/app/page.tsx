@@ -1,5 +1,5 @@
 import type { Expense } from "@shared-expense/shared";
-import { fetchMonthlyExpenses, sampleExpenses } from "../features/expenses/api";
+import { loadMonthlyExpensesForPage } from "../features/expenses/page-data";
 
 const month = "2026-07";
 
@@ -73,17 +73,13 @@ async function loadExpenses(): Promise<{
   errorMessage?: string;
 }> {
   try {
-    return await fetchMonthlyExpenses({
+    return await loadMonthlyExpensesForPage({
       month,
       apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
       idToken: process.env.NEXT_PUBLIC_DEV_LIFF_ID_TOKEN,
     });
   } catch {
-    return {
-      source: "sample",
-      expenses: sampleExpenses,
-      errorMessage: "APIから取得できないためサンプルを表示しています",
-    };
+    return { source: "api", expenses: [], errorMessage: "支出明細を取得できません" };
   }
 }
 

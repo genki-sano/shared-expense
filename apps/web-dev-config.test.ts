@@ -16,12 +16,30 @@ function readText(path: string): string {
 }
 
 describe("web dev configuration", () => {
-  test("root pnpm dev delegates to the web app", () => {
+  test("root pnpm dev starts the API and web app together", () => {
     const rootPackage = readPackageJson("package.json");
 
     expect(rootPackage.scripts).toMatchObject({
-      dev: "pnpm --filter @shared-expense/web dev",
+      dev: "NEXT_PUBLIC_API_BASE_URL=http://localhost:8787 NEXT_PUBLIC_DEV_LIFF_ID_TOKEN=local-dev pnpm --parallel --filter @shared-expense/api --filter @shared-expense/web dev",
     });
+  });
+
+  test("API app exposes a local development server script", () => {
+    const apiPackage = readPackageJson("apps/api/package.json");
+
+    expect(apiPackage).toMatchObject({
+      name: "@shared-expense/api",
+      scripts: {
+        dev: "tsx src/dev.ts",
+      },
+    });
+    expect(existsSync(join(rootDir, "apps/api/src/dev.ts"))).toBe(true);
+  });
+
+  test("env template points the web preview at the local API", () => {
+    const envExample = readText(".env.example");
+
+    expect(envExample).toContain("NEXT_PUBLIC_API_BASE_URL=http://localhost:8787");
   });
 
   test("web app exposes Next.js development and verification scripts", () => {
