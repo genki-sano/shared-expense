@@ -1,5 +1,37 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Spreadsheet Expense Repository
+
+### Checklist
+
+- [x] Write implementation plan
+- [x] Add failing Spreadsheet repository tests
+- [x] Verify RED with targeted test
+- [x] Implement Google Sheets values-backed Expense repository
+- [x] Export repository APIs
+- [x] Verify GREEN with targeted test
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-25 10:55 JST: Started Spreadsheet-backed Expense repository slice after user approved the design.
+- 2026-07-25 10:55 JST: Wrote focused implementation plan at `docs/superpowers/plans/2026-07-25-spreadsheet-expense-repository.md`.
+- 2026-07-25 12:26 JST: Implemented `SpreadsheetExpenseRepository` backed by a Google Sheets values client and existing legacy payments row mapper.
+
+### Verification Log
+
+- 2026-07-25 12:25 JST: `pnpm test packages/integrations/src/spreadsheet/expense-repository.test.ts` failed as expected because `./expense-repository` did not exist.
+- 2026-07-25 12:25 JST: `pnpm test packages/integrations/src/spreadsheet/expense-repository.test.ts` passed with 3 tests.
+- 2026-07-25 12:26 JST: `pnpm test` passed with 47 tests across 9 files.
+- 2026-07-25 12:26 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-25 12:26 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+- 2026-07-25 12:27 JST: Pre-commit `pnpm test` passed with 47 tests across 9 files.
+- 2026-07-25 12:27 JST: Pre-commit `pnpm typecheck` passed; Redocly reported the same existing OpenAPI warnings.
+- 2026-07-25 12:27 JST: Pre-commit `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+
 ## Task: Expense list API and frontend connection
 
 ### Checklist
