@@ -20,6 +20,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@shared-expense/integrations':
+        specifier: workspace:*
+        version: link:../../packages/integrations
       '@shared-expense/shared':
         specifier: workspace:*
         version: link:../../packages/shared

@@ -1,5 +1,43 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Wire API to Spreadsheet repository
+
+### Checklist
+
+- [x] Write implementation plan
+- [x] Add failing Google Sheets values client tests
+- [x] Verify values client RED with targeted test
+- [x] Implement fetch-backed Google Sheets values client
+- [x] Verify values client GREEN with targeted test
+- [x] Add failing API env wiring tests
+- [x] Verify API wiring RED with targeted test
+- [x] Implement `createAppFromEnv` Spreadsheet wiring
+- [x] Verify API wiring GREEN with targeted test
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-25 12:40 JST: Started API wiring slice for the real Spreadsheet repository using `user_type` mapping `1 -> woman`, `2 -> man`.
+- 2026-07-25 12:40 JST: Wrote focused implementation plan at `docs/superpowers/plans/2026-07-25-api-spreadsheet-wiring.md`.
+- 2026-07-25 12:54 JST: Added fetch-backed Google Sheets values client and `createAppFromEnv` Spreadsheet wiring.
+
+### Verification Log
+
+- 2026-07-25 12:53 JST: `pnpm test packages/integrations/src/spreadsheet/google-sheets-values-client.test.ts` failed as expected because `./google-sheets-values-client` did not exist.
+- 2026-07-25 12:53 JST: `pnpm test apps/api/src/app-env.test.ts` failed as expected because `createAppFromEnv` was not implemented.
+- 2026-07-25 12:54 JST: `pnpm test packages/integrations/src/spreadsheet/google-sheets-values-client.test.ts` passed with 2 tests.
+- 2026-07-25 12:54 JST: `pnpm test apps/api/src/app-env.test.ts` initially failed because `@shared-expense/integrations` workspace link was not installed; `pnpm install --no-frozen-lockfile` refreshed the link and the targeted test passed with 2 tests.
+- 2026-07-25 12:54 JST: `pnpm test` passed with 51 tests across 11 files.
+- 2026-07-25 12:55 JST: `pnpm typecheck` initially failed because `fetcher: undefined` was explicitly passed under `exactOptionalPropertyTypes`; changed wiring to include `fetcher` only when present.
+- 2026-07-25 12:55 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-25 12:55 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+- 2026-07-25 17:05 JST: Pre-commit `pnpm test` passed with 51 tests across 11 files.
+- 2026-07-25 17:05 JST: Pre-commit `pnpm typecheck` passed; Redocly reported the same existing OpenAPI warnings.
+- 2026-07-25 17:05 JST: Pre-commit `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+
 ## Task: Spreadsheet Expense Repository
 
 ### Checklist
