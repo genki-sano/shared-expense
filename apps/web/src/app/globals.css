@@ -102,6 +102,25 @@ textarea {
   font-size: 0.95rem;
 }
 
+.sourceBadge {
+  border-radius: 999px;
+  background: #edf3ef;
+  color: #40514b;
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.errorMessage {
+  margin: 0 0 8px;
+  border-radius: 8px;
+  background: #fff4d8;
+  color: #5d4212;
+  padding: 8px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
 .addButton {
   display: grid;
   place-items: center;

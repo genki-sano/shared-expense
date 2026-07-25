@@ -1,5 +1,45 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Expense list API and frontend connection
+
+### Checklist
+
+- [x] Write implementation plan
+- [x] Add failing API route tests
+- [x] Verify API RED with targeted test
+- [x] Implement Expense repository and list route
+- [x] Verify API GREEN with targeted test
+- [x] Add failing frontend API adapter tests
+- [x] Verify frontend RED with targeted test
+- [x] Implement frontend API adapter and page connection
+- [x] Verify frontend GREEN with targeted test
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+
+### Progress Log
+
+- 2026-07-25 10:45 JST: Started vertical slice for `GET /api/expenses?date=YYYY-MM` through mobile monthly list rendering.
+- 2026-07-25 10:45 JST: Wrote focused implementation plan at `docs/superpowers/plans/2026-07-25-expense-list-api-web-connection.md`.
+- 2026-07-25 10:45 JST: Added authenticated Expense list route with injectable repository and connected the web preview through a fetch adapter with sample fallback.
+
+### Verification Log
+
+- 2026-07-25 10:42 JST: `pnpm test apps/api/src/app.test.ts` failed as expected because `./expenses/repository` did not exist.
+- 2026-07-25 10:42 JST: `pnpm test apps/api/src/app.test.ts` passed with 3 tests.
+- 2026-07-25 10:43 JST: `pnpm test apps/web/src/features/expenses/api.test.ts` failed as expected because `./api` did not exist.
+- 2026-07-25 10:44 JST: `pnpm test apps/web/src/features/expenses/api.test.ts` passed with 3 tests.
+- 2026-07-25 10:44 JST: `pnpm test` passed with 44 tests across 8 files.
+- 2026-07-25 10:44 JST: `pnpm typecheck` failed because `apps/web` imported `@shared-expense/shared` without declaring the workspace dependency.
+- 2026-07-25 10:44 JST: Added `@shared-expense/shared` to `apps/web/package.json`; `pnpm install --lockfile-only` recreated `node_modules` and needed network-backed `pnpm install --no-frozen-lockfile` to restore dependencies.
+- 2026-07-25 10:44 JST: `pnpm typecheck` failed because `Array.prototype.toSorted` is not available under the repo's ES2022 lib target.
+- 2026-07-25 10:45 JST: Replaced `toSorted` with copy-plus-`sort`.
+- 2026-07-25 10:45 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-25 10:45 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+- 2026-07-25 10:47 JST: Final `pnpm test` passed with 44 tests across 8 files.
+- 2026-07-25 10:47 JST: Final `pnpm typecheck` passed; Redocly reported the same existing OpenAPI warnings.
+- 2026-07-25 10:47 JST: Final `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+
 ## Task: Improve mobile monthly list preview
 
 ### Checklist

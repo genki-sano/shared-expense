@@ -1,31 +1,7 @@
-const expenses = [
-  {
-    id: "1",
-    name: "スーパー",
-    paidBy: "Genki",
-    date: "7/18",
-    category: "食費",
-    amount: 6420,
-  },
-  {
-    id: "2",
-    name: "電気代",
-    paidBy: "Partner",
-    date: "7/12",
-    category: "光熱費",
-    amount: 11840,
-  },
-  {
-    id: "3",
-    name: "日用品",
-    paidBy: "Genki",
-    date: "7/06",
-    category: "生活用品",
-    amount: 3280,
-  },
-];
+import type { Expense } from "@shared-expense/shared";
+import { fetchMonthlyExpenses, sampleExpenses } from "../features/expenses/api";
 
-const total = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+const month = "2026-07";
 
 const numberFormatter = new Intl.NumberFormat("ja-JP", {
   style: "currency",
@@ -33,7 +9,10 @@ const numberFormatter = new Intl.NumberFormat("ja-JP", {
   maximumFractionDigits: 0,
 });
 
-export default function Home() {
+export default async function Home() {
+  const { expenses, source, errorMessage } = await loadExpenses();
+  const total = expenses.reduce((sum, expense) => sum + expense.price, 0);
+
   return (
     <main className="shell">
       <div className="app">
@@ -60,20 +39,25 @@ export default function Home() {
 
         <div className="toolbar">
           <h2 className="sectionTitle">明細</h2>
+          {source === "sample" ? <span className="sourceBadge">Sample</span> : null}
         </div>
+
+        {errorMessage === undefined ? null : (
+          <p className="errorMessage">{errorMessage}</p>
+        )}
 
         <section className="list" aria-label="支出明細">
           {expenses.map((expense) => (
             <article className="expense" key={expense.id}>
-              <span className="dateBadge">{expense.date}</span>
+              <span className="dateBadge">{formatMonthDay(expense.date)}</span>
               <div>
-                <p className="expenseName">{expense.name}</p>
+                <p className="expenseName">{expense.memo ?? expense.category}</p>
                 <p className="expenseMeta">
-                  {expense.category} / {expense.paidBy}
+                  {expense.category} / {expense.userId}
                 </p>
               </div>
               <span className="amount">
-                {numberFormatter.format(expense.amount)}
+                {numberFormatter.format(expense.price)}
               </span>
             </article>
           ))}
@@ -81,4 +65,28 @@ export default function Home() {
       </div>
     </main>
   );
+}
+
+async function loadExpenses(): Promise<{
+  expenses: Expense[];
+  source: "api" | "sample";
+  errorMessage?: string;
+}> {
+  try {
+    return await fetchMonthlyExpenses({
+      month,
+      apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
+      idToken: process.env.NEXT_PUBLIC_DEV_LIFF_ID_TOKEN,
+    });
+  } catch {
+    return {
+      source: "sample",
+      expenses: sampleExpenses,
+      errorMessage: "APIから取得できないためサンプルを表示しています",
+    };
+  }
+}
+
+function formatMonthDay(date: string): string {
+  return date.slice(5).replace("-", "/");
 }
