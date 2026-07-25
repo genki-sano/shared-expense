@@ -1,5 +1,22 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Add env templates
+
+### Checklist
+
+- [x] Create committed `.env.example`
+- [x] Create ignored local `.env.local`
+- [x] Verify `.env.local` is ignored
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-25 17:15 JST: Added env template for Spreadsheet-backed API reads and web API preview connection.
+
+### Verification Log
+
+- 2026-07-25 17:15 JST: `git status --short` showed `.env.example` as untracked and did not show `.env.local`, confirming local env is ignored.
+
 ## Task: Wire API to Spreadsheet repository
 
 ### Checklist
