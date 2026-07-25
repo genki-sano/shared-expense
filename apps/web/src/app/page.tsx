@@ -48,12 +48,20 @@ export default async function Home() {
 
         <section className="list" aria-label="支出明細">
           {expenses.map((expense) => (
-            <article className="expense" key={expense.id}>
+            <article
+              className={`expense ${payerClassName(expense.userId)}`}
+              key={expense.id}
+            >
               <span className="dateBadge">{formatMonthDay(expense.date)}</span>
               <div>
                 <p className="expenseName">{expense.memo ?? expense.category}</p>
                 <p className="expenseMeta">
-                  {expense.category} / {expense.userName ?? expense.userId}
+                  {expense.category}
+                  <span
+                    className={`payerPill ${payerClassName(expense.userId)}`}
+                  >
+                    {expense.userName ?? expense.userId}
+                  </span>
                 </p>
               </div>
               <span className="amount">
@@ -85,4 +93,16 @@ async function loadExpenses(): Promise<{
 
 function formatMonthDay(date: string): string {
   return date.slice(5).replace("-", "/");
+}
+
+function payerClassName(userId: string): "payerWoman" | "payerMan" | "payerUnknown" {
+  if (userId === "woman") {
+    return "payerWoman";
+  }
+
+  if (userId === "man") {
+    return "payerMan";
+  }
+
+  return "payerUnknown";
 }

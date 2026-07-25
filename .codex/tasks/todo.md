@@ -1,5 +1,36 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Improve payer visibility in expense list
+
+### Checklist
+
+- [x] Explore current list markup and styles
+- [x] Present payer visibility options
+- [x] Receive option A selection
+- [x] Add failing web layout/style tests
+- [x] Verify RED with targeted test
+- [x] Implement left payer bar and payer pill
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-25 23:00 JST: User asked to improve visibility of who paid in the mobile expense list.
+- 2026-07-25 23:00 JST: Created visual comparison mock for A/B/C payer display options; user chose option A, left color bar plus payer name pill.
+- 2026-07-25 22:56 JST: Implemented option A with a payer-colored left border and payer name pill on each expense row.
+- 2026-07-25 22:57 JST: Committed changes as `feat: highlight expense payers`.
+
+### Verification Log
+
+- 2026-07-25 22:55 JST: `pnpm test apps/web-dev-config.test.ts` failed as expected because the expense rows did not expose payer class names or payer pill styles.
+- 2026-07-25 22:56 JST: `pnpm test apps/web-dev-config.test.ts` passed with 7 tests.
+- 2026-07-25 22:56 JST: `pnpm test` passed with 60 tests across 14 files.
+- 2026-07-25 22:56 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-25 22:57 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+
 ## Task: Display Spreadsheet user names
 
 ### Checklist

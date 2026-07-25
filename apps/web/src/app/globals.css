@@ -149,10 +149,23 @@ textarea {
   align-items: center;
   gap: 10px;
   min-height: 64px;
-  padding: 10px 12px;
+  padding: 10px 12px 10px 8px;
   border-bottom: 1px solid #e8ece9;
+  border-left: 5px solid #c8d5d0;
   background: #ffffff;
   color: #17211f;
+}
+
+.expense.payerWoman {
+  border-left-color: #d84d73;
+}
+
+.expense.payerMan {
+  border-left-color: #2878c5;
+}
+
+.expense.payerUnknown {
+  border-left-color: #8d9994;
 }
 
 .expense:last-child {
@@ -180,9 +193,39 @@ textarea {
 }
 
 .expenseMeta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
   margin: 0;
   color: #5f6b66;
   font-size: 0.8rem;
+}
+
+.payerPill {
+  display: inline-grid;
+  place-items: center;
+  min-width: 50px;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  font-weight: 850;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.payerPill.payerWoman {
+  background: #fde8ee;
+  color: #9b2449;
+}
+
+.payerPill.payerMan {
+  background: #e3f0ff;
+  color: #145a9c;
+}
+
+.payerPill.payerUnknown {
+  background: #edf3ef;
+  color: #40514b;
 }
 
 .amount {

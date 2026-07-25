@@ -72,4 +72,16 @@ describe("web dev configuration", () => {
     expect(cssSource).toContain("background: #12211d");
     expect(cssSource).toContain("color: #ffffff");
   });
+
+  test("expense rows expose payer bars and payer pills for quick scanning", () => {
+    const pageSource = readText("apps/web/src/app/page.tsx");
+    const cssSource = readText("apps/web/src/app/globals.css");
+
+    expect(pageSource).toContain("payerClassName(expense.userId)");
+    expect(pageSource).toContain("payerPill ${payerClassName(expense.userId)}");
+    expect(cssSource).toContain(".expense.payerWoman");
+    expect(cssSource).toContain(".expense.payerMan");
+    expect(cssSource).toContain(".payerPill.payerWoman");
+    expect(cssSource).toContain(".payerPill.payerMan");
+  });
 });
