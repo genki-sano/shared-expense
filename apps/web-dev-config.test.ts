@@ -11,6 +11,10 @@ function readPackageJson(path: string): Record<string, unknown> {
   >;
 }
 
+function readText(path: string): string {
+  return readFileSync(join(rootDir, path), "utf8");
+}
+
 describe("web dev configuration", () => {
   test("root pnpm dev delegates to the web app", () => {
     const rootPackage = readPackageJson("package.json");
@@ -32,5 +36,22 @@ describe("web dev configuration", () => {
       },
     });
     expect(existsSync(join(rootDir, "apps/web/src/app/page.tsx"))).toBe(true);
+  });
+
+  test("mobile preview uses a compact dashboard summary instead of stacked metric cards", () => {
+    const pageSource = readText("apps/web/src/app/page.tsx");
+
+    expect(pageSource).toContain('className="summaryPanel"');
+    expect(pageSource).toContain('className="summaryDetails"');
+    expect(pageSource).not.toContain('className="metric"');
+  });
+
+  test("web app pins light rendering colors to avoid dark mode text inversion", () => {
+    const cssSource = readText("apps/web/src/app/globals.css");
+
+    expect(cssSource).toContain("color-scheme: light");
+    expect(cssSource).toContain(".summaryPanel");
+    expect(cssSource).toContain("background: #12211d");
+    expect(cssSource).toContain("color: #ffffff");
   });
 });

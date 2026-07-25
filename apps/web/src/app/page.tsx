@@ -42,23 +42,19 @@ export default function Home() {
             <p className="month">2026年7月</p>
             <h1 className="title">月次支出</h1>
           </div>
-          <button className="addButton" type="button">
-            追加
+          <button className="addButton" type="button" aria-label="支出を追加">
+            +
           </button>
         </header>
 
-        <section className="summary" aria-label="月次サマリ">
-          <div className="metric">
-            <p className="metricLabel">合計</p>
-            <p className="metricValue">{numberFormatter.format(total)}</p>
+        <section className="summaryPanel" aria-label="月次サマリ">
+          <div>
+            <p className="summaryLabel">精算予定</p>
+            <p className="settlementAmount">{numberFormatter.format(4270)}</p>
           </div>
-          <div className="metric">
-            <p className="metricLabel">精算予定</p>
-            <p className="metricValue">{numberFormatter.format(4270)}</p>
-          </div>
-          <div className="metric">
-            <p className="metricLabel">件数</p>
-            <p className="metricValue">{expenses.length}件</p>
+          <div className="summaryDetails" aria-label="合計と件数">
+            <span>合計 {numberFormatter.format(total)}</span>
+            <span>{expenses.length}件</span>
           </div>
         </section>
 
@@ -69,10 +65,11 @@ export default function Home() {
         <section className="list" aria-label="支出明細">
           {expenses.map((expense) => (
             <article className="expense" key={expense.id}>
+              <span className="dateBadge">{expense.date}</span>
               <div>
                 <p className="expenseName">{expense.name}</p>
                 <p className="expenseMeta">
-                  {expense.date} / {expense.category} / {expense.paidBy}
+                  {expense.category} / {expense.paidBy}
                 </p>
               </div>
               <span className="amount">

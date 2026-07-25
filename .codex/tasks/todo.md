@@ -1,5 +1,32 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Improve mobile monthly list preview
+
+### Checklist
+
+- [x] Add failing mobile layout and dark-mode guard tests
+- [x] Verify RED with targeted test
+- [x] Implement compact dashboard mobile layout
+- [x] Add explicit light color-scheme and paired text/background colors
+- [x] Verify targeted test passes
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+
+### Progress Log
+
+- 2026-07-25 10:30 JST: Started mobile-first redesign after user chose visual option A and flagged dark-mode readability.
+- 2026-07-25 10:35 JST: Replaced stacked summary cards with compact settlement-first dashboard panel and denser mobile expense rows.
+
+### Verification Log
+
+- 2026-07-25 10:34 JST: `pnpm test apps/web-dev-config.test.ts` failed as expected because the current UI still used `metric` cards and did not set `color-scheme: light`.
+- 2026-07-25 10:35 JST: `pnpm test apps/web-dev-config.test.ts` passed with 4 tests.
+- 2026-07-25 10:35 JST: `pnpm test` passed with 38 tests across 6 files.
+- 2026-07-25 10:35 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-25 10:36 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+- 2026-07-25 10:36 JST: Started a temporary Next.js dev server on port 3100 and `curl -sL http://localhost:3100` returned HTML containing `summaryPanel`, `summaryDetails`, and compact expense rows.
+
 ## Task: Enable local frontend preview with `pnpm dev`
 
 ### Checklist

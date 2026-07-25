@@ -1,6 +1,7 @@
 :root {
+  color-scheme: light;
   color: #17211f;
-  background: #f7f4ee;
+  background: #f6f7f4;
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
@@ -12,8 +13,7 @@
 
 body {
   margin: 0;
-  background:
-    linear-gradient(180deg, #f8f5ef 0%, #edf3ef 52%, #eef1f7 100%);
+  background: #f6f7f4;
   color: #17211f;
 }
 
@@ -26,12 +26,12 @@ textarea {
 
 .shell {
   min-height: 100vh;
-  padding: 20px;
+  padding: 14px;
 }
 
 .app {
   margin: 0 auto;
-  max-width: 880px;
+  max-width: 420px;
 }
 
 .topbar {
@@ -39,52 +39,54 @@ textarea {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 12px 0 20px;
+  padding: 8px 0 12px;
 }
 
 .title {
   margin: 0;
-  font-size: clamp(1.5rem, 4vw, 2.2rem);
-  font-weight: 750;
+  font-size: 1.65rem;
+  font-weight: 800;
   line-height: 1.15;
 }
 
 .month {
+  margin: 0 0 3px;
   color: #4f5b56;
-  font-size: 0.95rem;
-  font-weight: 650;
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 
-.summary {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin-bottom: 18px;
-}
-
-.metric,
-.expense {
-  border: 1px solid rgba(23, 33, 31, 0.12);
+.summaryPanel {
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.76);
-  box-shadow: 0 10px 30px rgba(23, 33, 31, 0.06);
+  background: #12211d;
+  color: #ffffff;
+  padding: 16px;
+  box-shadow: 0 10px 24px rgba(18, 33, 29, 0.14);
 }
 
-.metric {
-  padding: 14px;
-}
-
-.metricLabel {
-  margin: 0 0 8px;
-  color: #65706b;
+.summaryLabel {
+  margin: 0 0 4px;
+  color: #c8d5d0;
   font-size: 0.78rem;
   font-weight: 700;
 }
 
-.metricValue {
+.settlementAmount {
   margin: 0;
-  font-size: 1.25rem;
-  font-weight: 780;
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 850;
+  line-height: 1.05;
+}
+
+.summaryDetails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 12px;
+  color: #dce6e2;
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 
 .toolbar {
@@ -92,45 +94,76 @@ textarea {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin: 22px 0 10px;
+  margin: 18px 0 8px;
 }
 
 .sectionTitle {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 .addButton {
-  min-height: 40px;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
   border: 0;
-  border-radius: 8px;
-  padding: 0 14px;
+  border-radius: 50%;
   background: #176b87;
-  color: white;
-  font-weight: 750;
+  color: #ffffff;
+  font-size: 1.55rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .list {
   display: grid;
-  gap: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(23, 33, 31, 0.1);
+  border-radius: 8px;
+  background: #ffffff;
 }
 
 .expense {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 12px;
-  padding: 14px;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 64px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e8ece9;
+  background: #ffffff;
+  color: #17211f;
+}
+
+.expense:last-child {
+  border-bottom: 0;
+}
+
+.dateBadge {
+  display: grid;
+  place-items: center;
+  min-width: 42px;
+  height: 32px;
+  border-radius: 8px;
+  background: #edf3ef;
+  color: #40514b;
+  font-size: 0.78rem;
+  font-weight: 800;
 }
 
 .expenseName {
-  margin: 0 0 6px;
-  font-weight: 750;
+  margin: 0 0 4px;
+  overflow: hidden;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .expenseMeta {
   margin: 0;
   color: #5f6b66;
-  font-size: 0.88rem;
+  font-size: 0.8rem;
 }
 
 .amount {
@@ -140,25 +173,26 @@ textarea {
   white-space: nowrap;
 }
 
-@media (max-width: 620px) {
+@media (min-width: 621px) {
   .shell {
-    padding: 14px;
+    padding: 28px;
   }
 
-  .topbar {
-    align-items: flex-start;
-    flex-direction: column;
+  .app {
+    max-width: 520px;
   }
 
-  .summary {
-    grid-template-columns: 1fr;
+  .summaryPanel {
+    padding: 20px;
   }
+}
 
+@media (max-width: 360px) {
   .expense {
-    grid-template-columns: 1fr;
+    grid-template-columns: 42px minmax(0, 1fr);
   }
 
   .amount {
-    align-self: start;
+    grid-column: 2;
   }
 }
