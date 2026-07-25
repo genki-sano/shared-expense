@@ -1,5 +1,41 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Enable local frontend preview with `pnpm dev`
+
+### Checklist
+
+- [x] Add failing workspace dev configuration test
+- [x] Verify RED with targeted test
+- [x] Add root `dev` script and minimal `apps/web` Next.js app
+- [x] Install frontend dependencies
+- [x] Verify targeted test passes
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Start `pnpm dev` and confirm local URL
+
+### Progress Log
+
+- 2026-07-20 15:00 JST: Started task to make implemented screens confirmable with `pnpm dev`.
+- 2026-07-20 16:11 JST: Added RED test for root `dev` delegation and `apps/web` Next.js scripts.
+- 2026-07-20 16:14 JST: Added root `dev` script, minimal Next.js app under `apps/web`, and installed frontend dependencies.
+- 2026-07-20 16:17 JST: Started `pnpm dev` with approval after sandbox port binding failed.
+
+### Verification Log
+- 2026-07-20 16:11 JST: `pnpm test apps/web-dev-config.test.ts` failed as expected because root `dev` was missing and `apps/web/package.json` did not exist.
+- 2026-07-20 16:14 JST: `pnpm install --no-frozen-lockfile` failed in sandbox with `ENOTFOUND registry.npmjs.org`; reran with network approval and succeeded.
+- 2026-07-20 16:16 JST: `pnpm test apps/web-dev-config.test.ts` passed with 2 tests.
+- 2026-07-20 16:16 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-20 16:16 JST: `pnpm build` passed; Next.js built `/` as static content and Redocly reported the same existing warnings.
+- 2026-07-20 16:17 JST: `pnpm dev` failed in sandbox with `listen EPERM 0.0.0.0:3000`; reran with port binding approval and Next.js reported `Ready` at `http://localhost:3000`.
+- 2026-07-20 16:17 JST: `curl -sL http://localhost:3000` returned the rendered page HTML containing `月次支出` and `明細`.
+- 2026-07-20 16:18 JST: Final `pnpm test` passed with 36 tests across 6 files.
+- 2026-07-20 16:18 JST: Final `pnpm typecheck` passed; Redocly reported the same existing OpenAPI warnings.
+- 2026-07-20 16:18 JST: Final `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+- 2026-07-20 16:18 JST: Final `curl -sL http://localhost:3000` returned the rendered page HTML containing `月次支出` and `明細`.
+- 2026-07-25 10:23 JST: Pre-commit `pnpm test` passed with 36 tests across 6 files.
+- 2026-07-25 10:23 JST: Pre-commit `pnpm typecheck` passed; Redocly reported the same existing OpenAPI warnings.
+- 2026-07-25 10:23 JST: Pre-commit `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+
 ## Checklist
 
 - [x] Explore current workspace instructions and existing docs

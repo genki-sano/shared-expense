@@ -1,0 +1,164 @@
+:root {
+  color: #17211f;
+  background: #f7f4ee;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background:
+    linear-gradient(180deg, #f8f5ef 0%, #edf3ef 52%, #eef1f7 100%);
+  color: #17211f;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.shell {
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.app {
+  margin: 0 auto;
+  max-width: 880px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0 20px;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  font-weight: 750;
+  line-height: 1.15;
+}
+
+.month {
+  color: #4f5b56;
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.metric,
+.expense {
+  border: 1px solid rgba(23, 33, 31, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 10px 30px rgba(23, 33, 31, 0.06);
+}
+
+.metric {
+  padding: 14px;
+}
+
+.metricLabel {
+  margin: 0 0 8px;
+  color: #65706b;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.metricValue {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 780;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 22px 0 10px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.addButton {
+  min-height: 40px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 14px;
+  background: #176b87;
+  color: white;
+  font-weight: 750;
+}
+
+.list {
+  display: grid;
+  gap: 10px;
+}
+
+.expense {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  padding: 14px;
+}
+
+.expenseName {
+  margin: 0 0 6px;
+  font-weight: 750;
+}
+
+.expenseMeta {
+  margin: 0;
+  color: #5f6b66;
+  font-size: 0.88rem;
+}
+
+.amount {
+  align-self: center;
+  color: #22342f;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+@media (max-width: 620px) {
+  .shell {
+    padding: 14px;
+  }
+
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .summary {
+    grid-template-columns: 1fr;
+  }
+
+  .expense {
+    grid-template-columns: 1fr;
+  }
+
+  .amount {
+    align-self: start;
+  }
+}
