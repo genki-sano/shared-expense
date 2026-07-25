@@ -25,6 +25,7 @@ describe("fetchMonthlyExpenses", () => {
             {
               id: "exp_1",
               userId: "user_a",
+              userName: "ひとみ",
               date: "2026-07-18",
               price: 6420,
               category: "食費",
@@ -52,6 +53,7 @@ describe("fetchMonthlyExpenses", () => {
         {
           id: "exp_1",
           userId: "user_a",
+          userName: "ひとみ",
           date: "2026-07-18",
           price: 6420,
           category: "食費",

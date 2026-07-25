@@ -53,7 +53,7 @@ export default async function Home() {
               <div>
                 <p className="expenseName">{expense.memo ?? expense.category}</p>
                 <p className="expenseMeta">
-                  {expense.category} / {expense.userId}
+                  {expense.category} / {expense.userName ?? expense.userId}
                 </p>
               </div>
               <span className="amount">

@@ -35,6 +35,18 @@ describe("createAppFromEnv", () => {
             });
           }
 
+          if (
+            String(url) ===
+            "https://sheets.googleapis.com/v4/spreadsheets/spreadsheet_1/values/users!A2%3AF"
+          ) {
+            return Response.json({
+              values: [
+                ["1", "ひとみ", "line_woman", "line_woman", "2021/03/03", "2021/03/03"],
+                ["2", "げんき", "line_man", "line_man", "2021/03/03", "2021/03/03"],
+              ],
+            });
+          }
+
           return Response.json({
             values: [
               [
@@ -79,6 +91,7 @@ describe("createAppFromEnv", () => {
         {
           id: "2148",
           userId: "woman",
+          userName: "ひとみ",
           date: "2026-07-22",
           price: 328,
           category: "食費",
@@ -88,6 +101,7 @@ describe("createAppFromEnv", () => {
         {
           id: "2145",
           userId: "man",
+          userName: "げんき",
           date: "2026-07-20",
           price: 643,
           category: "食費",
@@ -97,6 +111,27 @@ describe("createAppFromEnv", () => {
       ],
     });
     expect(calls).toEqual([
+      {
+        url: "https://oauth2.googleapis.com/token",
+        init: {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+            assertion: "signed-jwt",
+          }),
+        },
+      },
+      {
+        url: "https://sheets.googleapis.com/v4/spreadsheets/spreadsheet_1/values/users!A2%3AF",
+        init: {
+          headers: {
+            Authorization: "Bearer access-token",
+          },
+        },
+      },
       {
         url: "https://oauth2.googleapis.com/token",
         init: {

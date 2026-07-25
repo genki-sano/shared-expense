@@ -259,6 +259,9 @@ components:
         userId:
           type: string
           example: user_1
+        userName:
+          type: string
+          example: げんき
         date:
           type: string
           format: date

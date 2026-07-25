@@ -20,6 +20,10 @@ describe("SpreadsheetExpenseRepository", () => {
     const client: GoogleSheetsValuesClient = {
       getValues: async (input) => {
         ranges.push(`${input.spreadsheetId}:${input.range}`);
+        if (input.range === "users!A2:F") {
+          return {};
+        }
+
         return {
           values: [
             [
@@ -92,7 +96,67 @@ describe("SpreadsheetExpenseRepository", () => {
         version: 1,
       },
     ]);
-    expect(ranges).toEqual(["spreadsheet_1:payments!A2:K"]);
+    expect(ranges).toEqual(["spreadsheet_1:users!A2:F", "spreadsheet_1:payments!A2:K"]);
+  });
+
+  it("adds user names from the users sheet by legacy user type", async () => {
+    const repository = new SpreadsheetExpenseRepository({
+      spreadsheetId: "spreadsheet_1",
+      valuesClient: {
+        getValues: async (input) => {
+          if (input.range === "users!A2:F") {
+            return {
+              values: [
+                ["1", "ひとみ", "line_woman", "line_woman", "2021/03/03", "2021/03/03"],
+                ["2", "げんき", "line_man", "line_man", "2021/03/03", "2021/03/03"],
+              ],
+            };
+          }
+
+          return {
+            values: [
+              [
+                "exp_1",
+                "1",
+                "食費",
+                "6420",
+                "2026/07/18",
+                "スーパー",
+                "1",
+                "1",
+                "2026/07/18 10:00:00",
+                "2026/07/18 10:00:00",
+                "45856",
+              ],
+            ],
+          };
+        },
+      },
+      userTypeToUserId: (userType) => {
+        if (userType === "1") {
+          return "woman";
+        }
+
+        if (userType === "2") {
+          return "man";
+        }
+
+        return null;
+      },
+    });
+
+    await expect(repository.listByMonth({ month: "2026-07" })).resolves.toEqual([
+      {
+        id: "exp_1",
+        userId: "woman",
+        userName: "ひとみ",
+        date: "2026-07-18",
+        price: 6420,
+        category: "食費",
+        memo: "スーパー",
+        version: 1,
+      },
+    ]);
   });
 
   it("treats missing values as an empty payments sheet", async () => {

@@ -1,5 +1,36 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Display Spreadsheet user names
+
+### Checklist
+
+- [x] Inspect `users` sheet structure
+- [x] Add failing repository/API/web tests for user names
+- [x] Verify RED with targeted tests
+- [x] Implement `users` sheet name resolution
+- [x] Add `userName` to shared/API contract types
+- [x] Render `userName` in web when available
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-25 22:05 JST: Read `users!A1:F3`; columns are `type,name,line_user_id,firebase_id,created_at,updated_at` with `1 -> ひとみ`, `2 -> げんき`.
+- 2026-07-25 22:05 JST: User approved resolving display names from the `users` sheet and falling back to `userId` when missing.
+- 2026-07-25 22:48 JST: Implemented optional `Expense.userName`, users-sheet name lookup in `SpreadsheetExpenseRepository`, OpenAPI schema update, and web display fallback.
+- 2026-07-25 22:49 JST: Committed changes as `feat: display spreadsheet user names`.
+
+### Verification Log
+
+- 2026-07-25 22:47 JST: `pnpm test packages/integrations/src/spreadsheet/expense-repository.test.ts apps/api/src/app-env.test.ts apps/web/src/features/expenses/api.test.ts` failed as expected because the repository did not read `users!A2:F` or return `userName`.
+- 2026-07-25 22:48 JST: `pnpm test packages/integrations/src/spreadsheet/expense-repository.test.ts apps/api/src/app-env.test.ts apps/web/src/features/expenses/api.test.ts` passed with 9 tests across 3 files.
+- 2026-07-25 22:48 JST: `pnpm test` passed with 59 tests across 14 files.
+- 2026-07-25 22:48 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-25 22:48 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+
 ## Task: Run API and web together for local dev
 
 ### Checklist
