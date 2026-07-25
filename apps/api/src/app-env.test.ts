@@ -9,17 +9,32 @@ const user = {
 };
 
 describe("createAppFromEnv", () => {
-  it("uses the Spreadsheet repository when spreadsheet id and access token are configured", async () => {
+  it("uses the Spreadsheet repository when service account env is configured", async () => {
     const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
     const app = createAppFromEnv(
       {
         GOOGLE_SPREADSHEET_ID: "spreadsheet_1",
-        GOOGLE_ACCESS_TOKEN: "access-token",
+        GOOGLE_SERVICE_ACCOUNT_EMAIL: "sheets-reader@example.iam.gserviceaccount.com",
+        GOOGLE_PRIVATE_KEY: "-----BEGIN PRIVATE KEY-----\\nkey\\n-----END PRIVATE KEY-----\\n",
       },
       {
         authenticateToken: async () => user,
+        signServiceAccountJwt: async (input) => {
+          expect(input.privateKey).toBe(
+            "-----BEGIN PRIVATE KEY-----\nkey\n-----END PRIVATE KEY-----\n",
+          );
+          return "signed-jwt";
+        },
         fetcher: async (url, init) => {
           calls.push({ url: String(url), init });
+          if (String(url) === "https://oauth2.googleapis.com/token") {
+            return Response.json({
+              access_token: "access-token",
+              token_type: "Bearer",
+              expires_in: 3600,
+            });
+          }
+
           return Response.json({
             values: [
               [
@@ -82,6 +97,19 @@ describe("createAppFromEnv", () => {
       ],
     });
     expect(calls).toEqual([
+      {
+        url: "https://oauth2.googleapis.com/token",
+        init: {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+            assertion: "signed-jwt",
+          }),
+        },
+      },
       {
         url: "https://sheets.googleapis.com/v4/spreadsheets/spreadsheet_1/values/payments!A2%3AK",
         init: {

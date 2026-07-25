@@ -1,16 +1,17 @@
 import type { GoogleSheetsValuesClient } from "./expense-repository";
+import type { GoogleAccessTokenProvider } from "../google/service-account-auth-provider";
 
 export type FetchGoogleSheetsValuesClientInput = {
-  accessToken: string;
+  accessTokenProvider: GoogleAccessTokenProvider;
   fetcher?: typeof fetch;
 };
 
 export class FetchGoogleSheetsValuesClient implements GoogleSheetsValuesClient {
-  readonly #accessToken: string;
+  readonly #accessTokenProvider: GoogleAccessTokenProvider;
   readonly #fetcher: typeof fetch;
 
   constructor(input: FetchGoogleSheetsValuesClientInput) {
-    this.#accessToken = input.accessToken;
+    this.#accessTokenProvider = input.accessTokenProvider;
     this.#fetcher = input.fetcher ?? fetch;
   }
 
@@ -24,7 +25,7 @@ export class FetchGoogleSheetsValuesClient implements GoogleSheetsValuesClient {
       )}/values/${encodeURIComponent(input.range)}`,
       {
         headers: {
-          Authorization: `Bearer ${this.#accessToken}`,
+          Authorization: `Bearer ${await this.#accessTokenProvider.getAccessToken()}`,
         },
       },
     );

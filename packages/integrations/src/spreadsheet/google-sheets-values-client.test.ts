@@ -5,7 +5,9 @@ describe("FetchGoogleSheetsValuesClient", () => {
   it("calls Google Sheets values.get with encoded spreadsheet id, range, and bearer token", async () => {
     const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
     const client = new FetchGoogleSheetsValuesClient({
-      accessToken: "access-token",
+      accessTokenProvider: {
+        getAccessToken: async () => "access-token",
+      },
       fetcher: async (url, init) => {
         calls.push({ url: String(url), init });
         return Response.json({
@@ -36,7 +38,9 @@ describe("FetchGoogleSheetsValuesClient", () => {
 
   it("throws when Google Sheets returns an error", async () => {
     const client = new FetchGoogleSheetsValuesClient({
-      accessToken: "access-token",
+      accessTokenProvider: {
+        getAccessToken: async () => "access-token",
+      },
       fetcher: async () => Response.json({ error: "denied" }, { status: 403 }),
     });
 

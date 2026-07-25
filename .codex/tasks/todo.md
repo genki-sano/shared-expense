@@ -1,5 +1,36 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Switch Google Sheets auth to service account
+
+### Checklist
+
+- [x] Write implementation plan
+- [x] Add failing service account access token provider test
+- [x] Implement service account JWT signing and OAuth token exchange
+- [x] Change Google Sheets values client to use an access token provider
+- [x] Wire API env to service account credentials
+- [x] Update env templates
+- [x] Run targeted tests
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-25 17:30 JST: Started service account auth switch from manual `GOOGLE_ACCESS_TOKEN` to `GOOGLE_SERVICE_ACCOUNT_EMAIL` and `GOOGLE_PRIVATE_KEY`.
+- 2026-07-25 17:30 JST: Wrote focused implementation plan at `docs/superpowers/plans/2026-07-25-google-service-account-auth.md`.
+- 2026-07-25 21:37 JST: Implemented service account JWT token exchange, provider-backed Sheets fetches, API env wiring, and env template updates.
+- 2026-07-25 21:42 JST: Committed changes as `feat: use service account for sheets auth`.
+
+### Verification Log
+
+- 2026-07-25 21:35 JST: `pnpm test packages/integrations/src/google/service-account-access-token-provider.test.ts` failed as expected because `./service-account-access-token-provider` did not exist.
+- 2026-07-25 21:40 JST: `pnpm test packages/integrations/src/google/service-account-auth-provider.test.ts packages/integrations/src/spreadsheet/google-sheets-values-client.test.ts apps/api/src/app-env.test.ts` passed with 6 tests across 3 files after renaming the provider file to avoid global ignored `*token*` paths.
+- 2026-07-25 21:40 JST: `pnpm test` passed with 53 tests across 12 files.
+- 2026-07-25 21:40 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-25 21:41 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+
 ## Task: Add env templates
 
 ### Checklist

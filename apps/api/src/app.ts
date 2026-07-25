@@ -1,6 +1,9 @@
 import {
   FetchGoogleSheetsValuesClient,
+  GoogleServiceAccountAccessTokenProvider,
   SpreadsheetExpenseRepository,
+  type GoogleServiceAccountAccessTokenProviderInput,
+  type ServiceAccountJwtSigner,
 } from "@shared-expense/integrations";
 import type { User } from "@shared-expense/shared";
 import { Hono } from "hono";
@@ -14,12 +17,14 @@ export type AppDependencies = {
 
 export type AppEnv = {
   GOOGLE_SPREADSHEET_ID?: string | undefined;
-  GOOGLE_ACCESS_TOKEN?: string | undefined;
+  GOOGLE_SERVICE_ACCOUNT_EMAIL?: string | undefined;
+  GOOGLE_PRIVATE_KEY?: string | undefined;
 };
 
 export type AppEnvDependencies = {
   authenticateToken: (token: string) => Promise<User>;
   fetcher?: typeof fetch;
+  signServiceAccountJwt?: ServiceAccountJwtSigner;
 };
 
 const defaultDependencies: AppDependencies = {
@@ -52,20 +57,30 @@ function expenseRepositoryFromEnv(
   env: AppEnv,
   dependencies: AppEnvDependencies,
 ): ExpenseRepository {
-  if (env.GOOGLE_SPREADSHEET_ID === undefined || env.GOOGLE_ACCESS_TOKEN === undefined) {
+  if (
+    env.GOOGLE_SPREADSHEET_ID === undefined ||
+    env.GOOGLE_SERVICE_ACCOUNT_EMAIL === undefined ||
+    env.GOOGLE_PRIVATE_KEY === undefined
+  ) {
     return new InMemoryExpenseRepository([]);
+  }
+  const tokenProviderInput: GoogleServiceAccountAccessTokenProviderInput = {
+    clientEmail: env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+    privateKey: env.GOOGLE_PRIVATE_KEY,
+  };
+  if (dependencies.fetcher !== undefined) {
+    tokenProviderInput.fetcher = dependencies.fetcher;
+  }
+  if (dependencies.signServiceAccountJwt !== undefined) {
+    tokenProviderInput.signJwt = dependencies.signServiceAccountJwt;
   }
 
   return new SpreadsheetExpenseRepository({
     spreadsheetId: env.GOOGLE_SPREADSHEET_ID,
-    valuesClient: new FetchGoogleSheetsValuesClient(
-      dependencies.fetcher === undefined
-        ? { accessToken: env.GOOGLE_ACCESS_TOKEN }
-        : {
-            accessToken: env.GOOGLE_ACCESS_TOKEN,
-            fetcher: dependencies.fetcher,
-          },
-    ),
+    valuesClient: new FetchGoogleSheetsValuesClient({
+      accessTokenProvider: new GoogleServiceAccountAccessTokenProvider(tokenProviderInput),
+      ...(dependencies.fetcher === undefined ? {} : { fetcher: dependencies.fetcher }),
+    }),
     userTypeToUserId,
   });
 }
