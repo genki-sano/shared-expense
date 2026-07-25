@@ -1,5 +1,33 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Remove category from expense row meta
+
+### Checklist
+
+- [x] Confirm display direction
+- [x] Add failing web layout test
+- [x] Verify RED with targeted test
+- [x] Remove category from meta row
+- [x] Verify targeted test passes
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-25 23:05 JST: User chose to stop showing category in the list meta line after adding payer pills.
+- 2026-07-25 23:01 JST: Removed category from the expense meta row; category still appears as the main title when memo is missing.
+- 2026-07-25 23:02 JST: Committed changes as `feat: simplify expense row meta`.
+
+### Verification Log
+
+- 2026-07-25 23:01 JST: `pnpm test apps/web-dev-config.test.ts` failed as expected because `expense.category` was still rendered before the payer pill.
+- 2026-07-25 23:01 JST: `pnpm test apps/web-dev-config.test.ts` passed with 8 tests.
+- 2026-07-25 23:01 JST: `pnpm test` passed with 61 tests across 14 files.
+- 2026-07-25 23:02 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-25 23:02 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+
 ## Task: Improve payer visibility in expense list
 
 ### Checklist

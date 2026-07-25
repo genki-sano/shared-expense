@@ -56,7 +56,6 @@ export default async function Home() {
               <div>
                 <p className="expenseName">{expense.memo ?? expense.category}</p>
                 <p className="expenseMeta">
-                  {expense.category}
                   <span
                     className={`payerPill ${payerClassName(expense.userId)}`}
                   >

@@ -84,4 +84,11 @@ describe("web dev configuration", () => {
     expect(cssSource).toContain(".payerPill.payerWoman");
     expect(cssSource).toContain(".payerPill.payerMan");
   });
+
+  test("expense row meta shows only the payer pill, not category text", () => {
+    const pageSource = readText("apps/web/src/app/page.tsx");
+
+    expect(pageSource).toContain('<p className="expenseMeta">');
+    expect(pageSource).not.toContain("{expense.category}\n                  <span");
+  });
 });
