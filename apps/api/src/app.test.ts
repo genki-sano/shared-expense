@@ -109,3 +109,135 @@ describe("GET /api/expenses", () => {
     });
   });
 });
+
+describe("Expense mutations", () => {
+  it("creates an expense for the authenticated actor", async () => {
+    const response = await app().request("/api/expenses", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer valid",
+        "Content-Type": "application/json",
+        "Idempotency-Key": "create-1",
+      },
+      body: JSON.stringify({
+        date: "2026-07-26",
+        price: 1200,
+        category: "食費",
+        memo: "昼食",
+      }),
+    });
+
+    expect(response.status).toBe(201);
+    await expect(response.json()).resolves.toMatchObject({
+      id: expect.any(String),
+      userId: "user_a",
+      date: "2026-07-26",
+      price: 1200,
+      category: "食費",
+      memo: "昼食",
+      version: 1,
+    });
+  });
+
+  it("requires Idempotency-Key for mutations", async () => {
+    const response = await app().request("/api/expenses", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer valid",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        date: "2026-07-26",
+        price: 1200,
+        category: "食費",
+      }),
+    });
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      message: "Invalid request",
+      details: { field: "Idempotency-Key", reason: "is required" },
+    });
+  });
+
+  it("updates an existing expense", async () => {
+    const response = await app().request("/api/expenses/exp_earlier", {
+      method: "PUT",
+      headers: {
+        Authorization: "Bearer valid",
+        "Content-Type": "application/json",
+        "Idempotency-Key": "update-1",
+      },
+      body: JSON.stringify({
+        price: 3600,
+        memo: null,
+        version: 2,
+      }),
+    });
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      id: "exp_earlier",
+      userId: "user_a",
+      date: "2026-07-06",
+      price: 3600,
+      category: "生活用品",
+      memo: null,
+      version: 2,
+    });
+  });
+
+  it("returns 409 when update version does not match", async () => {
+    const response = await app().request("/api/expenses/exp_earlier", {
+      method: "PUT",
+      headers: {
+        Authorization: "Bearer valid",
+        "Content-Type": "application/json",
+        "Idempotency-Key": "update-conflict-1",
+      },
+      body: JSON.stringify({
+        price: 3600,
+        version: 1,
+      }),
+    });
+
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toEqual({
+      message: "Expense version conflict",
+      details: {
+        id: "exp_earlier",
+        expectedVersion: 1,
+        actualVersion: 2,
+      },
+    });
+  });
+
+  it("deletes an existing expense", async () => {
+    const response = await app().request("/api/expenses/exp_earlier", {
+      method: "DELETE",
+      headers: {
+        Authorization: "Bearer valid",
+        "Idempotency-Key": "delete-1",
+      },
+    });
+
+    expect(response.status).toBe(204);
+    expect(await response.text()).toBe("");
+  });
+
+  it("returns 404 when deleting an unknown expense", async () => {
+    const response = await app().request("/api/expenses/missing", {
+      method: "DELETE",
+      headers: {
+        Authorization: "Bearer valid",
+        "Idempotency-Key": "delete-missing-1",
+      },
+    });
+
+    expect(response.status).toBe(404);
+    await expect(response.json()).resolves.toEqual({
+      message: "Expense not found",
+      details: { id: "missing" },
+    });
+  });
+});

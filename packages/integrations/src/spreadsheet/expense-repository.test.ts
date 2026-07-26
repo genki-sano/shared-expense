@@ -14,6 +14,18 @@ const userTypeToUserId = (userType: string): string | null => {
   return null;
 };
 
+const userIdToUserType = (userId: string): string | null => {
+  if (userId === "user_a") {
+    return "man";
+  }
+
+  if (userId === "user_b") {
+    return "woman";
+  }
+
+  return null;
+};
+
 describe("SpreadsheetExpenseRepository", () => {
   it("reads legacy payments rows from payments!A2:K and returns requested month expenses newest first", async () => {
     const ranges: string[] = [];
@@ -199,5 +211,208 @@ describe("SpreadsheetExpenseRepository", () => {
     await expect(repository.listByMonth({ month: "2026-07" })).rejects.toThrow(
       "Invalid payments row at sheet row 2: Unknown userType: unknown",
     );
+  });
+
+  it("creates a legacy payment row for the actor", async () => {
+    const appendedRows: unknown[][] = [];
+    const repository = new SpreadsheetExpenseRepository({
+      spreadsheetId: "spreadsheet_1",
+      valuesClient: {
+        getValues: async (input) => {
+          if (input.range === "users!A2:F") {
+            return { values: [["man", "げんき"]] };
+          }
+
+          return {
+            values: [
+              [
+                "10",
+                "woman",
+                "食費",
+                "1000",
+                "2026/07/01",
+                "",
+                "woman",
+                "woman",
+                "2026/07/01 10:00:00",
+                "2026/07/01 10:00:00",
+                "45839",
+              ],
+            ],
+          };
+        },
+        appendValues: async (input) => {
+          appendedRows.push(input.values[0] ?? []);
+        },
+        updateValues: async () => {
+          throw new Error("update should not be called");
+        },
+        clearValues: async () => {
+          throw new Error("clear should not be called");
+        },
+      },
+      userTypeToUserId,
+      userIdToUserType,
+      now: () => new Date("2026-07-26T12:34:56+09:00"),
+    });
+
+    await expect(
+      repository.create({
+        actor: { id: "user_a" },
+        date: "2026-07-26",
+        price: 1200,
+        category: "食費",
+        memo: "昼食",
+      }),
+    ).resolves.toEqual({
+      id: "11",
+      userId: "user_a",
+      userName: "げんき",
+      date: "2026-07-26",
+      price: 1200,
+      category: "食費",
+      memo: "昼食",
+      version: 1,
+    });
+    expect(appendedRows).toEqual([
+      [
+        "11",
+        "man",
+        "食費",
+        "1200",
+        "2026/07/26",
+        "昼食",
+        "man",
+        "man",
+        "2026/07/26 12:34:56",
+        "2026/07/26 12:34:56",
+        "=DATEVALUE(E3)",
+      ],
+    ]);
+  });
+
+  it("updates a matching legacy payment row", async () => {
+    const updates: Array<{ range: string; values: unknown[][] }> = [];
+    const repository = new SpreadsheetExpenseRepository({
+      spreadsheetId: "spreadsheet_1",
+      valuesClient: {
+        getValues: async (input) => {
+          if (input.range === "users!A2:F") {
+            return { values: [["man", "げんき"]] };
+          }
+
+          return {
+            values: [
+              [
+                "10",
+                "man",
+                "食費",
+                "1000",
+                "2026/07/01",
+                "朝食",
+                "man",
+                "man",
+                "2026/07/01 10:00:00",
+                "2026/07/01 10:00:00",
+                "45839",
+              ],
+            ],
+          };
+        },
+        appendValues: async () => {
+          throw new Error("append should not be called");
+        },
+        updateValues: async (input) => {
+          updates.push({ range: input.range, values: input.values });
+        },
+        clearValues: async () => {
+          throw new Error("clear should not be called");
+        },
+      },
+      userTypeToUserId,
+      userIdToUserType,
+      now: () => new Date("2026-07-26T12:34:56+09:00"),
+    });
+
+    await expect(
+      repository.update({
+        id: "10",
+        version: 1,
+        actor: { id: "user_a" },
+        patch: { price: 1300, memo: null },
+      }),
+    ).resolves.toMatchObject({
+      id: "10",
+      userId: "user_a",
+      price: 1300,
+      memo: null,
+      userName: "げんき",
+    });
+    expect(updates).toEqual([
+      {
+        range: "payments!A2:K2",
+        values: [
+          [
+            "10",
+            "man",
+            "食費",
+            "1300",
+            "2026/07/01",
+            "",
+            "man",
+            "man",
+            "2026/07/01 10:00:00",
+            "2026/07/26 12:34:56",
+            "=DATEVALUE(E2)",
+          ],
+        ],
+      },
+    ]);
+  });
+
+  it("clears a matching legacy payment row", async () => {
+    const clearedRanges: string[] = [];
+    const repository = new SpreadsheetExpenseRepository({
+      spreadsheetId: "spreadsheet_1",
+      valuesClient: {
+        getValues: async (input) => {
+          if (input.range === "users!A2:F") {
+            return {};
+          }
+
+          return {
+            values: [
+              [
+                "10",
+                "man",
+                "食費",
+                "1000",
+                "2026/07/01",
+                "朝食",
+                "man",
+                "man",
+                "2026/07/01 10:00:00",
+                "2026/07/01 10:00:00",
+                "45839",
+              ],
+            ],
+          };
+        },
+        appendValues: async () => {
+          throw new Error("append should not be called");
+        },
+        updateValues: async () => {
+          throw new Error("update should not be called");
+        },
+        clearValues: async (input) => {
+          clearedRanges.push(input.range);
+        },
+      },
+      userTypeToUserId,
+      userIdToUserType,
+    });
+
+    await expect(repository.delete({ id: "10" })).resolves.toBeUndefined();
+    expect(clearedRanges).toEqual(["payments!A2:K2"]);
   });
 });

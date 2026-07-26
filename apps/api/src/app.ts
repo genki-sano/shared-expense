@@ -82,6 +82,7 @@ function expenseRepositoryFromEnv(
       ...(dependencies.fetcher === undefined ? {} : { fetcher: dependencies.fetcher }),
     }),
     userTypeToUserId,
+    userIdToUserType,
   });
 }
 
@@ -92,6 +93,18 @@ function userTypeToUserId(userType: string): string | null {
 
   if (userType === "2") {
     return "man";
+  }
+
+  return null;
+}
+
+function userIdToUserType(userId: string): string | null {
+  if (userId === "woman") {
+    return "1";
+  }
+
+  if (userId === "man") {
+    return "2";
   }
 
   return null;

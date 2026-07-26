@@ -1,5 +1,40 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Expense CRUD API
+
+### Checklist
+
+- [x] Confirm implementation design
+- [x] Write implementation plan
+- [x] Add failing Spreadsheet repository mutation tests
+- [x] Implement Spreadsheet create/update/delete
+- [x] Add failing API route mutation tests
+- [x] Implement API create/update/delete routes
+- [x] Wire Google Sheets mutation client
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-26 00:10 JST: User approved starting from Expense CRUD API.
+- 2026-07-26 00:10 JST: Wrote implementation plan at `docs/superpowers/plans/2026-07-26-expense-crud-api.md`.
+- 2026-07-26 19:52 JST: Implemented Spreadsheet-backed create/update/delete using legacy `payments` rows and Google Sheets values append/update/clear.
+- 2026-07-26 19:54 JST: Implemented `POST /api/expenses`, `PUT /api/expenses/{id}`, and `DELETE /api/expenses/{id}` with auth, idempotency key validation, request validation, 404, and 409 handling.
+- 2026-07-26 19:59 JST: Committed changes as `feat: add expense crud api`.
+
+### Verification Log
+
+- 2026-07-26 19:30 JST: `pnpm test packages/integrations/src/spreadsheet/expense-repository.test.ts` failed as expected because `repository.create/update/delete` did not exist.
+- 2026-07-26 19:52 JST: `pnpm test packages/integrations/src/spreadsheet/google-sheets-values-client.test.ts` failed as expected because `appendValues` did not exist.
+- 2026-07-26 19:53 JST: `pnpm test apps/api/src/app.test.ts` failed as expected because mutation routes returned 404.
+- 2026-07-26 19:56 JST: `pnpm test apps/api/src/app.test.ts packages/integrations/src/spreadsheet/expense-repository.test.ts packages/integrations/src/spreadsheet/google-sheets-values-client.test.ts` passed with 19 tests across 3 files.
+- 2026-07-26 19:59 JST: `pnpm test` passed with 71 tests across 14 files.
+- 2026-07-26 19:58 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-26 19:59 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+
 ## Task: Remove category from expense row meta
 
 ### Checklist

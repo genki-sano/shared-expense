@@ -51,4 +51,66 @@ describe("FetchGoogleSheetsValuesClient", () => {
       }),
     ).rejects.toThrow("Failed to read Google Sheets values: 403");
   });
+
+  it("appends, updates, and clears Google Sheets values with bearer token", async () => {
+    const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
+    const client = new FetchGoogleSheetsValuesClient({
+      accessTokenProvider: {
+        getAccessToken: async () => "access-token",
+      },
+      fetcher: async (url, init) => {
+        calls.push({ url: String(url), init });
+        return Response.json({});
+      },
+    });
+
+    await client.appendValues({
+      spreadsheetId: "spreadsheet_1",
+      range: "payments!A2:K",
+      values: [["1"]],
+    });
+    await client.updateValues({
+      spreadsheetId: "spreadsheet_1",
+      range: "payments!A2:K2",
+      values: [["2"]],
+    });
+    await client.clearValues({
+      spreadsheetId: "spreadsheet_1",
+      range: "payments!A2:K2",
+    });
+
+    expect(calls).toEqual([
+      {
+        url: "https://sheets.googleapis.com/v4/spreadsheets/spreadsheet_1/values/payments!A2%3AK:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS",
+        init: {
+          method: "POST",
+          headers: {
+            Authorization: "Bearer access-token",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ values: [["1"]] }),
+        },
+      },
+      {
+        url: "https://sheets.googleapis.com/v4/spreadsheets/spreadsheet_1/values/payments!A2%3AK2?valueInputOption=USER_ENTERED",
+        init: {
+          method: "PUT",
+          headers: {
+            Authorization: "Bearer access-token",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ values: [["2"]] }),
+        },
+      },
+      {
+        url: "https://sheets.googleapis.com/v4/spreadsheets/spreadsheet_1/values/payments!A2%3AK2:clear",
+        init: {
+          method: "POST",
+          headers: {
+            Authorization: "Bearer access-token",
+          },
+        },
+      },
+    ]);
+  });
 });

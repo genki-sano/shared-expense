@@ -5,15 +5,43 @@ export type ListExpensesInput = {
   actor: User;
 };
 
+export type CreateExpenseInput = {
+  actor: User;
+  date: string;
+  price: number;
+  category: string;
+  memo: string | null;
+};
+
+export type UpdateExpenseInput = {
+  id: string;
+  actor: User;
+  version: number;
+  patch: {
+    date?: string;
+    price?: number;
+    category?: string;
+    memo?: string | null;
+  };
+};
+
+export type DeleteExpenseInput = {
+  id: string;
+  actor: User;
+};
+
 export type ExpenseRepository = {
   listByMonth(input: ListExpensesInput): Promise<Expense[]>;
+  create(input: CreateExpenseInput): Promise<Expense>;
+  update(input: UpdateExpenseInput): Promise<Expense>;
+  delete(input: DeleteExpenseInput): Promise<void>;
 };
 
 export class InMemoryExpenseRepository implements ExpenseRepository {
-  readonly #expenses: readonly Expense[];
+  readonly #expenses: Expense[];
 
   constructor(expenses: readonly Expense[]) {
-    this.#expenses = expenses;
+    this.#expenses = [...expenses];
   }
 
   async listByMonth(input: ListExpensesInput): Promise<Expense[]> {
@@ -27,5 +55,82 @@ export class InMemoryExpenseRepository implements ExpenseRepository {
 
         return right.id.localeCompare(left.id);
       });
+  }
+
+  async create(input: CreateExpenseInput): Promise<Expense> {
+    const expense: Expense = {
+      id: `exp_${this.#expenses.length + 1}`,
+      userId: input.actor.id,
+      date: input.date,
+      price: input.price,
+      category: input.category,
+      memo: input.memo,
+      version: 1,
+    };
+    this.#expenses.push(expense);
+
+    return expense;
+  }
+
+  async update(input: UpdateExpenseInput): Promise<Expense> {
+    const index = this.#expenses.findIndex((expense) => expense.id === input.id);
+    if (index === -1) {
+      throw new ExpenseRepositoryError("not_found", input.id);
+    }
+
+    const current = this.#expenses[index];
+    if (current === undefined) {
+      throw new ExpenseRepositoryError("not_found", input.id);
+    }
+
+    if (current.version !== input.version) {
+      throw new ExpenseRepositoryError(
+        "version_conflict",
+        input.id,
+        input.version,
+        current.version,
+      );
+    }
+
+    const next: Expense = {
+      ...current,
+      date: input.patch.date ?? current.date,
+      price: input.patch.price ?? current.price,
+      category: input.patch.category ?? current.category,
+      memo: "memo" in input.patch ? input.patch.memo ?? null : current.memo,
+    };
+    this.#expenses[index] = next;
+
+    return next;
+  }
+
+  async delete(input: DeleteExpenseInput): Promise<void> {
+    const index = this.#expenses.findIndex((expense) => expense.id === input.id);
+    if (index === -1) {
+      throw new ExpenseRepositoryError("not_found", input.id);
+    }
+
+    this.#expenses.splice(index, 1);
+  }
+}
+
+export class ExpenseRepositoryError extends Error {
+  readonly code: "not_found" | "version_conflict";
+  readonly id: string;
+  readonly expectedVersion: number | undefined;
+  readonly actualVersion: number | undefined;
+
+  constructor(
+    code: "not_found" | "version_conflict",
+    id: string,
+    expectedVersion?: number,
+    actualVersion?: number,
+  ) {
+    super(code === "not_found" ? `Expense not found: ${id}` : `Expense version conflict: ${id}`);
+    this.name = "ExpenseRepositoryError";
+    this.code = code;
+    this.id = id;
+    this.expectedVersion = expectedVersion;
+    this.actualVersion = actualVersion;
   }
 }
