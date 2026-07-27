@@ -1,5 +1,33 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Use writable Google Sheets OAuth scope
+
+### Checklist
+
+- [x] Identify append 403 root cause
+- [x] Add failing writable scope test
+- [x] Change service account default scope to writable Sheets scope
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-27 22:00 JST: User reported `Failed to append Google Sheets values: 403`. Root cause: service account token provider defaulted to `https://www.googleapis.com/auth/spreadsheets.readonly`, which can read but cannot append/update/clear values.
+- 2026-07-27 22:03 JST: Changed service account default scope to `https://www.googleapis.com/auth/spreadsheets` for read/write Sheets values access.
+- 2026-07-27 22:04 JST: Committed changes as `fix: use writable sheets scope`.
+
+### Verification Log
+
+- 2026-07-27 22:03 JST: `pnpm test packages/integrations/src/google/service-account-auth-provider.test.ts` failed as expected because the JWT payload still used `https://www.googleapis.com/auth/spreadsheets.readonly`.
+- 2026-07-27 22:03 JST: `pnpm test packages/integrations/src/google/service-account-auth-provider.test.ts` passed with 2 tests.
+- 2026-07-27 22:03 JST: `pnpm test` passed with 83 tests across 16 files.
+- 2026-07-27 22:03 JST: `pnpm typecheck` initially failed because `packages/integrations/src/index.ts` still exported `GOOGLE_SHEETS_READONLY_SCOPE`; updated it to export `GOOGLE_SHEETS_SCOPE`.
+- 2026-07-27 22:03 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-27 22:03 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+
 ## Task: Surface API create repository failures
 
 ### Checklist

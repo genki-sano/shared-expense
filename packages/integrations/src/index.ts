@@ -15,7 +15,7 @@ export type {
 } from "./spreadsheet/expense-repository";
 export type { FetchGoogleSheetsValuesClientInput } from "./spreadsheet/google-sheets-values-client";
 export {
-  GOOGLE_SHEETS_READONLY_SCOPE,
+  GOOGLE_SHEETS_SCOPE,
   GOOGLE_TOKEN_URL,
   GoogleServiceAccountAccessTokenProvider,
   signServiceAccountJwt,

@@ -1,5 +1,5 @@
 export const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
-export const GOOGLE_SHEETS_READONLY_SCOPE = "https://www.googleapis.com/auth/spreadsheets.readonly";
+export const GOOGLE_SHEETS_SCOPE = "https://www.googleapis.com/auth/spreadsheets";
 
 const JWT_BEARER_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:jwt-bearer";
 
@@ -46,7 +46,7 @@ export class GoogleServiceAccountAccessTokenProvider implements GoogleAccessToke
   constructor(input: GoogleServiceAccountAccessTokenProviderInput) {
     this.#clientEmail = input.clientEmail;
     this.#privateKey = normalizePrivateKey(input.privateKey);
-    this.#scope = input.scope ?? GOOGLE_SHEETS_READONLY_SCOPE;
+    this.#scope = input.scope ?? GOOGLE_SHEETS_SCOPE;
     this.#fetcher = input.fetcher ?? fetch;
     this.#now = input.now ?? (() => new Date());
     this.#signJwt = input.signJwt ?? signServiceAccountJwt;

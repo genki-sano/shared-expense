@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  GOOGLE_SHEETS_READONLY_SCOPE,
+  GOOGLE_SHEETS_SCOPE,
   GOOGLE_TOKEN_URL,
   GoogleServiceAccountAccessTokenProvider,
 } from "./service-account-auth-provider";
@@ -35,7 +35,7 @@ describe("GoogleServiceAccountAccessTokenProvider", () => {
     expect(signedPayloads).toEqual([
       {
         iss: "sheets-reader@example.iam.gserviceaccount.com",
-        scope: GOOGLE_SHEETS_READONLY_SCOPE,
+        scope: GOOGLE_SHEETS_SCOPE,
         aud: GOOGLE_TOKEN_URL,
         iat: 1784968200,
         exp: 1784971800,
