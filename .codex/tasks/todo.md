@@ -1,5 +1,36 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Change Spreadsheet expense delete to logical delete
+
+### Checklist
+
+- [x] Try to inspect referenced Spreadsheet
+- [x] Add failing repository logical delete tests
+- [x] Read payments rows with deletion marker columns
+- [x] Filter logically deleted rows from monthly list
+- [x] Change delete to update deleted marker columns
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-27 22:00 JST: User asked to change delete from physical delete to logical delete and provided Spreadsheet `1Xg_yFKm1dIlYKpZYMAq80uy1JImzRLDr4CHsuZriMSM`.
+- 2026-07-27 22:00 JST: Google Sheets connector metadata read returned `403 PERMISSION_DENIED`, so implementation proceeds with the conservative assumption that existing `payments!A:K` stays intact and logical delete markers are added as `L:deleted_at` and `M:deleted_by`.
+- 2026-07-27 22:27 JST: User updated Spreadsheet permissions. Confirmed gid `30835585` is `payments`, with 12 columns and `L:deleted_at`.
+- 2026-07-27 22:27 JST: Changed expense repository to read `payments!A2:L`, filter rows with non-empty `deleted_at`, and update only `payments!L{row}` on delete.
+- 2026-07-27 22:29 JST: Prepared commit for logical delete changes.
+
+### Verification Log
+
+- 2026-07-27 22:27 JST: `pnpm test packages/integrations/src/spreadsheet/expense-repository.test.ts` passed with 7 tests.
+- 2026-07-27 22:28 JST: `pnpm test` initially failed because `apps/api/src/app-env.test.ts` still expected `payments!A2:K`; updated the expectation to `payments!A2:L`.
+- 2026-07-27 22:28 JST: `pnpm test` passed with 85 tests across 16 files.
+- 2026-07-27 22:28 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-27 22:29 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+
 ## Task: Simplify expense form fields
 
 ### Checklist

@@ -27,7 +27,7 @@ const userIdToUserType = (userId: string): string | null => {
 };
 
 describe("SpreadsheetExpenseRepository", () => {
-  it("reads legacy payments rows from payments!A2:K and returns requested month expenses newest first", async () => {
+  it("reads legacy payments rows from payments!A2:L and returns requested month expenses newest first", async () => {
     const ranges: string[] = [];
     const client: GoogleSheetsValuesClient = {
       getValues: async (input) => {
@@ -77,6 +77,20 @@ describe("SpreadsheetExpenseRepository", () => {
               "2026/07/06 10:00:00",
               "45844",
             ],
+            [
+              "exp_deleted",
+              "man",
+              "食費",
+              "500",
+              "2026/07/05",
+              "削除済み",
+              "man",
+              "man",
+              "2026/07/05 10:00:00",
+              "2026/07/05 10:00:00",
+              "45843",
+              "2026/07/10 12:00:00",
+            ],
           ],
         };
       },
@@ -108,7 +122,7 @@ describe("SpreadsheetExpenseRepository", () => {
         version: 1,
       },
     ]);
-    expect(ranges).toEqual(["spreadsheet_1:users!A2:F", "spreadsheet_1:payments!A2:K"]);
+    expect(ranges).toEqual(["spreadsheet_1:users!A2:F", "spreadsheet_1:payments!A2:L"]);
   });
 
   it("adds user names from the users sheet by legacy user type", async () => {
@@ -370,8 +384,8 @@ describe("SpreadsheetExpenseRepository", () => {
     ]);
   });
 
-  it("clears a matching legacy payment row", async () => {
-    const clearedRanges: string[] = [];
+  it("marks a matching legacy payment row as deleted", async () => {
+    const updates: Array<{ range: string; values: unknown[][] }> = [];
     const repository = new SpreadsheetExpenseRepository({
       spreadsheetId: "spreadsheet_1",
       valuesClient: {
@@ -401,18 +415,24 @@ describe("SpreadsheetExpenseRepository", () => {
         appendValues: async () => {
           throw new Error("append should not be called");
         },
-        updateValues: async () => {
-          throw new Error("update should not be called");
+        updateValues: async (input) => {
+          updates.push({ range: input.range, values: input.values });
         },
         clearValues: async (input) => {
-          clearedRanges.push(input.range);
+          throw new Error(`clear should not be called: ${input.range}`);
         },
       },
       userTypeToUserId,
       userIdToUserType,
+      now: () => new Date("2026-07-26T12:34:56+09:00"),
     });
 
-    await expect(repository.delete({ id: "10" })).resolves.toBeUndefined();
-    expect(clearedRanges).toEqual(["payments!A2:K2"]);
+    await expect(repository.delete({ id: "10", actor: { id: "user_a" } })).resolves.toBeUndefined();
+    expect(updates).toEqual([
+      {
+        range: "payments!L2:L2",
+        values: [["2026/07/26 12:34:56"]],
+      },
+    ]);
   });
 });

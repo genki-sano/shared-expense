@@ -7,6 +7,8 @@ import {
   type UserTypeToUserId,
 } from "./expense-row";
 
+const PAYMENTS_RANGE = "payments!A2:L";
+
 export type GoogleSheetsValuesClient = {
   getValues(input: {
     spreadsheetId: string;
@@ -81,12 +83,17 @@ export class SpreadsheetExpenseRepository {
     const userNamesByType = await this.#userNamesByType();
     const response = await this.#valuesClient.getValues({
       spreadsheetId: this.#spreadsheetId,
-      range: "payments!A2:K",
+      range: PAYMENTS_RANGE,
     });
 
     return (response.values ?? [])
       .map((row, index) => ({ row, rowNumber: index + 2 }))
       .filter((item) => item.row.length > 0)
+      .map((item) => ({
+        ...item,
+        deletedAt: deletedAtFromPaymentRow(item.row),
+      }))
+      .filter((item) => item.deletedAt === "")
       .map((item) => this.#expenseFromRow(item.row, item.rowNumber, userNamesByType))
       .filter((expense) => expense.date.startsWith(`${input.month}-`))
       .sort((left, right) => {
@@ -135,7 +142,7 @@ export class SpreadsheetExpenseRepository {
 
     const userNamesByType = await this.#userNamesByType();
     const payments = await this.#paymentRows();
-    const match = payments.rows.find((row) => row.row[0] === input.id);
+    const match = payments.rows.find((row) => row.deletedAt === "" && row.row[0] === input.id);
 
     if (match === undefined) {
       throw new Error(`Expense not found: ${input.id}`);
@@ -168,15 +175,16 @@ export class SpreadsheetExpenseRepository {
 
   async delete(input: DeleteSpreadsheetExpenseInput): Promise<void> {
     const payments = await this.#paymentRows();
-    const match = payments.rows.find((row) => row.row[0] === input.id);
+    const match = payments.rows.find((row) => row.deletedAt === "" && row.row[0] === input.id);
 
     if (match === undefined) {
       throw new Error(`Expense not found: ${input.id}`);
     }
 
-    await this.#clearValues({
+    await this.#updateValues({
       spreadsheetId: this.#spreadsheetId,
-      range: `payments!A${match.rowNumber}:K${match.rowNumber}`,
+      range: `payments!L${match.rowNumber}:L${match.rowNumber}`,
+      values: [[formatTimestamp(this.#now())]],
     });
   }
 
@@ -224,11 +232,11 @@ export class SpreadsheetExpenseRepository {
   }
 
   async #paymentRows(): Promise<{
-    rows: Array<{ row: LegacyPaymentRow; rowNumber: number }>;
+    rows: Array<{ row: LegacyPaymentRow; rowNumber: number; deletedAt: string }>;
   }> {
     const response = await this.#valuesClient.getValues({
       spreadsheetId: this.#spreadsheetId,
-      range: "payments!A2:K",
+      range: PAYMENTS_RANGE,
     });
 
     return {
@@ -238,6 +246,7 @@ export class SpreadsheetExpenseRepository {
         .map((item) => ({
           row: toLegacyPaymentRow(item.row),
           rowNumber: item.rowNumber,
+          deletedAt: deletedAtFromPaymentRow(item.row),
         })),
     };
   }
@@ -301,13 +310,6 @@ export class SpreadsheetExpenseRepository {
     await this.#valuesClient.updateValues(input);
   }
 
-  async #clearValues(input: { spreadsheetId: string; range: string }): Promise<void> {
-    if (this.#valuesClient.clearValues === undefined) {
-      throw new Error("Google Sheets clearValues is not configured");
-    }
-
-    await this.#valuesClient.clearValues(input);
-  }
 }
 
 function toLegacyPaymentRow(row: unknown[]): LegacyPaymentRow {
@@ -316,6 +318,10 @@ function toLegacyPaymentRow(row: unknown[]): LegacyPaymentRow {
   }
 
   return row.slice(0, 11).map((value) => String(value)) as LegacyPaymentRow;
+}
+
+function deletedAtFromPaymentRow(row: unknown[]): string {
+  return row[11] === undefined ? "" : String(row[11]).trim();
 }
 
 function nextPaymentId(rows: Array<{ row: LegacyPaymentRow }>): string {

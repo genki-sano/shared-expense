@@ -146,7 +146,7 @@ describe("createAppFromEnv", () => {
         },
       },
       {
-        url: "https://sheets.googleapis.com/v4/spreadsheets/spreadsheet_1/values/payments!A2%3AK",
+        url: "https://sheets.googleapis.com/v4/spreadsheets/spreadsheet_1/values/payments!A2%3AL",
         init: {
           headers: {
             Authorization: "Bearer access-token",
