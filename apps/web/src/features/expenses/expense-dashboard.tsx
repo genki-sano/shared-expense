@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import {
   createExpense,
   deleteExpense,
+  ExpenseApiError,
   updateExpense,
   type CreateExpensePayload,
   type UpdateExpensePayload,
@@ -59,8 +60,9 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
       setExpenses((current) => sortExpenses([created, ...current]));
       setIsCreateOpen(false);
       setStatusMessage("支出を追加しました");
-    } catch {
-      setStatusMessage("支出を追加できませんでした");
+    } catch (error) {
+      logExpenseMutationError("create", error);
+      setStatusMessage(`支出を追加できませんでした。${errorMessageForUser(error)}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -85,8 +87,11 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
       );
       setEditingExpenseId(null);
       setStatusMessage("支出を更新しました");
-    } catch {
-      setStatusMessage("支出を更新できませんでした。再読み込みしてからやり直してください");
+    } catch (error) {
+      logExpenseMutationError("update", error);
+      setStatusMessage(
+        `支出を更新できませんでした。${errorMessageForUser(error)} 再読み込みしてからやり直してください`,
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -108,8 +113,9 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
       });
       setExpenses((current) => current.filter((item) => item.id !== expense.id));
       setStatusMessage("支出を削除しました");
-    } catch {
-      setStatusMessage("支出を削除できませんでした");
+    } catch (error) {
+      logExpenseMutationError("delete", error);
+      setStatusMessage(`支出を削除できませんでした。${errorMessageForUser(error)}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -371,4 +377,28 @@ function payerClassName(userId: string): "payerWoman" | "payerMan" | "payerUnkno
   }
 
   return "payerUnknown";
+}
+
+function logExpenseMutationError(
+  operation: "create" | "update" | "delete",
+  error: unknown,
+): void {
+  console.error(`Expense ${operation} failed`, error);
+}
+
+function errorMessageForUser(error: unknown): string {
+  if (error instanceof ExpenseApiError) {
+    const detail = error.responseBody.trim();
+    if (detail === "") {
+      return `API status: ${error.status}`;
+    }
+
+    return `API status: ${error.status} / ${detail}`;
+  }
+
+  if (error instanceof Error && error.message.trim() !== "") {
+    return error.message;
+  }
+
+  return "詳細はブラウザ console を確認してください";
 }

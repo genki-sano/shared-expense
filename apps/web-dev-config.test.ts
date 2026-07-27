@@ -102,6 +102,8 @@ describe("web dev configuration", () => {
     expect(dashboardSource).toContain("createExpense(");
     expect(dashboardSource).toContain("updateExpense(");
     expect(dashboardSource).toContain("deleteExpense(");
+    expect(dashboardSource).toContain("console.error");
+    expect(dashboardSource).toContain("errorMessageForUser(error)");
     expect(dashboardSource).toContain('aria-label="支出を追加"');
     expect(dashboardSource).toContain('aria-label="支出を編集"');
     expect(dashboardSource).toContain('aria-label="支出を削除"');

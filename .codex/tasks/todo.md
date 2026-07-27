@@ -1,5 +1,34 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Surface Expense mutation failures
+
+### Checklist
+
+- [x] Identify swallowed frontend mutation errors
+- [x] Add failing API error detail tests
+- [x] Implement detailed API mutation errors
+- [x] Log dashboard mutation failures
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-27 22:00 JST: User reported create failure only showed `支出を追加できませんでした` and no logs. Root cause: dashboard mutation handlers used bare `catch` blocks and the API client threw status-only errors without reading response bodies.
+- 2026-07-27 22:01 JST: Added `ExpenseApiError` with operation, status, and response body, plus dashboard `console.error` logging and user-visible API error details.
+- 2026-07-27 21:42 JST: Committed changes as `fix: surface expense mutation errors`.
+
+### Verification Log
+
+- 2026-07-27 21:40 JST: `pnpm test apps/web/src/features/expenses/api.test.ts` failed as expected because mutation errors only included status and `ExpenseApiError` did not exist.
+- 2026-07-27 21:41 JST: `pnpm test apps/web/src/features/expenses/api.test.ts` passed with 8 tests.
+- 2026-07-27 21:41 JST: `pnpm test apps/web/src/features/expenses/api.test.ts apps/web-dev-config.test.ts` passed with 17 tests across 2 files.
+- 2026-07-27 21:41 JST: `pnpm test` passed with 77 tests across 14 files.
+- 2026-07-27 21:41 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-27 21:41 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+
 ## Task: Connect frontend to Expense CRUD API
 
 ### Checklist

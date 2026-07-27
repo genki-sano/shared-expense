@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   createExpense,
   deleteExpense,
+  ExpenseApiError,
   fetchMonthlyExpenses,
   updateExpense,
 } from "./api";
@@ -211,7 +212,7 @@ describe("expense mutations", () => {
     ]);
   });
 
-  it("throws a helpful error when mutation API returns an error", async () => {
+  it("throws a detailed API error when mutation API returns JSON error body", async () => {
     await expect(
       deleteExpense({
         apiBaseUrl: "https://api.example.test",
@@ -221,6 +222,32 @@ describe("expense mutations", () => {
         fetcher: async () =>
           Response.json({ message: "Expense not found" }, { status: 404 }),
       }),
-    ).rejects.toThrow("Failed to delete expense: 404");
+    ).rejects.toMatchObject({
+      message: 'Failed to delete expense: 404 {"message":"Expense not found"}',
+      operation: "delete expense",
+      status: 404,
+      responseBody: '{"message":"Expense not found"}',
+    });
+  });
+
+  it("marks mutation failures with ExpenseApiError for UI logging", async () => {
+    await expect(
+      createExpense({
+        apiBaseUrl: "https://api.example.test",
+        idToken: "id-token",
+        idempotencyKey: "create-key",
+        expense: {
+          date: "2026-07-27",
+          price: 1200,
+          category: "食費",
+          memo: "ランチ",
+        },
+        fetcher: async () =>
+          Response.json(
+            { message: "Invalid request", details: { field: "date" } },
+            { status: 400 },
+          ),
+      }),
+    ).rejects.toBeInstanceOf(ExpenseApiError);
   });
 });

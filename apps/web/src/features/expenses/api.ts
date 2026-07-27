@@ -45,6 +45,22 @@ export type DeleteExpenseInput = ExpenseMutationInput & {
   id: string;
 };
 
+export class ExpenseApiError extends Error {
+  readonly operation: string;
+  readonly status: number;
+  readonly responseBody: string;
+
+  constructor(input: { operation: string; status: number; responseBody: string }) {
+    const detail =
+      input.responseBody.trim() === "" ? "" : ` ${input.responseBody.trim()}`;
+    super(`Failed to ${input.operation}: ${input.status}${detail}`);
+    this.name = "ExpenseApiError";
+    this.operation = input.operation;
+    this.status = input.status;
+    this.responseBody = input.responseBody;
+  }
+}
+
 export const sampleExpenses: Expense[] = [
   {
     id: "sample_1",
@@ -99,38 +115,41 @@ export async function fetchMonthlyExpenses(
 }
 
 export async function createExpense(input: CreateExpenseInput): Promise<Expense> {
+  const operation = "create expense";
   const response = await mutationFetch(input, "/api/expenses", {
     method: "POST",
     json: input.expense,
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to create expense: ${response.status}`);
+    throw await expenseApiError(operation, response);
   }
 
   return (await response.json()) as Expense;
 }
 
 export async function updateExpense(input: UpdateExpenseInput): Promise<Expense> {
+  const operation = "update expense";
   const response = await mutationFetch(input, `/api/expenses/${input.id}`, {
     method: "PUT",
     json: input.expense,
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to update expense: ${response.status}`);
+    throw await expenseApiError(operation, response);
   }
 
   return (await response.json()) as Expense;
 }
 
 export async function deleteExpense(input: DeleteExpenseInput): Promise<void> {
+  const operation = "delete expense";
   const response = await mutationFetch(input, `/api/expenses/${input.id}`, {
     method: "DELETE",
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to delete expense: ${response.status}`);
+    throw await expenseApiError(operation, response);
   }
 }
 
@@ -170,4 +189,22 @@ function authorizationHeaders(idToken: string | undefined): Record<string, strin
   }
 
   return { Authorization: `Bearer ${idToken}` };
+}
+
+async function expenseApiError(
+  operation: string,
+  response: Response,
+): Promise<ExpenseApiError> {
+  let responseBody = "";
+  try {
+    responseBody = await response.text();
+  } catch {
+    responseBody = "";
+  }
+
+  return new ExpenseApiError({
+    operation,
+    status: response.status,
+    responseBody,
+  });
 }
