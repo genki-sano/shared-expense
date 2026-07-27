@@ -45,6 +45,10 @@ export type DeleteExpenseInput = ExpenseMutationInput & {
   id: string;
 };
 
+export type RestoreExpenseInput = ExpenseMutationInput & {
+  id: string;
+};
+
 export class ExpenseApiError extends Error {
   readonly operation: string;
   readonly status: number;
@@ -151,6 +155,19 @@ export async function deleteExpense(input: DeleteExpenseInput): Promise<void> {
   if (!response.ok) {
     throw await expenseApiError(operation, response);
   }
+}
+
+export async function restoreExpense(input: RestoreExpenseInput): Promise<Expense> {
+  const operation = "restore expense";
+  const response = await mutationFetch(input, `/api/expenses/${input.id}/restore`, {
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    throw await expenseApiError(operation, response);
+  }
+
+  return (await response.json()) as Expense;
 }
 
 async function mutationFetch(

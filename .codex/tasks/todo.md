@@ -1,5 +1,34 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Add undo for deleted expenses
+
+### Checklist
+
+- [x] Inspect current delete flow and contracts
+- [x] Add repository restore support for `deleted_at`
+- [x] Add API restore endpoint
+- [x] Add frontend undo action to delete status
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-27 22:30 JST: User asked to show an `元に戻す` link next to `支出を削除しました`, restoring the most recently deleted row by clearing `deleted_at`.
+- 2026-07-27 22:30 JST: Current delete flow removes the item from local state and shows a plain status message; API only exposes DELETE, and Spreadsheet repository writes `payments!L{row}` for logical delete.
+- 2026-07-27 22:38 JST: Added `restore` to expense repositories, `POST /api/expenses/{id}/restore`, frontend `restoreExpense`, and a status-link undo action that restores the most recently deleted expense.
+- 2026-07-27 22:39 JST: Prepared commit for deleted expense undo.
+
+### Verification Log
+
+- 2026-07-27 22:38 JST: `pnpm test packages/integrations/src/spreadsheet/expense-repository.test.ts` passed with 8 tests.
+- 2026-07-27 22:38 JST: `pnpm test apps/api/src/app.test.ts apps/web/src/features/expenses/api.test.ts apps/web-dev-config.test.ts` passed with 34 tests.
+- 2026-07-27 22:38 JST: `pnpm test` passed with 89 tests across 16 files.
+- 2026-07-27 22:39 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-27 22:39 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+
 ## Task: Change Spreadsheet expense delete to logical delete
 
 ### Checklist

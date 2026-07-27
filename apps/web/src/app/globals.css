@@ -131,6 +131,10 @@ button:disabled {
 }
 
 .statusMessage {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   margin: 0 0 8px;
   border-radius: 8px;
   background: #e9f7ee;
@@ -138,6 +142,18 @@ button:disabled {
   padding: 8px 10px;
   font-size: 0.78rem;
   font-weight: 750;
+}
+
+.statusLink {
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+  color: #176b87;
+  padding: 0;
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .addButton {

@@ -435,4 +435,65 @@ describe("SpreadsheetExpenseRepository", () => {
       },
     ]);
   });
+
+  it("restores a deleted legacy payment row by clearing deleted_at", async () => {
+    const updates: Array<{ range: string; values: unknown[][] }> = [];
+    const repository = new SpreadsheetExpenseRepository({
+      spreadsheetId: "spreadsheet_1",
+      valuesClient: {
+        getValues: async (input) => {
+          if (input.range === "users!A2:F") {
+            return { values: [["man", "げんき"]] };
+          }
+
+          return {
+            values: [
+              [
+                "10",
+                "man",
+                "食費",
+                "1000",
+                "2026/07/01",
+                "朝食",
+                "man",
+                "man",
+                "2026/07/01 10:00:00",
+                "2026/07/01 10:00:00",
+                "45839",
+                "2026/07/26 12:34:56",
+              ],
+            ],
+          };
+        },
+        appendValues: async () => {
+          throw new Error("append should not be called");
+        },
+        updateValues: async (input) => {
+          updates.push({ range: input.range, values: input.values });
+        },
+        clearValues: async (input) => {
+          throw new Error(`clear should not be called: ${input.range}`);
+        },
+      },
+      userTypeToUserId,
+      userIdToUserType,
+    });
+
+    await expect(repository.restore({ id: "10", actor: { id: "user_a" } })).resolves.toEqual({
+      id: "10",
+      userId: "user_a",
+      userName: "げんき",
+      date: "2026-07-01",
+      price: 1000,
+      category: "食費",
+      memo: "朝食",
+      version: 1,
+    });
+    expect(updates).toEqual([
+      {
+        range: "payments!L2:L2",
+        values: [[""]],
+      },
+    ]);
+  });
 });

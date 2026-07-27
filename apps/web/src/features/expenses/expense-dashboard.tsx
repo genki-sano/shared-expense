@@ -6,6 +6,7 @@ import {
   createExpense,
   deleteExpense,
   ExpenseApiError,
+  restoreExpense,
   updateExpense,
   type CreateExpensePayload,
   type UpdateExpensePayload,
@@ -39,6 +40,7 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [restorableExpense, setRestorableExpense] = useState<Expense | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const total = useMemo(
@@ -51,6 +53,7 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
   async function handleCreate(payload: CreateExpensePayload): Promise<void> {
     setIsSubmitting(true);
     setStatusMessage(null);
+    setRestorableExpense(null);
     try {
       const created = await createExpense({
         apiBaseUrl: props.apiBaseUrl,
@@ -75,6 +78,7 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
   ): Promise<void> {
     setIsSubmitting(true);
     setStatusMessage(null);
+    setRestorableExpense(null);
     try {
       const updated = await updateExpense({
         apiBaseUrl: props.apiBaseUrl,
@@ -113,10 +117,32 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
         id: expense.id,
       });
       setExpenses((current) => current.filter((item) => item.id !== expense.id));
+      setEditingExpenseId(null);
+      setRestorableExpense(expense);
       setStatusMessage("支出を削除しました");
     } catch (error) {
       logExpenseMutationError("delete", error);
       setStatusMessage(`支出を削除できませんでした。${errorMessageForUser(error)}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleRestore(expense: Expense): Promise<void> {
+    setIsSubmitting(true);
+    try {
+      const restored = await restoreExpense({
+        apiBaseUrl: props.apiBaseUrl,
+        idToken: props.idToken,
+        idempotencyKey: createIdempotencyKey(`expense-restore-${expense.id}`),
+        id: expense.id,
+      });
+      setExpenses((current) => sortExpenses([restored, ...current]));
+      setRestorableExpense(null);
+      setStatusMessage("支出を復元しました");
+    } catch (error) {
+      logExpenseMutationError("restore", error);
+      setStatusMessage(`支出を復元できませんでした。${errorMessageForUser(error)}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -177,6 +203,16 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
         {statusMessage === null ? null : (
           <p className="statusMessage" role="status">
             {statusMessage}
+            {statusMessage === "支出を削除しました" && restorableExpense !== null ? (
+              <button
+                className="statusLink"
+                type="button"
+                disabled={isSubmitting}
+                onClick={() => void handleRestore(restorableExpense)}
+              >
+                元に戻す
+              </button>
+            ) : null}
           </p>
         )}
         {isMutationEnabled ? null : (
@@ -371,7 +407,7 @@ function payerClassName(userId: string): "payerWoman" | "payerMan" | "payerUnkno
 }
 
 function logExpenseMutationError(
-  operation: "create" | "update" | "delete",
+  operation: "create" | "update" | "delete" | "restore",
   error: unknown,
 ): void {
   console.error(`Expense ${operation} failed`, error);

@@ -186,6 +186,9 @@ describe("Expense mutations", () => {
       delete: async () => {
         throw new Error("unused");
       },
+      restore: async () => {
+        throw new Error("unused");
+      },
     };
     const response = await createApp({
       authenticateToken: async () => user,
@@ -313,6 +316,53 @@ describe("Expense mutations", () => {
     await expect(response.json()).resolves.toEqual({
       message: "Expense not found",
       details: { id: "missing" },
+    });
+  });
+
+  it("restores a deleted expense", async () => {
+    const restoreApp = app();
+    const deleteResponse = await restoreApp.request("/api/expenses/exp_earlier", {
+      method: "DELETE",
+      headers: {
+        Authorization: "Bearer valid",
+        "Idempotency-Key": "delete-before-restore-1",
+      },
+    });
+    expect(deleteResponse.status).toBe(204);
+
+    const response = await restoreApp.request("/api/expenses/exp_earlier/restore", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer valid",
+        "Idempotency-Key": "restore-1",
+      },
+    });
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      id: "exp_earlier",
+      userId: "user_a",
+      date: "2026-07-06",
+      price: 3280,
+      category: "生活用品",
+      memo: "",
+      version: 2,
+    });
+  });
+
+  it("returns 404 when restoring an active or unknown expense", async () => {
+    const response = await app().request("/api/expenses/exp_earlier/restore", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer valid",
+        "Idempotency-Key": "restore-active-1",
+      },
+    });
+
+    expect(response.status).toBe(404);
+    await expect(response.json()).resolves.toEqual({
+      message: "Expense not found",
+      details: { id: "exp_earlier" },
     });
   });
 });

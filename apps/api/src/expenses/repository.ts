@@ -30,15 +30,22 @@ export type DeleteExpenseInput = {
   actor: User;
 };
 
+export type RestoreExpenseInput = {
+  id: string;
+  actor: User;
+};
+
 export type ExpenseRepository = {
   listByMonth(input: ListExpensesInput): Promise<Expense[]>;
   create(input: CreateExpenseInput): Promise<Expense>;
   update(input: UpdateExpenseInput): Promise<Expense>;
   delete(input: DeleteExpenseInput): Promise<void>;
+  restore(input: RestoreExpenseInput): Promise<Expense>;
 };
 
 export class InMemoryExpenseRepository implements ExpenseRepository {
   readonly #expenses: Expense[];
+  readonly #deletedExpenses: Expense[] = [];
 
   constructor(expenses: readonly Expense[]) {
     this.#expenses = [...expenses];
@@ -110,7 +117,24 @@ export class InMemoryExpenseRepository implements ExpenseRepository {
       throw new ExpenseRepositoryError("not_found", input.id);
     }
 
-    this.#expenses.splice(index, 1);
+    this.#deletedExpenses.push(...this.#expenses.splice(index, 1));
+  }
+
+  async restore(input: RestoreExpenseInput): Promise<Expense> {
+    const index = this.#deletedExpenses.findIndex((expense) => expense.id === input.id);
+    if (index === -1) {
+      throw new ExpenseRepositoryError("not_found", input.id);
+    }
+
+    const restored = this.#deletedExpenses[index];
+    if (restored === undefined) {
+      throw new ExpenseRepositoryError("not_found", input.id);
+    }
+
+    this.#deletedExpenses.splice(index, 1);
+    this.#expenses.push(restored);
+
+    return restored;
   }
 }
 

@@ -153,6 +153,29 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
     }
   });
 
+  app.post("/:id/restore", async (c) => {
+    const actor = await authenticateRequest(c.req.header("Authorization"), dependencies);
+    if (actor === null) {
+      return c.json({ message: "Unauthorized", details: {} }, 401);
+    }
+
+    const idempotencyError = validateIdempotencyKey(c.req.header("Idempotency-Key"));
+    if (idempotencyError !== null) {
+      return c.json(idempotencyError, 400);
+    }
+
+    try {
+      const expense = await dependencies.expenseRepository.restore({
+        id: c.req.param("id"),
+        actor,
+      });
+
+      return c.json(expense);
+    } catch (error) {
+      return repositoryErrorResponse(error);
+    }
+  });
+
   return app;
 }
 

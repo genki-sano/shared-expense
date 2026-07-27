@@ -64,6 +64,11 @@ export type DeleteSpreadsheetExpenseInput = {
   actor?: { id: string };
 };
 
+export type RestoreSpreadsheetExpenseInput = {
+  id: string;
+  actor?: { id: string };
+};
+
 export class SpreadsheetExpenseRepository {
   readonly #spreadsheetId: string;
   readonly #valuesClient: GoogleSheetsValuesClient;
@@ -186,6 +191,24 @@ export class SpreadsheetExpenseRepository {
       range: `payments!L${match.rowNumber}:L${match.rowNumber}`,
       values: [[formatTimestamp(this.#now())]],
     });
+  }
+
+  async restore(input: RestoreSpreadsheetExpenseInput): Promise<Expense> {
+    const userNamesByType = await this.#userNamesByType();
+    const payments = await this.#paymentRows();
+    const match = payments.rows.find((row) => row.deletedAt !== "" && row.row[0] === input.id);
+
+    if (match === undefined) {
+      throw new Error(`Expense not found: ${input.id}`);
+    }
+
+    await this.#updateValues({
+      spreadsheetId: this.#spreadsheetId,
+      range: `payments!L${match.rowNumber}:L${match.rowNumber}`,
+      values: [[""]],
+    });
+
+    return this.#expenseFromRow(match.row, match.rowNumber, userNamesByType);
   }
 
   async #userNamesByType(): Promise<Map<string, string>> {

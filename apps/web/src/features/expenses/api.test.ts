@@ -4,6 +4,7 @@ import {
   deleteExpense,
   ExpenseApiError,
   fetchMonthlyExpenses,
+  restoreExpense,
   updateExpense,
 } from "./api";
 
@@ -210,6 +211,42 @@ describe("expense mutations", () => {
         },
       },
     ]);
+  });
+
+  it("restores an expense with an idempotency key", async () => {
+    const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
+    const result = await restoreExpense({
+      apiBaseUrl: "https://api.example.test",
+      idToken: "id-token",
+      idempotencyKey: "restore-key",
+      id: "exp_1",
+      fetcher: async (url, init) => {
+        calls.push({ url: String(url), init });
+        return Response.json({
+          id: "exp_1",
+          userId: "man",
+          date: "2026-07-28",
+          price: 3400,
+          category: "日用品",
+          memo: null,
+          version: 1,
+        });
+      },
+    });
+
+    expect(calls).toEqual([
+      {
+        url: "https://api.example.test/api/expenses/exp_1/restore",
+        init: {
+          method: "POST",
+          headers: {
+            Authorization: "Bearer id-token",
+            "Idempotency-Key": "restore-key",
+          },
+        },
+      },
+    ]);
+    expect(result.id).toBe("exp_1");
   });
 
   it("throws a detailed API error when mutation API returns JSON error body", async () => {
