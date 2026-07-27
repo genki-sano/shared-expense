@@ -67,13 +67,27 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
       return c.json(parsedBody.error, 400);
     }
 
-    const expense = await dependencies.expenseRepository.create({
-      actor,
-      date: parsedBody.value.date,
-      price: parsedBody.value.price,
-      category: parsedBody.value.category,
-      memo: parsedBody.value.memo ?? null,
-    });
+    let expense;
+    try {
+      expense = await dependencies.expenseRepository.create({
+        actor,
+        date: parsedBody.value.date,
+        price: parsedBody.value.price,
+        category: parsedBody.value.category,
+        memo: parsedBody.value.memo ?? null,
+      });
+    } catch (error) {
+      console.error("Expense create failed", error);
+      return c.json(
+        {
+          message: "Expense create failed",
+          details: {
+            reason: errorMessage(error),
+          },
+        },
+        500,
+      );
+    }
 
     return c.json(expense, 201);
   });
@@ -292,6 +306,14 @@ function invalidField(
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function errorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return String(error);
 }
 
 function repositoryErrorResponse(error: unknown): Response {

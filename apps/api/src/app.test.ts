@@ -1,7 +1,7 @@
 import type { Expense, User } from "@shared-expense/shared";
 import { describe, expect, it } from "vitest";
 import { createApp } from "./app";
-import { InMemoryExpenseRepository } from "./expenses/repository";
+import { InMemoryExpenseRepository, type ExpenseRepository } from "./expenses/repository";
 
 const user: User = {
   id: "user_a",
@@ -171,6 +171,46 @@ describe("Expense mutations", () => {
       category: "食費",
       memo: "昼食",
       version: 1,
+    });
+  });
+
+  it("returns structured details when creating an expense fails in the repository", async () => {
+    const failingRepository: ExpenseRepository = {
+      listByMonth: async () => [],
+      create: async () => {
+        throw new Error("Failed to append Google Sheets values: 403");
+      },
+      update: async () => {
+        throw new Error("unused");
+      },
+      delete: async () => {
+        throw new Error("unused");
+      },
+    };
+    const response = await createApp({
+      authenticateToken: async () => user,
+      expenseRepository: failingRepository,
+    }).request("/api/expenses", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer valid",
+        "Content-Type": "application/json",
+        "Idempotency-Key": "create-failure-1",
+      },
+      body: JSON.stringify({
+        date: "2026-07-26",
+        price: 1200,
+        category: "食費",
+        memo: "昼食",
+      }),
+    });
+
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toEqual({
+      message: "Expense create failed",
+      details: {
+        reason: "Failed to append Google Sheets values: 403",
+      },
     });
   });
 

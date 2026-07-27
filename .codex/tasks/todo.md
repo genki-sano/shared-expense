@@ -1,5 +1,32 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Surface API create repository failures
+
+### Checklist
+
+- [x] Identify generic create 500 response
+- [x] Add failing API create failure response test
+- [x] Return structured create failure details
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-27 22:00 JST: User still received `ExpenseApiError: Failed to create expense: 500 Internal Server Error`. Root cause for observability: `POST /api/expenses` did not catch repository exceptions, so Hono returned a generic plain-text 500 and hid the underlying Spreadsheet error.
+- 2026-07-27 22:00 JST: Added structured JSON response and server-side `console.error` logging for create repository failures.
+- 2026-07-27 22:02 JST: Committed changes as `fix: return create failure details`.
+
+### Verification Log
+
+- 2026-07-27 22:00 JST: `pnpm test apps/api/src/app.test.ts` failed as expected because create repository failures returned plain text `Internal Server Error` instead of JSON details.
+- 2026-07-27 22:00 JST: `pnpm test apps/api/src/app.test.ts` passed with 12 tests; expected stderr showed `Expense create failed Error: Failed to append Google Sheets values: 403`.
+- 2026-07-27 22:01 JST: `pnpm test` passed with 83 tests across 16 files.
+- 2026-07-27 22:01 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-27 22:01 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+
 ## Task: Use Spreadsheet-mappable local dev actor
 
 ### Checklist
