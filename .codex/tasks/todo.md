@@ -1,5 +1,35 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Preserve request bodies in API dev server
+
+### Checklist
+
+- [x] Identify create body parsing failure
+- [x] Add failing Node request conversion test
+- [x] Implement dev server request body forwarding
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Verify local dev POST body forwarding
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-27 22:00 JST: User reported `ExpenseApiError: Failed to create expense: 400 {"message":"Invalid request","details":{"field":"body","reason":"must be a JSON object"}}`. Root cause: local API dev server converted `IncomingMessage` to Fetch `Request` without forwarding the request body, so POST/PUT bodies arrived empty.
+- 2026-07-27 21:49 JST: Added `createNodeRequest` helper and changed the local API dev server to forward non-GET/HEAD request streams with Node fetch `duplex: "half"`.
+- 2026-07-27 21:53 JST: Committed changes as `fix: forward api dev request bodies`.
+
+### Verification Log
+
+- 2026-07-27 21:48 JST: `pnpm test apps/api/src/dev-request.test.ts` failed as expected because `./dev-request` did not exist and POST body forwarding was not implemented.
+- 2026-07-27 21:48 JST: `pnpm test apps/api/src/dev-request.test.ts` passed with 2 tests.
+- 2026-07-27 21:51 JST: With `pnpm dev` running, `curl -sL -i -X POST http://localhost:8787/api/expenses ... --data '{"date":"bad-date","price":1200,"category":"食費","memo":"body check"}'` returned `400` with `details.field: "date"`, confirming the JSON object body reached the API; before the fix the failure was `details.field: "body"`.
+- 2026-07-27 21:51 JST: `pnpm test` passed with 81 tests across 15 files.
+- 2026-07-27 21:52 JST: `pnpm typecheck` initially failed because `BodyInit` was not available in the API TypeScript lib and then because `RequestInit["body"]` included `undefined`; changed the cast to `NonNullable<RequestInit["body"]>`.
+- 2026-07-27 21:52 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-27 21:52 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+
 ## Task: Fix local API CORS for frontend mutations
 
 ### Checklist

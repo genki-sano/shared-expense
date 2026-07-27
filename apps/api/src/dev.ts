@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
-import type { IncomingMessage } from "node:http";
 import { createAppFromEnv } from "./app";
 import { loadLocalDevAppEnv } from "./dev-env";
+import { createNodeRequest } from "./dev-request";
 
 const port = Number(process.env.PORT ?? 8787);
 const app = createAppFromEnv(loadLocalDevAppEnv(), {
@@ -15,7 +15,7 @@ const app = createAppFromEnv(loadLocalDevAppEnv(), {
 
 const server = createServer(async (incoming, outgoing) => {
   try {
-    const request = createRequest(incoming);
+    const request = createNodeRequest(incoming, port);
     const response = await app.fetch(request);
 
     outgoing.statusCode = response.status;
@@ -33,29 +33,3 @@ const server = createServer(async (incoming, outgoing) => {
 server.listen(port, () => {
   console.log(`API dev server ready at http://localhost:${port}`);
 });
-
-function createRequest(incoming: IncomingMessage): Request {
-  const host = incoming.headers.host ?? `localhost:${port}`;
-  const url = new URL(incoming.url ?? "/", `http://${host}`);
-  const headers = new Headers();
-
-  for (const [key, value] of Object.entries(incoming.headers)) {
-    if (value === undefined) {
-      continue;
-    }
-
-    if (Array.isArray(value)) {
-      for (const item of value) {
-        headers.append(key, item);
-      }
-      continue;
-    }
-
-    headers.set(key, value);
-  }
-
-  return new Request(url, {
-    method: incoming.method ?? "GET",
-    headers,
-  });
-}
