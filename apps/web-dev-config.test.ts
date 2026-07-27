@@ -123,4 +123,14 @@ describe("web dev configuration", () => {
     expect(cssSource).toContain(".deleteButton");
     expect(cssSource).not.toContain(".rowActions");
   });
+
+  test("expense form captures payment content without a category field", () => {
+    const dashboardSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
+
+    expect(dashboardSource).toContain("<span>支払内容</span>");
+    expect(dashboardSource).toContain('category: DEFAULT_EXPENSE_CATEGORY');
+    expect(dashboardSource).not.toContain("<span>カテゴリ</span>");
+    expect(dashboardSource).not.toContain("category: string;");
+    expect(dashboardSource).not.toContain("category: expense.category");
+  });
 });

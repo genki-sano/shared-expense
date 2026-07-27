@@ -23,9 +23,10 @@ type ExpenseDashboardProps = {
 type ExpenseFormDraft = {
   date: string;
   price: string;
-  category: string;
   memo: string;
 };
+
+const DEFAULT_EXPENSE_CATEGORY = "その他";
 
 const numberFormatter = new Intl.NumberFormat("ja-JP", {
   style: "currency",
@@ -254,7 +255,7 @@ function ExpenseForm(props: {
         void props.onSubmit({
           date: draft.date,
           price: Number(draft.price),
-          category: draft.category.trim(),
+          category: DEFAULT_EXPENSE_CATEGORY,
           memo: draft.memo.trim() === "" ? null : draft.memo.trim(),
         });
       }}
@@ -285,20 +286,8 @@ function ExpenseForm(props: {
           }
         />
       </label>
-      <label className="field">
-        <span>カテゴリ</span>
-        <input
-          required
-          type="text"
-          value={draft.category}
-          disabled={props.disabled}
-          onChange={(event) =>
-            setDraft((current) => ({ ...current, category: event.target.value }))
-          }
-        />
-      </label>
       <label className="field wideField">
-        <span>メモ</span>
+        <span>支払内容</span>
         <input
           type="text"
           value={draft.memo}
@@ -341,7 +330,6 @@ function defaultDraftForMonth(month: string): ExpenseFormDraft {
   return {
     date: today.startsWith(month) ? today : `${month}-01`,
     price: "",
-    category: "その他",
     memo: "",
   };
 }
@@ -350,7 +338,6 @@ function draftFromExpense(expense: Expense): ExpenseFormDraft {
   return {
     date: expense.date,
     price: String(expense.price),
-    category: expense.category,
     memo: expense.memo ?? "",
   };
 }

@@ -1,5 +1,35 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Simplify expense form fields
+
+### Checklist
+
+- [x] Inspect current expense form fields
+- [x] Add failing form simplification test
+- [x] Remove category input from the form
+- [x] Rename memo label to payment content
+- [x] Keep API-compatible default category payload
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-27 22:00 JST: User asked to remove category from forms and rename memo to `支払内容`.
+- 2026-07-27 22:18 JST: Removed the category field from create/edit forms, renamed the memo label to `支払内容`, and kept API compatibility by sending `DEFAULT_EXPENSE_CATEGORY`.
+- 2026-07-27 22:19 JST: Committed changes as `feat: simplify expense form fields`.
+
+### Verification Log
+
+- 2026-07-27 22:18 JST: `pnpm test apps/web-dev-config.test.ts` failed as expected because the form still showed `カテゴリ` and `メモ`.
+- 2026-07-27 22:18 JST: `pnpm test apps/web-dev-config.test.ts` passed with 11 tests.
+- 2026-07-27 22:18 JST: `pnpm test` passed with 85 tests across 16 files.
+- 2026-07-27 22:18 JST: `pnpm typecheck` initially failed because `.next/types/cache-life.d.ts` was missing before Next regenerated `.next/types`; `pnpm build` regenerated it.
+- 2026-07-27 22:18 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-27 22:19 JST: `pnpm typecheck` passed after `.next/types` was regenerated; Redocly reported the same existing warnings.
+
 ## Task: Improve mobile edit/delete affordance
 
 ### Checklist
