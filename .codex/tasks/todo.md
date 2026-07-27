@@ -1,5 +1,34 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Use Spreadsheet-mappable local dev actor
+
+### Checklist
+
+- [x] Identify create 500 root cause
+- [x] Add failing local dev actor test
+- [x] Change local dev actor to a Spreadsheet-mappable user id
+- [x] Verify targeted tests pass
+- [x] Verify local dev create validation path
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-27 22:00 JST: User reported `ExpenseApiError: Failed to create expense: 500 Internal Server Error` after body forwarding was fixed. Root cause: local dev authentication returned actor id `local-dev`, but Spreadsheet mutations require actor ids that map back to existing user types (`woman` -> `1`, `man` -> `2`).
+- 2026-07-27 21:55 JST: Added `authenticateLocalDevToken` helper and changed local dev actor id to `man` while keeping `lineUserId: "local-dev"` for the dev bearer token.
+- 2026-07-27 21:57 JST: Committed changes as `fix: use mappable local dev actor`.
+
+### Verification Log
+
+- 2026-07-27 21:55 JST: `pnpm test apps/api/src/dev-auth.test.ts` failed as expected because `./dev-auth` did not exist.
+- 2026-07-27 21:55 JST: `pnpm test apps/api/src/dev-auth.test.ts` passed with 1 test.
+- 2026-07-27 21:56 JST: With `pnpm dev` running, `curl -sL -i -X POST http://localhost:8787/api/expenses ... --data '{"date":"bad-date","price":1200,"category":"食費","memo":"actor check"}'` returned `400` with `details.field: "date"` instead of `500`, confirming the local dev actor no longer crashes Spreadsheet mutation mapping.
+- 2026-07-27 21:56 JST: `pnpm test` passed with 82 tests across 16 files.
+- 2026-07-27 21:56 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-27 21:57 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+
 ## Task: Preserve request bodies in API dev server
 
 ### Checklist

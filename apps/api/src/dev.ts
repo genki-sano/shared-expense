@@ -1,16 +1,12 @@
 import { createServer } from "node:http";
 import { createAppFromEnv } from "./app";
+import { authenticateLocalDevToken } from "./dev-auth";
 import { loadLocalDevAppEnv } from "./dev-env";
 import { createNodeRequest } from "./dev-request";
 
 const port = Number(process.env.PORT ?? 8787);
 const app = createAppFromEnv(loadLocalDevAppEnv(), {
-  authenticateToken: async () => ({
-    id: "local-dev",
-    lineUserId: "local-dev",
-    displayName: "Local Dev",
-    notifyEnabled: true,
-  }),
+  authenticateToken: authenticateLocalDevToken,
 });
 
 const server = createServer(async (incoming, outgoing) => {
