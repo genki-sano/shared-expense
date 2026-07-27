@@ -188,49 +188,40 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
               className={`expense ${payerClassName(expense.userId)}`}
               key={expense.id}
             >
-              <span className="dateBadge">{formatMonthDay(expense.date)}</span>
-              <div className="expenseBody">
-                <p className="expenseName">{expense.memo ?? expense.category}</p>
-                <p className="expenseMeta">
-                  <span
-                    className={`payerPill ${payerClassName(expense.userId)}`}
-                  >
-                    {expense.userName ?? expense.userId}
+              <button
+                className="expenseTapTarget"
+                type="button"
+                aria-label={`支出を編集: ${expense.memo ?? expense.category}`}
+                aria-expanded={editingExpenseId === expense.id}
+                disabled={!isMutationEnabled || isSubmitting}
+                onClick={() => {
+                  setEditingExpenseId((current) =>
+                    current === expense.id ? null : expense.id,
+                  );
+                  setIsCreateOpen(false);
+                }}
+              >
+                <span className="dateBadge">{formatMonthDay(expense.date)}</span>
+                <span className="expenseBody">
+                  <span className="expenseName">{expense.memo ?? expense.category}</span>
+                  <span className="expenseMeta">
+                    <span
+                      className={`payerPill ${payerClassName(expense.userId)}`}
+                    >
+                      {expense.userName ?? expense.userId}
+                    </span>
                   </span>
-                </p>
-              </div>
-              <span className="amount">{numberFormatter.format(expense.price)}</span>
-              <div className="rowActions">
-                <button
-                  className="textButton"
-                  type="button"
-                  aria-label="支出を編集"
-                  disabled={!isMutationEnabled || isSubmitting}
-                  onClick={() => {
-                    setEditingExpenseId((current) =>
-                      current === expense.id ? null : expense.id,
-                    );
-                    setIsCreateOpen(false);
-                  }}
-                >
-                  編集
-                </button>
-                <button
-                  className="textButton danger"
-                  type="button"
-                  aria-label="支出を削除"
-                  disabled={!isMutationEnabled || isSubmitting}
-                  onClick={() => void handleDelete(expense)}
-                >
-                  削除
-                </button>
-              </div>
+                </span>
+                <span className="amount">{numberFormatter.format(expense.price)}</span>
+              </button>
               {editingExpenseId === expense.id ? (
                 <ExpenseForm
                   defaultDraft={draftFromExpense(expense)}
+                  deleteLabel="削除"
                   disabled={isSubmitting}
                   submitLabel="保存"
                   onCancel={() => setEditingExpenseId(null)}
+                  onDelete={() => handleDelete(expense)}
                   onSubmit={(payload) =>
                     handleUpdate(expense, { ...payload, version: expense.version })
                   }
@@ -246,9 +237,11 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
 
 function ExpenseForm(props: {
   defaultDraft: ExpenseFormDraft;
+  deleteLabel?: string;
   disabled: boolean;
   submitLabel: string;
   onCancel: () => void;
+  onDelete?: () => Promise<void>;
   onSubmit: (payload: CreateExpensePayload) => Promise<void>;
 }) {
   const [draft, setDraft] = useState(props.defaultDraft);
@@ -327,6 +320,17 @@ function ExpenseForm(props: {
         >
           キャンセル
         </button>
+        {props.onDelete === undefined ? null : (
+          <button
+            className="deleteButton"
+            type="button"
+            disabled={props.disabled}
+            aria-label="支出を削除"
+            onClick={() => void props.onDelete?.()}
+          >
+            {props.deleteLabel ?? "削除"}
+          </button>
+        )}
       </div>
     </form>
   );

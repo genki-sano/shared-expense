@@ -88,7 +88,7 @@ describe("web dev configuration", () => {
   test("expense row meta shows only the payer pill, not category text", () => {
     const pageSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
 
-    expect(pageSource).toContain('<p className="expenseMeta">');
+    expect(pageSource).toContain('className="expenseMeta"');
     expect(pageSource).not.toContain("{expense.category}\n                  <span");
   });
 
@@ -105,9 +105,22 @@ describe("web dev configuration", () => {
     expect(dashboardSource).toContain("console.error");
     expect(dashboardSource).toContain("errorMessageForUser(error)");
     expect(dashboardSource).toContain('aria-label="支出を追加"');
-    expect(dashboardSource).toContain('aria-label="支出を編集"');
+    expect(dashboardSource).toContain('aria-label={`支出を編集:');
     expect(dashboardSource).toContain('aria-label="支出を削除"');
     expect(cssSource).toContain(".expenseForm");
-    expect(cssSource).toContain(".rowActions");
+  });
+
+  test("expense edit and delete controls are optimized for mobile tapping", () => {
+    const dashboardSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
+    const cssSource = readText("apps/web/src/app/globals.css");
+
+    expect(dashboardSource).toContain('className="expenseTapTarget"');
+    expect(dashboardSource).toContain('aria-label={`支出を編集:');
+    expect(dashboardSource).toContain("deleteLabel=");
+    expect(dashboardSource).not.toContain('className="rowActions"');
+    expect(cssSource).toContain(".expenseTapTarget");
+    expect(cssSource).toContain("min-height: 58px");
+    expect(cssSource).toContain(".deleteButton");
+    expect(cssSource).not.toContain(".rowActions");
   });
 });

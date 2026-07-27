@@ -1,5 +1,34 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Improve mobile edit/delete affordance
+
+### Checklist
+
+- [x] Inspect current row action markup and styles
+- [x] Add failing mobile action affordance test
+- [x] Implement row tap-to-edit and move delete into edit form
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Verify local dev markup
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-27 22:00 JST: User reported edit/delete affordance feels PC-oriented and hard to tap on smartphones. Current UI uses small always-visible text buttons per row.
+- 2026-07-27 22:09 JST: Changed each expense row into a large tap target for editing and moved delete into the expanded edit form as a full-width action.
+- 2026-07-27 22:10 JST: Committed changes as `feat: improve mobile expense actions`.
+
+### Verification Log
+
+- 2026-07-27 22:08 JST: `pnpm test apps/web-dev-config.test.ts` failed as expected because `.expenseTapTarget` and mobile-oriented delete affordance did not exist.
+- 2026-07-27 22:09 JST: `pnpm test apps/web-dev-config.test.ts` passed with 10 tests.
+- 2026-07-27 22:09 JST: `pnpm test` passed with 84 tests across 16 files.
+- 2026-07-27 22:09 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-27 22:09 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+- 2026-07-27 22:10 JST: With `pnpm dev` running, `curl -sL http://localhost:3000 | rg -o 'expenseTapTarget|rowActions|deleteButton'` returned `expenseTapTarget` entries and no `rowActions`, confirming the row-level tap target is rendered.
+
 ## Task: Use writable Google Sheets OAuth scope
 
 ### Checklist

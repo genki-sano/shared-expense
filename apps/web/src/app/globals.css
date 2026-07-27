@@ -205,7 +205,8 @@ button:disabled {
 }
 
 .primaryButton,
-.secondaryButton {
+.secondaryButton,
+.deleteButton {
   min-height: 40px;
   border-radius: 8px;
   padding: 8px 10px;
@@ -225,6 +226,13 @@ button:disabled {
   color: #40514b;
 }
 
+.deleteButton {
+  grid-column: 1 / -1;
+  border: 1px solid #f0c6c6;
+  background: #fff7f7;
+  color: #9d2f2f;
+}
+
 .list {
   display: grid;
   overflow: hidden;
@@ -234,16 +242,35 @@ button:disabled {
 }
 
 .expense {
-  display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 10px;
+  display: block;
   min-height: 64px;
-  padding: 10px 12px 10px 8px;
+  padding: 0;
   border-bottom: 1px solid #e8ece9;
   border-left: 5px solid #c8d5d0;
   background: #ffffff;
   color: #17211f;
+}
+
+.expenseTapTarget {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 58px;
+  border: 0;
+  background: transparent;
+  color: #17211f;
+  padding: 10px 12px 10px 8px;
+  text-align: left;
+}
+
+.expenseTapTarget:active {
+  background: #f3f7f5;
+}
+
+.expenseTapTarget:disabled {
+  opacity: 1;
 }
 
 .expenseBody {
@@ -279,6 +306,7 @@ button:disabled {
 }
 
 .expenseName {
+  display: block;
   margin: 0 0 4px;
   overflow: hidden;
   font-weight: 800;
@@ -329,30 +357,6 @@ button:disabled {
   white-space: nowrap;
 }
 
-.rowActions {
-  grid-column: 2 / -1;
-  display: flex;
-  justify-content: flex-end;
-  gap: 6px;
-  margin-top: -4px;
-}
-
-.textButton {
-  min-height: 28px;
-  border: 1px solid #d6ded9;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #40514b;
-  padding: 4px 8px;
-  font-size: 0.72rem;
-  font-weight: 850;
-}
-
-.textButton.danger {
-  border-color: #f0c6c6;
-  color: #9d2f2f;
-}
-
 @media (min-width: 621px) {
   .shell {
     padding: 28px;
@@ -368,15 +372,11 @@ button:disabled {
 }
 
 @media (max-width: 360px) {
-  .expense {
+  .expenseTapTarget {
     grid-template-columns: 42px minmax(0, 1fr);
   }
 
   .amount {
-    grid-column: 2;
-  }
-
-  .rowActions {
     grid-column: 2;
   }
 
