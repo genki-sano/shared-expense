@@ -1,5 +1,39 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Connect frontend to Expense CRUD API
+
+### Checklist
+
+- [x] Inspect current web expense data flow
+- [x] Add failing web API mutation tests
+- [x] Add failing UI structure tests
+- [x] Implement expense mutation API client
+- [x] Implement mobile-first create/edit/delete UI
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Verify local dev startup
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-27 00:00 JST: Started frontend CRUD API connection work. Current web app only loads monthly expenses and has no mutation client or operation UI.
+- 2026-07-27 21:28 JST: Added tests for web mutation API calls and dashboard create/edit/delete controls.
+- 2026-07-27 21:30 JST: Added `createExpense`, `updateExpense`, and `deleteExpense` web API client functions.
+- 2026-07-27 21:31 JST: Split the monthly screen into `ExpenseDashboard` and added mobile-first add/edit/delete flows with local state updates.
+- 2026-07-27 21:33 JST: Committed changes as `feat: connect expense crud frontend`.
+
+### Verification Log
+
+- 2026-07-27 21:28 JST: `pnpm test apps/web/src/features/expenses/api.test.ts apps/web-dev-config.test.ts` failed as expected because mutation client functions and `expense-dashboard.tsx` did not exist.
+- 2026-07-27 21:30 JST: `pnpm test apps/web/src/features/expenses/api.test.ts apps/web-dev-config.test.ts` passed with 16 tests across 2 files.
+- 2026-07-27 21:31 JST: `pnpm typecheck` initially failed due `exactOptionalPropertyTypes` on `ExpenseDashboardProps.errorMessage`; changed the prop to accept explicit `undefined`.
+- 2026-07-27 21:31 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-27 21:31 JST: `pnpm test` passed with 76 tests across 14 files.
+- 2026-07-27 21:31 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+- 2026-07-27 21:32 JST: `pnpm dev` initially failed inside the sandbox with `tsx` IPC pipe `EPERM`; reran outside the sandbox and API started at `http://localhost:8787`, web started at `http://localhost:3000`, `curl -sL http://localhost:8787/health` returned `{"ok":true}`, and `curl -sL http://localhost:3000` returned the monthly expense page with edit/delete controls.
+
 ## Task: Expense CRUD API
 
 ### Checklist

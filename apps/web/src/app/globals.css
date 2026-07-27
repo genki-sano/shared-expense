@@ -24,6 +24,15 @@ textarea {
   font: inherit;
 }
 
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .shell {
   min-height: 100vh;
   padding: 14px;
@@ -121,6 +130,16 @@ textarea {
   font-weight: 700;
 }
 
+.statusMessage {
+  margin: 0 0 8px;
+  border-radius: 8px;
+  background: #e9f7ee;
+  color: #245239;
+  padding: 8px 10px;
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
 .addButton {
   display: grid;
   place-items: center;
@@ -133,6 +152,77 @@ textarea {
   font-size: 1.55rem;
   font-weight: 800;
   line-height: 1;
+}
+
+.expenseForm {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+  border: 1px solid rgba(23, 33, 31, 0.1);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 12px;
+}
+
+.expense .expenseForm {
+  grid-column: 1 / -1;
+  margin: 2px 0 0;
+  border-color: #dfe7e3;
+  background: #f9fbf8;
+}
+
+.field {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  color: #4f5b56;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.field input {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid #d6ded9;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #17211f;
+  padding: 8px 10px;
+  font-size: 0.92rem;
+  font-weight: 650;
+}
+
+.wideField,
+.formActions {
+  grid-column: 1 / -1;
+}
+
+.formActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.primaryButton,
+.secondaryButton {
+  min-height: 40px;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  font-weight: 850;
+}
+
+.primaryButton {
+  border: 0;
+  background: #176b87;
+  color: #ffffff;
+}
+
+.secondaryButton {
+  border: 1px solid #d6ded9;
+  background: #ffffff;
+  color: #40514b;
 }
 
 .list {
@@ -154,6 +244,10 @@ textarea {
   border-left: 5px solid #c8d5d0;
   background: #ffffff;
   color: #17211f;
+}
+
+.expenseBody {
+  min-width: 0;
 }
 
 .expense.payerWoman {
@@ -235,6 +329,30 @@ textarea {
   white-space: nowrap;
 }
 
+.rowActions {
+  grid-column: 2 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: -4px;
+}
+
+.textButton {
+  min-height: 28px;
+  border: 1px solid #d6ded9;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #40514b;
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.textButton.danger {
+  border-color: #f0c6c6;
+  color: #9d2f2f;
+}
+
 @media (min-width: 621px) {
   .shell {
     padding: 28px;
@@ -256,5 +374,13 @@ textarea {
 
   .amount {
     grid-column: 2;
+  }
+
+  .rowActions {
+    grid-column: 2;
+  }
+
+  .expenseForm {
+    grid-template-columns: 1fr;
   }
 }

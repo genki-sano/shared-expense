@@ -14,6 +14,37 @@ export type FetchMonthlyExpensesInput = {
   fetcher?: typeof fetch;
 };
 
+export type CreateExpensePayload = {
+  date: string;
+  price: number;
+  category: string;
+  memo: string | null;
+};
+
+export type UpdateExpensePayload = CreateExpensePayload & {
+  version: number;
+};
+
+export type ExpenseMutationInput = {
+  apiBaseUrl: string | undefined;
+  idToken?: string | undefined;
+  idempotencyKey: string;
+  fetcher?: typeof fetch;
+};
+
+export type CreateExpenseInput = ExpenseMutationInput & {
+  expense: CreateExpensePayload;
+};
+
+export type UpdateExpenseInput = ExpenseMutationInput & {
+  id: string;
+  expense: UpdateExpensePayload;
+};
+
+export type DeleteExpenseInput = ExpenseMutationInput & {
+  id: string;
+};
+
 export const sampleExpenses: Expense[] = [
   {
     id: "sample_1",
@@ -56,10 +87,7 @@ export async function fetchMonthlyExpenses(
   url.searchParams.set("date", input.month);
 
   const response = await fetcher(url.toString(), {
-    headers:
-      input.idToken === undefined || input.idToken === ""
-        ? {}
-        : { Authorization: `Bearer ${input.idToken}` },
+    headers: authorizationHeaders(input.idToken),
   });
 
   if (!response.ok) {
@@ -68,4 +96,78 @@ export async function fetchMonthlyExpenses(
 
   const body = (await response.json()) as { expenses: Expense[] };
   return { source: "api", expenses: body.expenses };
+}
+
+export async function createExpense(input: CreateExpenseInput): Promise<Expense> {
+  const response = await mutationFetch(input, "/api/expenses", {
+    method: "POST",
+    json: input.expense,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to create expense: ${response.status}`);
+  }
+
+  return (await response.json()) as Expense;
+}
+
+export async function updateExpense(input: UpdateExpenseInput): Promise<Expense> {
+  const response = await mutationFetch(input, `/api/expenses/${input.id}`, {
+    method: "PUT",
+    json: input.expense,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to update expense: ${response.status}`);
+  }
+
+  return (await response.json()) as Expense;
+}
+
+export async function deleteExpense(input: DeleteExpenseInput): Promise<void> {
+  const response = await mutationFetch(input, `/api/expenses/${input.id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to delete expense: ${response.status}`);
+  }
+}
+
+async function mutationFetch(
+  input: ExpenseMutationInput,
+  path: string,
+  options: { method: "POST" | "PUT" | "DELETE"; json?: unknown },
+): Promise<Response> {
+  if (input.apiBaseUrl === undefined || input.apiBaseUrl.trim() === "") {
+    throw new Error("Expense API base URL is not configured");
+  }
+
+  const fetcher = input.fetcher ?? fetch;
+  const headers: Record<string, string> = {
+    ...authorizationHeaders(input.idToken),
+    "Idempotency-Key": input.idempotencyKey,
+  };
+
+  const init: RequestInit = {
+    method: options.method,
+    headers:
+      options.json === undefined
+        ? headers
+        : { ...headers, "Content-Type": "application/json" },
+  };
+
+  if (options.json !== undefined) {
+    init.body = JSON.stringify(options.json);
+  }
+
+  return await fetcher(new URL(path, input.apiBaseUrl).toString(), init);
+}
+
+function authorizationHeaders(idToken: string | undefined): Record<string, string> {
+  if (idToken === undefined || idToken === "") {
+    return {};
+  }
+
+  return { Authorization: `Bearer ${idToken}` };
 }

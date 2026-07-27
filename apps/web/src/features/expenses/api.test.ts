@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { fetchMonthlyExpenses } from "./api";
+import {
+  createExpense,
+  deleteExpense,
+  fetchMonthlyExpenses,
+  updateExpense,
+} from "./api";
 
 describe("fetchMonthlyExpenses", () => {
   it("returns sample expenses when no API base URL is configured", async () => {
@@ -73,5 +78,149 @@ describe("fetchMonthlyExpenses", () => {
           Response.json({ message: "Unauthorized", details: {} }, { status: 401 }),
       }),
     ).rejects.toThrow("Failed to fetch expenses: 401");
+  });
+});
+
+describe("expense mutations", () => {
+  it("creates an expense with authorization and idempotency headers", async () => {
+    const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
+    const result = await createExpense({
+      apiBaseUrl: "https://api.example.test",
+      idToken: "id-token",
+      idempotencyKey: "create-key",
+      expense: {
+        date: "2026-07-27",
+        price: 1200,
+        category: "食費",
+        memo: "ランチ",
+      },
+      fetcher: async (url, init) => {
+        calls.push({ url: String(url), init });
+        return Response.json(
+          {
+            id: "exp_created",
+            userId: "woman",
+            userName: "ひとみ",
+            date: "2026-07-27",
+            price: 1200,
+            category: "食費",
+            memo: "ランチ",
+            version: 1,
+          },
+          { status: 201 },
+        );
+      },
+    });
+
+    expect(calls).toEqual([
+      {
+        url: "https://api.example.test/api/expenses",
+        init: {
+          method: "POST",
+          headers: {
+            Authorization: "Bearer id-token",
+            "Content-Type": "application/json",
+            "Idempotency-Key": "create-key",
+          },
+          body: JSON.stringify({
+            date: "2026-07-27",
+            price: 1200,
+            category: "食費",
+            memo: "ランチ",
+          }),
+        },
+      },
+    ]);
+    expect(result.id).toBe("exp_created");
+  });
+
+  it("updates an expense with versioned payload", async () => {
+    const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
+    await updateExpense({
+      apiBaseUrl: "https://api.example.test",
+      idToken: "id-token",
+      idempotencyKey: "update-key",
+      id: "exp_1",
+      expense: {
+        version: 1,
+        date: "2026-07-28",
+        price: 3400,
+        category: "日用品",
+        memo: null,
+      },
+      fetcher: async (url, init) => {
+        calls.push({ url: String(url), init });
+        return Response.json({
+          id: "exp_1",
+          userId: "man",
+          date: "2026-07-28",
+          price: 3400,
+          category: "日用品",
+          memo: null,
+          version: 1,
+        });
+      },
+    });
+
+    expect(calls).toEqual([
+      {
+        url: "https://api.example.test/api/expenses/exp_1",
+        init: {
+          method: "PUT",
+          headers: {
+            Authorization: "Bearer id-token",
+            "Content-Type": "application/json",
+            "Idempotency-Key": "update-key",
+          },
+          body: JSON.stringify({
+            version: 1,
+            date: "2026-07-28",
+            price: 3400,
+            category: "日用品",
+            memo: null,
+          }),
+        },
+      },
+    ]);
+  });
+
+  it("deletes an expense with an idempotency key", async () => {
+    const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
+    await deleteExpense({
+      apiBaseUrl: "https://api.example.test",
+      idToken: "id-token",
+      idempotencyKey: "delete-key",
+      id: "exp_1",
+      fetcher: async (url, init) => {
+        calls.push({ url: String(url), init });
+        return new Response(null, { status: 204 });
+      },
+    });
+
+    expect(calls).toEqual([
+      {
+        url: "https://api.example.test/api/expenses/exp_1",
+        init: {
+          method: "DELETE",
+          headers: {
+            Authorization: "Bearer id-token",
+            "Idempotency-Key": "delete-key",
+          },
+        },
+      },
+    ]);
+  });
+
+  it("throws a helpful error when mutation API returns an error", async () => {
+    await expect(
+      deleteExpense({
+        apiBaseUrl: "https://api.example.test",
+        idToken: "id-token",
+        idempotencyKey: "delete-key",
+        id: "exp_1",
+        fetcher: async () =>
+          Response.json({ message: "Expense not found" }, { status: 404 }),
+      }),
+    ).rejects.toThrow("Failed to delete expense: 404");
   });
 });

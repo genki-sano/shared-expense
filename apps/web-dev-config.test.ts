@@ -57,7 +57,7 @@ describe("web dev configuration", () => {
   });
 
   test("mobile preview uses a compact dashboard summary instead of stacked metric cards", () => {
-    const pageSource = readText("apps/web/src/app/page.tsx");
+    const pageSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
 
     expect(pageSource).toContain('className="summaryPanel"');
     expect(pageSource).toContain('className="summaryDetails"');
@@ -74,7 +74,7 @@ describe("web dev configuration", () => {
   });
 
   test("expense rows expose payer bars and payer pills for quick scanning", () => {
-    const pageSource = readText("apps/web/src/app/page.tsx");
+    const pageSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
     const cssSource = readText("apps/web/src/app/globals.css");
 
     expect(pageSource).toContain("payerClassName(expense.userId)");
@@ -86,9 +86,26 @@ describe("web dev configuration", () => {
   });
 
   test("expense row meta shows only the payer pill, not category text", () => {
-    const pageSource = readText("apps/web/src/app/page.tsx");
+    const pageSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
 
     expect(pageSource).toContain('<p className="expenseMeta">');
     expect(pageSource).not.toContain("{expense.category}\n                  <span");
+  });
+
+  test("expense dashboard exposes create, edit, and delete controls backed by the API client", () => {
+    const pageSource = readText("apps/web/src/app/page.tsx");
+    const dashboardSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
+    const cssSource = readText("apps/web/src/app/globals.css");
+
+    expect(pageSource).toContain("<ExpenseDashboard");
+    expect(dashboardSource).toContain('"use client"');
+    expect(dashboardSource).toContain("createExpense(");
+    expect(dashboardSource).toContain("updateExpense(");
+    expect(dashboardSource).toContain("deleteExpense(");
+    expect(dashboardSource).toContain('aria-label="支出を追加"');
+    expect(dashboardSource).toContain('aria-label="支出を編集"');
+    expect(dashboardSource).toContain('aria-label="支出を削除"');
+    expect(cssSource).toContain(".expenseForm");
+    expect(cssSource).toContain(".rowActions");
   });
 });
