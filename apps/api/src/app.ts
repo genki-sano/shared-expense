@@ -7,6 +7,7 @@ import {
 } from "@shared-expense/integrations";
 import type { User } from "@shared-expense/shared";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { createExpenseRoutes } from "./expenses/routes";
 import { InMemoryExpenseRepository, type ExpenseRepository } from "./expenses/repository";
 
@@ -36,6 +37,21 @@ const defaultDependencies: AppDependencies = {
 
 export function createApp(dependencies: AppDependencies = defaultDependencies): Hono {
   const app = new Hono();
+
+  app.use(
+    "/api/*",
+    cors({
+      origin: (origin) => {
+        if (origin === "http://localhost:3000" || origin === "http://localhost:3001") {
+          return origin;
+        }
+
+        return null;
+      },
+      allowHeaders: ["Authorization", "Content-Type", "Idempotency-Key"],
+      allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    }),
+  );
 
   app.get("/health", (c) => c.json({ ok: true }));
   app.route("/api/expenses", createExpenseRoutes(dependencies));

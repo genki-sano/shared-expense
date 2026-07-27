@@ -53,6 +53,41 @@ function app() {
   });
 }
 
+describe("CORS", () => {
+  it("allows local web preflight requests for expense mutations", async () => {
+    const response = await app().request("/api/expenses", {
+      method: "OPTIONS",
+      headers: {
+        Origin: "http://localhost:3000",
+        "Access-Control-Request-Method": "POST",
+        "Access-Control-Request-Headers":
+          "authorization,content-type,idempotency-key",
+      },
+    });
+
+    expect(response.status).toBe(204);
+    expect(response.headers.get("Access-Control-Allow-Origin")).toBe(
+      "http://localhost:3000",
+    );
+    expect(response.headers.get("Access-Control-Allow-Methods")).toContain("POST");
+    expect(response.headers.get("Access-Control-Allow-Headers")).toContain(
+      "Idempotency-Key",
+    );
+  });
+
+  it("does not allow arbitrary origins", async () => {
+    const response = await app().request("/api/expenses", {
+      method: "OPTIONS",
+      headers: {
+        Origin: "https://evil.example.test",
+        "Access-Control-Request-Method": "POST",
+      },
+    });
+
+    expect(response.headers.get("Access-Control-Allow-Origin")).toBeNull();
+  });
+});
+
 describe("GET /api/expenses", () => {
   it("requires a bearer token", async () => {
     const response = await app().request("/api/expenses?date=2026-07");

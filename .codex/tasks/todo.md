@@ -1,5 +1,34 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Fix local API CORS for frontend mutations
+
+### Checklist
+
+- [x] Identify browser preflight failure
+- [x] Add failing API CORS preflight test
+- [x] Implement API CORS headers for local web origins
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Verify local CORS preflight
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-27 22:00 JST: User reported browser CORS failure for `POST http://localhost:8787/api/expenses` from `http://localhost:3000`. Root cause: API did not return CORS headers for mutation preflight requests with `Authorization`, `Content-Type`, and `Idempotency-Key`.
+- 2026-07-27 21:44 JST: Added API CORS middleware for local web origins `http://localhost:3000` and `http://localhost:3001`, allowing `Authorization`, `Content-Type`, and `Idempotency-Key`.
+- 2026-07-27 21:46 JST: Committed changes as `fix: allow local expense api cors`.
+
+### Verification Log
+
+- 2026-07-27 21:44 JST: `pnpm test apps/api/src/app.test.ts` failed as expected because `OPTIONS /api/expenses` returned 404 without CORS headers.
+- 2026-07-27 21:44 JST: `pnpm test apps/api/src/app.test.ts` passed with 11 tests.
+- 2026-07-27 21:44 JST: `pnpm test` passed with 79 tests across 14 files.
+- 2026-07-27 21:44 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-27 21:44 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+- 2026-07-27 21:45 JST: With `pnpm dev` running, `curl -i -X OPTIONS http://localhost:8787/api/expenses -H 'Origin: http://localhost:3000' -H 'Access-Control-Request-Method: POST' -H 'Access-Control-Request-Headers: authorization,content-type,idempotency-key'` returned `204 No Content` with `access-control-allow-origin: http://localhost:3000`, `access-control-allow-methods: GET,POST,PUT,DELETE,OPTIONS`, and `access-control-allow-headers: Authorization,Content-Type,Idempotency-Key`.
+
 ## Task: Surface Expense mutation failures
 
 ### Checklist
