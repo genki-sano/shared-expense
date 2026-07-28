@@ -1,5 +1,35 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Replace notification ID with detail footer
+
+### Checklist
+
+- [x] Inspect current Flex notification payload
+- [x] Add Flex button/action types
+- [x] Remove user-facing notification ID from expense notifications
+- [x] Add detail footer button with configured URL
+- [x] Update env docs/tests
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-28 22:00 JST: User noted notification IDs are not useful in LINE notifications and requested a footer path to view details instead.
+- 2026-07-28 22:00 JST: Added `LINE_NOTIFICATION_DETAIL_BASE_URL` as the API-side base URL used by Flex footer buttons. Expense month is appended as `month=YYYY-MM`.
+- 2026-07-28 22:34 JST: Removed notification ID from the Flex body and added an optional footer button labeled `詳細を確認`.
+- 2026-07-28 22:35 JST: Preserved the committed `apps/web/next-env.d.ts` dev types import after `next build`.
+- 2026-07-28 22:35 JST: Prepared commit for replacing notification ID with a detail footer button.
+
+### Verification Log
+
+- 2026-07-28 22:34 JST: `pnpm test apps/api/src/notifications/expense-mutation-notifier.test.ts apps/api/src/app-env.test.ts apps/api/src/app.test.ts packages/integrations/src/line/messaging-client.test.ts apps/web-dev-config.test.ts` passed with 40 tests.
+- 2026-07-28 22:34 JST: `pnpm test` passed with 112 tests across 20 files.
+- 2026-07-28 22:34 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-28 22:35 JST: `pnpm build` passed; Next.js built `/` as dynamic and Redocly reported the same existing warnings.
+
 ## Task: Use Flex Messages for expense notifications
 
 ### Checklist

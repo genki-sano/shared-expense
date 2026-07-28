@@ -38,6 +38,7 @@ export type AppEnv = {
   GOOGLE_PRIVATE_KEY?: string | undefined;
   LINE_LOGIN_CHANNEL_ID?: string | undefined;
   LINE_MESSAGING_CHANNEL_ACCESS_TOKEN?: string | undefined;
+  LINE_NOTIFICATION_DETAIL_BASE_URL?: string | undefined;
 };
 
 export type AppEnvDependencies = {
@@ -137,6 +138,10 @@ function expenseMutationNotifierFromEnv(
       channelAccessToken: env.LINE_MESSAGING_CHANNEL_ACCESS_TOKEN,
       ...(dependencies.fetcher === undefined ? {} : { fetcher: dependencies.fetcher }),
     }),
+    ...(env.LINE_NOTIFICATION_DETAIL_BASE_URL === undefined ||
+    env.LINE_NOTIFICATION_DETAIL_BASE_URL.trim() === ""
+      ? {}
+      : { detailBaseUrl: env.LINE_NOTIFICATION_DETAIL_BASE_URL }),
   });
 }
 

@@ -16,6 +16,7 @@ export type {
   FetchLineMessagingClientInput,
   LineFlexBox,
   LineFlexBubble,
+  LineFlexButton,
   LineFlexComponent,
   LineFlexContainer,
   LineFlexMessage,
@@ -24,6 +25,7 @@ export type {
   LineMessagingClient,
   LineMessage,
   LineTextMessage,
+  LineUriAction,
   PushLineMessageInput,
 } from "./line/messaging-client";
 export type {

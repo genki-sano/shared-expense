@@ -4,7 +4,6 @@ import type {
   LineMessagingClient,
 } from "@shared-expense/integrations";
 import {
-  buildExpenseEventId,
   findPartnerUser,
   type Expense,
   type ExpenseEventType,
@@ -25,6 +24,7 @@ export type ExpenseMutationNotifier = {
 export type ExpenseMutationNotifierInput = {
   userRepository: HouseholdUserRepository;
   lineMessagingClient: LineMessagingClient;
+  detailBaseUrl?: string;
 };
 
 export function createExpenseMutationNotifier(
@@ -41,7 +41,7 @@ export function createExpenseMutationNotifier(
       await input.lineMessagingClient.pushMessage({
         to: recipient.lineUserId,
         messages: [
-          expenseMutationFlexMessage(notification),
+          expenseMutationFlexMessage(notification, input.detailBaseUrl),
         ],
       });
     },
@@ -54,10 +54,12 @@ export const noopExpenseMutationNotifier: ExpenseMutationNotifier = {
 
 function expenseMutationFlexMessage(
   input: ExpenseMutationNotificationInput,
+  detailBaseUrl: string | undefined,
 ): LineFlexMessage {
   const verb = eventVerb(input.eventType);
   const title = expenseTitle(input.expense);
   const amount = formatYen(input.expense.price);
+  const detailUrl = detailUrlForExpense(detailBaseUrl, input.expense);
 
   return {
     type: "flex",
@@ -99,13 +101,29 @@ function expenseMutationFlexMessage(
           },
           labelValueBox("日付", formatDate(input.expense.date)),
           labelValueBox("支払者", input.actor.displayName),
-          labelValueBox("通知ID", buildExpenseEventId(
-            input.eventType,
-            input.expense.id,
-            input.expense.version,
-          )),
         ],
       },
+      ...(detailUrl === null
+        ? {}
+        : {
+            footer: {
+              type: "box",
+              layout: "vertical",
+              contents: [
+                {
+                  type: "button",
+                  style: "primary",
+                  height: "sm",
+                  color: "#176B87",
+                  action: {
+                    type: "uri",
+                    label: "詳細を確認",
+                    uri: detailUrl,
+                  },
+                },
+              ],
+            },
+          }),
       styles: {
         body: {
           backgroundColor: "#F6F7F4",
@@ -113,6 +131,16 @@ function expenseMutationFlexMessage(
       },
     },
   };
+}
+
+function detailUrlForExpense(baseUrl: string | undefined, expense: Expense): string | null {
+  if (baseUrl === undefined || baseUrl.trim() === "") {
+    return null;
+  }
+
+  const url = new URL(baseUrl);
+  url.searchParams.set("month", expense.date.slice(0, 7));
+  return url.toString();
 }
 
 function labelValueBox(label: string, value: string): LineFlexBox {

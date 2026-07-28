@@ -55,7 +55,25 @@ export type LineFlexSeparator = {
   color?: string;
 };
 
-export type LineFlexComponent = LineFlexBox | LineFlexText | LineFlexSeparator;
+export type LineFlexButton = {
+  type: "button";
+  style?: "link" | "primary" | "secondary";
+  height?: "sm" | "md";
+  color?: string;
+  action: LineUriAction;
+};
+
+export type LineUriAction = {
+  type: "uri";
+  label: string;
+  uri: string;
+};
+
+export type LineFlexComponent =
+  | LineFlexBox
+  | LineFlexText
+  | LineFlexSeparator
+  | LineFlexButton;
 
 export type LineMessage = LineTextMessage | LineFlexMessage;
 

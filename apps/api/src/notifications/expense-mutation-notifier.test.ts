@@ -33,6 +33,7 @@ describe("createExpenseMutationNotifier", () => {
     const pushed: Parameters<LineMessagingClient["pushMessage"]>[0][] = [];
     const notifier = createExpenseMutationNotifier({
       userRepository: new InMemoryHouseholdUserRepository([actor, partner]),
+      detailBaseUrl: "https://liff.line.me/1234567890-shared-expense",
       lineMessagingClient: {
         pushMessage: async (input) => {
           pushed.push(input);
@@ -96,10 +97,23 @@ describe("createExpenseMutationNotifier", () => {
                     type: "box",
                     layout: "horizontal",
                   }),
-                  expect.objectContaining({
-                    type: "box",
-                    layout: "horizontal",
-                  }),
+                ],
+              },
+              footer: {
+                type: "box",
+                layout: "vertical",
+                contents: [
+                  {
+                    type: "button",
+                    style: "primary",
+                    height: "sm",
+                    color: "#176B87",
+                    action: {
+                      type: "uri",
+                      label: "詳細を確認",
+                      uri: "https://liff.line.me/1234567890-shared-expense?month=2026-07",
+                    },
+                  },
                 ],
               },
               styles: {
@@ -112,9 +126,8 @@ describe("createExpenseMutationNotifier", () => {
         ],
       },
     ]);
-    expect(JSON.stringify(pushed[0]?.messages[0])).toContain(
-      "expense.created:2148:v1",
-    );
+    expect(JSON.stringify(pushed[0]?.messages[0])).not.toContain("通知ID");
+    expect(JSON.stringify(pushed[0]?.messages[0])).not.toContain("expense.created");
   });
 
   it("skips when the partner disabled notifications", async () => {
