@@ -9,6 +9,10 @@ export type {
   ServiceAccountJwtSigner,
 } from "./google/service-account-auth-provider";
 export type {
+  LineIdTokenPayload,
+  VerifyLineIdTokenInput,
+} from "./line/id-token-verifier";
+export type {
   GoogleSheetsValuesClient,
   ListSpreadsheetExpensesInput,
   SpreadsheetExpenseRepositoryInput,
@@ -20,6 +24,10 @@ export {
   GoogleServiceAccountAccessTokenProvider,
   signServiceAccountJwt,
 } from "./google/service-account-auth-provider";
+export {
+  LINE_ID_TOKEN_VERIFY_URL,
+  verifyLineIdToken,
+} from "./line/id-token-verifier";
 export {
   expenseFromLegacyPaymentRow,
   expenseToLegacyPaymentRow,

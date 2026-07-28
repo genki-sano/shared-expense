@@ -1,5 +1,33 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Move LINE ID token verification to integrations package
+
+### Checklist
+
+- [x] Inspect current LINE auth placement
+- [x] Move LINE verify client to `packages/integrations`
+- [x] Keep API user resolution in `apps/api`
+- [x] Split tests by responsibility
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-28 20:00 JST: User pointed out LINE external dependencies may belong under `packages`.
+- 2026-07-28 20:00 JST: Decided to keep LINE external API verification in `packages/integrations`, while API-specific `sub` to household user resolution remains in `apps/api`.
+- 2026-07-28 21:10 JST: Moved LINE ID token verify client and tests to `packages/integrations/src/line`, and kept API auth focused on household user resolution.
+- 2026-07-28 21:11 JST: Prepared commit for moving LINE verification into integrations.
+
+### Verification Log
+
+- 2026-07-28 21:10 JST: `pnpm test packages/integrations/src/line/id-token-verifier.test.ts apps/api/src/auth/line-id-token.test.ts apps/api/src/app-env.test.ts` passed with 9 tests.
+- 2026-07-28 21:10 JST: `pnpm test` passed with 104 tests across 18 files.
+- 2026-07-28 21:10 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-28 21:11 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+
 ## Task: Implement production LIFF ID token authentication
 
 ### Checklist
