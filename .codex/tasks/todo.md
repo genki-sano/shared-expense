@@ -1,5 +1,38 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Initialize LIFF frontend ID token
+
+### Checklist
+
+- [x] Inspect current web token flow
+- [x] Add LIFF SDK dependency
+- [x] Add client-side LIFF ID token initialization
+- [x] Re-fetch expenses and settlement after LIFF token is available
+- [x] Preserve local dev token fallback
+- [x] Update env docs/tests
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-28 21:00 JST: User selected LIFF frontend productionization.
+- 2026-07-28 21:00 JST: Context7 LINE LIFF docs confirm `liff.init({ liffId })`, `liff.isLoggedIn()`, `liff.login()`, and `liff.getIDToken()` flow; ID token requires `openid` scope and is valid for one hour.
+- 2026-07-28 21:00 JST: Added `@line/liff` to `@shared-expense/web`.
+- 2026-07-28 21:47 JST: Added client-side LIFF token initialization, post-auth expense/settlement refetch, local dev token fallback, and `NEXT_PUBLIC_LIFF_ID` env documentation.
+- 2026-07-28 21:48 JST: Fixed LIFF initialization narrowing for TypeScript and preserved the committed `apps/web/next-env.d.ts` dev types import after `next build`.
+- 2026-07-28 21:49 JST: Prepared commit for LIFF frontend ID token initialization.
+
+### Verification Log
+
+- 2026-07-28 21:47 JST: `pnpm test apps/web-dev-config.test.ts apps/web/src/features/expenses/api.test.ts apps/web/src/features/expenses/page-data.test.ts` passed with 27 tests.
+- 2026-07-28 21:48 JST: `pnpm typecheck` initially failed because the narrowed LIFF ID type was not preserved inside the async initializer; fixed by assigning checked values to local constants.
+- 2026-07-28 21:48 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-28 21:48 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+- 2026-07-28 21:48 JST: `pnpm test` passed with 99 tests across 17 files.
+
 ## Task: Move API auth and users under core
 
 ### Checklist

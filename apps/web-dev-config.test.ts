@@ -40,6 +40,7 @@ describe("web dev configuration", () => {
     const envExample = readText(".env.example");
 
     expect(envExample).toContain("NEXT_PUBLIC_API_BASE_URL=http://localhost:8787");
+    expect(envExample).toContain("NEXT_PUBLIC_LIFF_ID=");
     expect(envExample).toContain("LINE_LOGIN_CHANNEL_ID=");
   });
 
@@ -55,6 +56,27 @@ describe("web dev configuration", () => {
       },
     });
     expect(existsSync(join(rootDir, "apps/web/src/app/page.tsx"))).toBe(true);
+  });
+
+  test("web app can initialize LIFF ID tokens for production auth", () => {
+    const webPackage = readPackageJson("apps/web/package.json");
+    const pageSource = readText("apps/web/src/app/page.tsx");
+    const dashboardSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
+    const liffClientSource = readText("apps/web/src/features/expenses/liff-client.ts");
+
+    expect(webPackage.dependencies).toMatchObject({
+      "@line/liff": expect.any(String),
+    });
+    expect(pageSource).toContain("NEXT_PUBLIC_LIFF_ID");
+    expect(pageSource).toContain("NEXT_PUBLIC_DEV_ID_TOKEN");
+    expect(dashboardSource).toContain("getLiffIdToken(");
+    expect(dashboardSource).toContain("fetchMonthlyExpenses({");
+    expect(dashboardSource).toContain("fetchMonthlySettlement({");
+    expect(liffClientSource).toContain('import("@line/liff")');
+    expect(liffClientSource).toContain("liff.init({ liffId: input.liffId })");
+    expect(liffClientSource).toContain("liff.isLoggedIn()");
+    expect(liffClientSource).toContain("liff.login(");
+    expect(liffClientSource).toContain("liff.getIDToken()");
   });
 
   test("mobile preview uses a compact dashboard summary instead of stacked metric cards", () => {

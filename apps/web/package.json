@@ -8,6 +8,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@line/liff": "^2.29.1",
     "@shared-expense/shared": "workspace:*",
     "next": "^16.2.9",
     "react": "^19.2.0",

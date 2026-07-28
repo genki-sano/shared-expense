@@ -2,16 +2,19 @@
 
 import { calculateMonthlySettlement, type Expense } from "@shared-expense/shared";
 import type { HouseholdUsers, MonthlySettlementSummary } from "@shared-expense/shared";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   createExpense,
   deleteExpense,
   ExpenseApiError,
+  fetchMonthlyExpenses,
+  fetchMonthlySettlement,
   restoreExpense,
   updateExpense,
   type CreateExpensePayload,
   type UpdateExpensePayload,
 } from "./api";
+import { getLiffIdToken } from "./liff-client";
 
 type ExpenseDashboardProps = {
   expenses: Expense[];
@@ -19,6 +22,7 @@ type ExpenseDashboardProps = {
   month: string;
   apiBaseUrl: string | undefined;
   idToken: string | undefined;
+  liffId: string | undefined;
   settlement: MonthlySettlementSummary;
   errorMessage: string | undefined;
 };
@@ -39,26 +43,101 @@ const numberFormatter = new Intl.NumberFormat("ja-JP", {
 
 export function ExpenseDashboard(props: ExpenseDashboardProps) {
   const [expenses, setExpenses] = useState(() => sortExpenses(props.expenses));
+  const [idToken, setIdToken] = useState<string | undefined>(props.idToken);
+  const [settlementSummary, setSettlementSummary] = useState(props.settlement);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [restorableExpense, setRestorableExpense] = useState<Expense | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   const total = useMemo(
     () => expenses.reduce((sum, expense) => sum + expense.price, 0),
     [expenses],
   );
   const settlementUsers = useMemo(
-    () => usersFromSettlement(props.settlement),
-    [props.settlement],
+    () => usersFromSettlement(settlementSummary),
+    [settlementSummary],
   );
   const settlement = useMemo(
     () => calculateMonthlySettlement(props.month, settlementUsers, expenses),
     [expenses, props.month, settlementUsers],
   );
   const isMutationEnabled =
-    props.apiBaseUrl !== undefined && props.apiBaseUrl.trim() !== "";
+    props.apiBaseUrl !== undefined &&
+    props.apiBaseUrl.trim() !== "" &&
+    idToken !== undefined &&
+    idToken.trim() !== "";
+
+  useEffect(() => {
+    const apiBaseUrl = props.apiBaseUrl;
+    const liffId = props.liffId;
+    if (
+      props.idToken !== undefined ||
+      apiBaseUrl === undefined ||
+      apiBaseUrl.trim() === "" ||
+      liffId === undefined ||
+      liffId.trim() === ""
+    ) {
+      return;
+    }
+
+    const normalizedApiBaseUrl = apiBaseUrl;
+    const normalizedLiffId = liffId;
+    let isCancelled = false;
+
+    async function initializeLiff(): Promise<void> {
+      setIsAuthenticating(true);
+      setStatusMessage("LINE認証を確認しています");
+      try {
+        const token = await getLiffIdToken({
+          liffId: normalizedLiffId,
+          redirectUri: window.location.href,
+        });
+        if (isCancelled || token === null) {
+          return;
+        }
+
+        const [expensesResult, settlementResult] = await Promise.all([
+          fetchMonthlyExpenses({
+            month: props.month,
+            apiBaseUrl: normalizedApiBaseUrl,
+            idToken: token,
+          }),
+          fetchMonthlySettlement({
+            month: props.month,
+            apiBaseUrl: normalizedApiBaseUrl,
+            idToken: token,
+          }),
+        ]);
+
+        if (isCancelled) {
+          return;
+        }
+
+        setIdToken(token);
+        setExpenses(sortExpenses(expensesResult.expenses));
+        setSettlementSummary(settlementResult.settlement);
+        setStatusMessage(null);
+      } catch (error) {
+        logExpenseMutationError("authenticate", error);
+        if (!isCancelled) {
+          setStatusMessage(`LINE認証に失敗しました。${errorMessageForUser(error)}`);
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsAuthenticating(false);
+        }
+      }
+    }
+
+    void initializeLiff();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [props.apiBaseUrl, props.idToken, props.liffId, props.month]);
 
   async function handleCreate(payload: CreateExpensePayload): Promise<void> {
     setIsSubmitting(true);
@@ -67,7 +146,7 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
     try {
       const created = await createExpense({
         apiBaseUrl: props.apiBaseUrl,
-        idToken: props.idToken,
+        idToken,
         idempotencyKey: createIdempotencyKey("expense-create"),
         expense: payload,
       });
@@ -92,7 +171,7 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
     try {
       const updated = await updateExpense({
         apiBaseUrl: props.apiBaseUrl,
-        idToken: props.idToken,
+        idToken,
         idempotencyKey: createIdempotencyKey(`expense-update-${expense.id}`),
         id: expense.id,
         expense: payload,
@@ -122,7 +201,7 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
     try {
       await deleteExpense({
         apiBaseUrl: props.apiBaseUrl,
-        idToken: props.idToken,
+        idToken,
         idempotencyKey: createIdempotencyKey(`expense-delete-${expense.id}`),
         id: expense.id,
       });
@@ -143,7 +222,7 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
     try {
       const restored = await restoreExpense({
         apiBaseUrl: props.apiBaseUrl,
-        idToken: props.idToken,
+        idToken,
         idempotencyKey: createIdempotencyKey(`expense-restore-${expense.id}`),
         id: expense.id,
       });
@@ -229,7 +308,11 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
           </p>
         )}
         {isMutationEnabled ? null : (
-          <p className="errorMessage">API未設定のため、追加・編集・削除はできません</p>
+          <p className="errorMessage">
+            {isAuthenticating
+              ? "LINE認証を確認しています"
+              : "APIまたは認証が未設定のため、追加・編集・削除はできません"}
+          </p>
         )}
 
         <section className="list" aria-label="支出明細">
@@ -453,7 +536,7 @@ function payerClassName(userId: string): "payerWoman" | "payerMan" | "payerUnkno
 }
 
 function logExpenseMutationError(
-  operation: "create" | "update" | "delete" | "restore",
+  operation: "authenticate" | "create" | "update" | "delete" | "restore",
   error: unknown,
 ): void {
   console.error(`Expense ${operation} failed`, error);
