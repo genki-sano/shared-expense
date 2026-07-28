@@ -1,5 +1,33 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Move API auth and users under core
+
+### Checklist
+
+- [x] Inspect current API source layout
+- [x] Move `auth` to `core/auth`
+- [x] Move `users` to `core/users`
+- [x] Update imports and tests
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-28 21:00 JST: User noted `apps/api/src/auth` and `apps/api/src/users` feel odd as siblings of feature modules `expenses` and `settlements`.
+- 2026-07-28 21:00 JST: Decided to move cross-cutting API auth and household user dependency boundaries under `apps/api/src/core`.
+- 2026-07-28 21:35 JST: Moved API auth and household user repository files under `apps/api/src/core`, and updated route/app imports.
+- 2026-07-28 21:36 JST: Prepared commit for moving API auth and users under core.
+
+### Verification Log
+
+- 2026-07-28 21:35 JST: `pnpm test apps/api/src/core/auth/line-id-token.test.ts apps/api/src/app.test.ts apps/api/src/app-env.test.ts` passed with 22 tests.
+- 2026-07-28 21:35 JST: `pnpm test` passed with 98 tests across 17 files.
+- 2026-07-28 21:35 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-28 21:36 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+
 ## Task: Decouple settlements from expense repository module
 
 ### Checklist

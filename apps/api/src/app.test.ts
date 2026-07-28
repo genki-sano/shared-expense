@@ -2,7 +2,7 @@ import type { Expense, User } from "@shared-expense/shared";
 import { describe, expect, it } from "vitest";
 import { createApp } from "./app";
 import { InMemoryExpenseRepository, type ExpenseRepository } from "./expenses/repository";
-import { InMemoryHouseholdUserRepository } from "./users/repository";
+import { InMemoryHouseholdUserRepository } from "./core/users/repository";
 
 const user: User = {
   id: "user_a",

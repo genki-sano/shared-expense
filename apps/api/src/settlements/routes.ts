@@ -1,7 +1,7 @@
 import { calculateMonthlySettlement } from "@shared-expense/shared";
 import type { User } from "@shared-expense/shared";
 import { Hono } from "hono";
-import type { HouseholdUserRepository } from "../users/repository";
+import type { HouseholdUserRepository } from "../core/users/repository";
 import type { MonthlySettlementExpenseReader } from "./repository";
 
 export type SettlementRoutesDependencies = {

@@ -8,7 +8,7 @@ import {
 import type { User } from "@shared-expense/shared";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { createLineIdTokenAuthenticator } from "./auth/line-id-token";
+import { createLineIdTokenAuthenticator } from "./core/auth/line-id-token";
 import { createExpenseRoutes } from "./expenses/routes";
 import { InMemoryExpenseRepository, type ExpenseRepository } from "./expenses/repository";
 import type { MonthlySettlementExpenseReader } from "./settlements/repository";
@@ -16,7 +16,7 @@ import { createSettlementRoutes } from "./settlements/routes";
 import {
   InMemoryHouseholdUserRepository,
   type HouseholdUserRepository,
-} from "./users/repository";
+} from "./core/users/repository";
 
 export type AppDependencies = {
   authenticateToken: (token: string) => Promise<User>;
