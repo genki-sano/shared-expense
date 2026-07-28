@@ -1,5 +1,34 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Use Flex Messages for expense notifications
+
+### Checklist
+
+- [x] Inspect current text notification payload
+- [x] Expand LINE Messaging client types for Flex messages
+- [x] Replace expense notification text with a Flex bubble
+- [x] Update notification and integration tests
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-28 22:00 JST: User requested LINE expense notifications to use Flex Message instead of plain text.
+- 2026-07-28 22:00 JST: LINE official docs confirm Flex messages are sent as `type: "flex"` messages with `altText` and `contents`, inside the same push message request body.
+- 2026-07-28 22:18 JST: Expanded LINE message types to include Flex bubbles and changed expense mutation notifications to send a structured Flex message with operation, title, amount, date, payer, and notification ID.
+- 2026-07-28 22:19 JST: Preserved the committed `apps/web/next-env.d.ts` dev types import after `next build`.
+- 2026-07-28 22:19 JST: Prepared commit for Flex Message expense notifications.
+
+### Verification Log
+
+- 2026-07-28 22:18 JST: `pnpm test packages/integrations/src/line/messaging-client.test.ts apps/api/src/notifications/expense-mutation-notifier.test.ts apps/api/src/app-env.test.ts apps/api/src/app.test.ts` passed with 27 tests.
+- 2026-07-28 22:18 JST: `pnpm test` passed with 112 tests across 20 files.
+- 2026-07-28 22:18 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-28 22:19 JST: `pnpm build` passed; Next.js built `/` as dynamic and Redocly reported the same existing warnings.
+
 ## Task: Send LINE notifications for expense mutations
 
 ### Checklist

@@ -51,17 +51,70 @@ describe("createExpenseMutationNotifier", () => {
         to: "line_man",
         messages: [
           {
-            type: "text",
-            text: [
-              "ひとみさんが支出を追加しました",
-              "2026/07/22 アイス",
-              "￥328",
-              "通知ID: expense.created:2148:v1",
-            ].join("\n"),
+            type: "flex",
+            altText: "ひとみさんが支出を追加しました: アイス ￥328",
+            contents: {
+              type: "bubble",
+              size: "mega",
+              body: {
+                type: "box",
+                layout: "vertical",
+                spacing: "md",
+                contents: [
+                  {
+                    type: "text",
+                    text: "支出を追加しました",
+                    size: "sm",
+                    color: "#176B87",
+                    weight: "bold",
+                  },
+                  {
+                    type: "text",
+                    text: "アイス",
+                    size: "xl",
+                    color: "#17211F",
+                    weight: "bold",
+                    wrap: true,
+                  },
+                  {
+                    type: "text",
+                    text: "￥328",
+                    size: "xxl",
+                    color: "#176B87",
+                    weight: "bold",
+                  },
+                  {
+                    type: "separator",
+                    margin: "md",
+                    color: "#D7DED9",
+                  },
+                  expect.objectContaining({
+                    type: "box",
+                    layout: "horizontal",
+                  }),
+                  expect.objectContaining({
+                    type: "box",
+                    layout: "horizontal",
+                  }),
+                  expect.objectContaining({
+                    type: "box",
+                    layout: "horizontal",
+                  }),
+                ],
+              },
+              styles: {
+                body: {
+                  backgroundColor: "#F6F7F4",
+                },
+              },
+            },
           },
         ],
       },
     ]);
+    expect(JSON.stringify(pushed[0]?.messages[0])).toContain(
+      "expense.created:2148:v1",
+    );
   });
 
   it("skips when the partner disabled notifications", async () => {

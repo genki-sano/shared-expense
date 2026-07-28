@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { FetchLineMessagingClient, LINE_PUSH_MESSAGE_URL } from "./messaging-client";
 
 describe("FetchLineMessagingClient", () => {
-  it("pushes text messages through the LINE Messaging API", async () => {
+  it("pushes messages through the LINE Messaging API", async () => {
     const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
     const client = new FetchLineMessagingClient({
       channelAccessToken: "channel-access-token",
@@ -14,7 +14,20 @@ describe("FetchLineMessagingClient", () => {
 
     await client.pushMessage({
       to: "line_man",
-      messages: [{ type: "text", text: "支出が追加されました" }],
+      messages: [
+        {
+          type: "flex",
+          altText: "支出が追加されました",
+          contents: {
+            type: "bubble",
+            body: {
+              type: "box",
+              layout: "vertical",
+              contents: [{ type: "text", text: "支出が追加されました" }],
+            },
+          },
+        },
+      ],
     });
 
     expect(calls).toEqual([
@@ -28,7 +41,20 @@ describe("FetchLineMessagingClient", () => {
           },
           body: JSON.stringify({
             to: "line_man",
-            messages: [{ type: "text", text: "支出が追加されました" }],
+            messages: [
+              {
+                type: "flex",
+                altText: "支出が追加されました",
+                contents: {
+                  type: "bubble",
+                  body: {
+                    type: "box",
+                    layout: "vertical",
+                    contents: [{ type: "text", text: "支出が追加されました" }],
+                  },
+                },
+              },
+            ],
           }),
         },
       },

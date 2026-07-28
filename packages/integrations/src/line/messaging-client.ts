@@ -5,9 +5,63 @@ export type LineTextMessage = {
   text: string;
 };
 
+export type LineFlexMessage = {
+  type: "flex";
+  altText: string;
+  contents: LineFlexContainer;
+};
+
+export type LineFlexContainer = LineFlexBubble;
+
+export type LineFlexBubble = {
+  type: "bubble";
+  size?: "nano" | "micro" | "kilo" | "mega" | "giga";
+  header?: LineFlexBox;
+  body?: LineFlexBox;
+  footer?: LineFlexBox;
+  styles?: Record<string, unknown>;
+};
+
+export type LineFlexBox = {
+  type: "box";
+  layout: "vertical" | "horizontal" | "baseline";
+  contents: LineFlexComponent[];
+  spacing?: string;
+  margin?: string;
+  paddingAll?: string;
+  paddingTop?: string;
+  paddingBottom?: string;
+  paddingStart?: string;
+  paddingEnd?: string;
+  backgroundColor?: string;
+  cornerRadius?: string;
+};
+
+export type LineFlexText = {
+  type: "text";
+  text: string;
+  size?: string;
+  color?: string;
+  weight?: "regular" | "bold";
+  wrap?: boolean;
+  align?: "start" | "end" | "center";
+  flex?: number;
+  margin?: string;
+};
+
+export type LineFlexSeparator = {
+  type: "separator";
+  margin?: string;
+  color?: string;
+};
+
+export type LineFlexComponent = LineFlexBox | LineFlexText | LineFlexSeparator;
+
+export type LineMessage = LineTextMessage | LineFlexMessage;
+
 export type PushLineMessageInput = {
   to: string;
-  messages: LineTextMessage[];
+  messages: LineMessage[];
 };
 
 export type LineMessagingClient = {

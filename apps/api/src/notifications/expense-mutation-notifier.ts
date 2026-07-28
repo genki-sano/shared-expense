@@ -1,4 +1,8 @@
-import type { LineMessagingClient } from "@shared-expense/integrations";
+import type {
+  LineFlexBox,
+  LineFlexMessage,
+  LineMessagingClient,
+} from "@shared-expense/integrations";
 import {
   buildExpenseEventId,
   findPartnerUser,
@@ -37,10 +41,7 @@ export function createExpenseMutationNotifier(
       await input.lineMessagingClient.pushMessage({
         to: recipient.lineUserId,
         messages: [
-          {
-            type: "text",
-            text: expenseMutationMessage(notification),
-          },
+          expenseMutationFlexMessage(notification),
         ],
       });
     },
@@ -51,17 +52,105 @@ export const noopExpenseMutationNotifier: ExpenseMutationNotifier = {
   notify: async () => {},
 };
 
-function expenseMutationMessage(input: ExpenseMutationNotificationInput): string {
-  return [
-    `${input.actor.displayName}さんが支出を${eventVerb(input.eventType)}しました`,
-    `${formatDate(input.expense.date)} ${expenseTitle(input.expense)}`,
-    formatYen(input.expense.price),
-    `通知ID: ${buildExpenseEventId(
-      input.eventType,
-      input.expense.id,
-      input.expense.version,
-    )}`,
-  ].join("\n");
+function expenseMutationFlexMessage(
+  input: ExpenseMutationNotificationInput,
+): LineFlexMessage {
+  const verb = eventVerb(input.eventType);
+  const title = expenseTitle(input.expense);
+  const amount = formatYen(input.expense.price);
+
+  return {
+    type: "flex",
+    altText: `${input.actor.displayName}さんが支出を${verb}しました: ${title} ${amount}`,
+    contents: {
+      type: "bubble",
+      size: "mega",
+      body: {
+        type: "box",
+        layout: "vertical",
+        spacing: "md",
+        contents: [
+          {
+            type: "text",
+            text: `支出を${verb}しました`,
+            size: "sm",
+            color: eventColor(input.eventType),
+            weight: "bold",
+          },
+          {
+            type: "text",
+            text: title,
+            size: "xl",
+            color: "#17211F",
+            weight: "bold",
+            wrap: true,
+          },
+          {
+            type: "text",
+            text: amount,
+            size: "xxl",
+            color: "#176B87",
+            weight: "bold",
+          },
+          {
+            type: "separator",
+            margin: "md",
+            color: "#D7DED9",
+          },
+          labelValueBox("日付", formatDate(input.expense.date)),
+          labelValueBox("支払者", input.actor.displayName),
+          labelValueBox("通知ID", buildExpenseEventId(
+            input.eventType,
+            input.expense.id,
+            input.expense.version,
+          )),
+        ],
+      },
+      styles: {
+        body: {
+          backgroundColor: "#F6F7F4",
+        },
+      },
+    },
+  };
+}
+
+function labelValueBox(label: string, value: string): LineFlexBox {
+  return {
+    type: "box",
+    layout: "horizontal",
+    spacing: "sm",
+    contents: [
+      {
+        type: "text",
+        text: label,
+        size: "xs",
+        color: "#63716B",
+        flex: 2,
+      },
+      {
+        type: "text",
+        text: value,
+        size: "xs",
+        color: "#17211F",
+        weight: "bold",
+        wrap: true,
+        flex: 5,
+      },
+    ],
+  };
+}
+
+function eventColor(eventType: ExpenseEventType): string {
+  if (eventType === "expense.created") {
+    return "#176B87";
+  }
+
+  if (eventType === "expense.updated") {
+    return "#8A5A00";
+  }
+
+  return "#9A3412";
 }
 
 function eventVerb(eventType: ExpenseEventType): string {

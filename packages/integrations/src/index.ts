@@ -14,7 +14,15 @@ export type {
 } from "./line/id-token-verifier";
 export type {
   FetchLineMessagingClientInput,
+  LineFlexBox,
+  LineFlexBubble,
+  LineFlexComponent,
+  LineFlexContainer,
+  LineFlexMessage,
+  LineFlexSeparator,
+  LineFlexText,
   LineMessagingClient,
+  LineMessage,
   LineTextMessage,
   PushLineMessageInput,
 } from "./line/messaging-client";
