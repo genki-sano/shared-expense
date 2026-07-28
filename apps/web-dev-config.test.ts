@@ -40,6 +40,7 @@ describe("web dev configuration", () => {
     const envExample = readText(".env.example");
 
     expect(envExample).toContain("NEXT_PUBLIC_API_BASE_URL=http://localhost:8787");
+    expect(envExample).toContain("LINE_LOGIN_CHANNEL_ID=");
   });
 
   test("web app exposes Next.js development and verification scripts", () => {

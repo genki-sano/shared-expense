@@ -174,4 +174,97 @@ describe("createAppFromEnv", () => {
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({ expenses: [] });
   });
+
+  it("verifies LIFF ID tokens and resolves the LINE user from Spreadsheet users", async () => {
+    const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
+    const app = createAppFromEnv(
+      {
+        GOOGLE_SPREADSHEET_ID: "spreadsheet_1",
+        GOOGLE_SERVICE_ACCOUNT_EMAIL: "sheets-reader@example.iam.gserviceaccount.com",
+        GOOGLE_PRIVATE_KEY: "-----BEGIN PRIVATE KEY-----\\nkey\\n-----END PRIVATE KEY-----\\n",
+        LINE_LOGIN_CHANNEL_ID: "line-channel-1",
+      },
+      {
+        signServiceAccountJwt: async () => "signed-jwt",
+        fetcher: async (url, init) => {
+          calls.push({ url: String(url), init });
+          if (String(url) === "https://api.line.me/oauth2/v2.1/verify") {
+            return Response.json({
+              sub: "line_woman",
+              aud: "line-channel-1",
+            });
+          }
+
+          if (String(url) === "https://oauth2.googleapis.com/token") {
+            return Response.json({
+              access_token: "access-token",
+              token_type: "Bearer",
+              expires_in: 3600,
+            });
+          }
+
+          if (
+            String(url) ===
+            "https://sheets.googleapis.com/v4/spreadsheets/spreadsheet_1/values/users!A2%3AF"
+          ) {
+            return Response.json({
+              values: [
+                ["1", "ひとみ", "line_woman", "line_woman", "2021/03/03", "2021/03/03"],
+                ["2", "げんき", "line_man", "line_man", "2021/03/03", "2021/03/03"],
+              ],
+            });
+          }
+
+          return Response.json({
+            values: [
+              [
+                "2148",
+                "1",
+                "食費",
+                "328",
+                "2026/07/22",
+                "アイス",
+                "1",
+                "1",
+                "2026/07/22 22:35:03",
+                "2026/07/22 22:35:03",
+                "45856",
+              ],
+            ],
+          });
+        },
+      },
+    );
+
+    const response = await app.request("/api/expenses?date=2026-07", {
+      headers: { Authorization: "Bearer liff-id-token" },
+    });
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      expenses: [
+        {
+          id: "2148",
+          userId: "woman",
+          userName: "ひとみ",
+          date: "2026-07-22",
+          price: 328,
+          category: "食費",
+          memo: "アイス",
+          version: 1,
+        },
+      ],
+    });
+    expect(calls[0]).toEqual({
+      url: "https://api.line.me/oauth2/v2.1/verify",
+      init: {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          id_token: "liff-id-token",
+          client_id: "line-channel-1",
+        }),
+      },
+    });
+  });
 });

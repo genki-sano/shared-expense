@@ -8,6 +8,7 @@ import {
 import type { User } from "@shared-expense/shared";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { createLineIdTokenAuthenticator } from "./auth/line-id-token";
 import { createExpenseRoutes } from "./expenses/routes";
 import { InMemoryExpenseRepository, type ExpenseRepository } from "./expenses/repository";
 import { createSettlementRoutes } from "./settlements/routes";
@@ -21,10 +22,11 @@ export type AppEnv = {
   GOOGLE_SPREADSHEET_ID?: string | undefined;
   GOOGLE_SERVICE_ACCOUNT_EMAIL?: string | undefined;
   GOOGLE_PRIVATE_KEY?: string | undefined;
+  LINE_LOGIN_CHANNEL_ID?: string | undefined;
 };
 
 export type AppEnvDependencies = {
-  authenticateToken: (token: string) => Promise<User>;
+  authenticateToken?: ((token: string) => Promise<User>) | undefined;
   fetcher?: typeof fetch;
   signServiceAccountJwt?: ServiceAccountJwtSigner;
 };
@@ -65,9 +67,28 @@ export function createAppFromEnv(
   env: AppEnv,
   dependencies: AppEnvDependencies = defaultDependencies,
 ): Hono {
+  const expenseRepository = expenseRepositoryFromEnv(env, dependencies);
   return createApp({
-    authenticateToken: dependencies.authenticateToken,
-    expenseRepository: expenseRepositoryFromEnv(env, dependencies),
+    authenticateToken:
+      dependencies.authenticateToken ??
+      authenticateTokenFromEnv(env, dependencies, expenseRepository),
+    expenseRepository,
+  });
+}
+
+function authenticateTokenFromEnv(
+  env: AppEnv,
+  dependencies: AppEnvDependencies,
+  expenseRepository: ExpenseRepository,
+): (token: string) => Promise<User> {
+  if (env.LINE_LOGIN_CHANNEL_ID === undefined || env.LINE_LOGIN_CHANNEL_ID.trim() === "") {
+    return defaultDependencies.authenticateToken;
+  }
+
+  return createLineIdTokenAuthenticator({
+    channelId: env.LINE_LOGIN_CHANNEL_ID,
+    expenseRepository,
+    ...(dependencies.fetcher === undefined ? {} : { fetcher: dependencies.fetcher }),
   });
 }
 

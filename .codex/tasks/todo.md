@@ -1,5 +1,35 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Implement production LIFF ID token authentication
+
+### Checklist
+
+- [x] Inspect current dev auth and user resolution
+- [x] Add LINE ID token verifier
+- [x] Resolve verified `sub` to Spreadsheet household user
+- [x] Wire env-based production auth
+- [x] Update env docs/tests
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-28 20:00 JST: User selected LIFF production authentication as the next task.
+- 2026-07-28 20:00 JST: LINE official docs say LIFF ID tokens should be verified on the server via `POST https://api.line.me/oauth2/v2.1/verify` with `id_token` and `client_id`, or by signature validation. This implementation will use the official verify endpoint.
+- 2026-07-28 20:41 JST: Added LINE ID token verification, Spreadsheet household user resolution by `lineUserId`, env-based `LINE_LOGIN_CHANNEL_ID` wiring, and env template docs.
+- 2026-07-28 20:42 JST: Prepared commit for production LIFF ID token authentication.
+
+### Verification Log
+
+- 2026-07-28 20:41 JST: `pnpm test apps/api/src/auth/line-id-token.test.ts apps/api/src/app-env.test.ts apps/web-dev-config.test.ts` passed with 19 tests.
+- 2026-07-28 20:41 JST: `pnpm test` passed with 103 tests across 17 files.
+- 2026-07-28 20:42 JST: `pnpm typecheck` initially failed because an optional `fetcher` was passed as explicit `undefined`; changed the call to omit it when absent.
+- 2026-07-28 20:42 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-28 20:42 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+
 ## Task: Connect monthly settlement summary API and UI
 
 ### Checklist
