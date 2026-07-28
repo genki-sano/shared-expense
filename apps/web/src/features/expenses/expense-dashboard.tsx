@@ -80,13 +80,17 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
   const canMutate = isMutationEnabled && !isMonthLoading;
 
   useEffect(() => {
+    const selectedExpenseExists = props.expenses.some(
+      (expense) => expense.id === props.selectedExpenseId,
+    );
+
     setDisplayMonth(props.month);
     setExpenses(sortExpenses(props.expenses));
     setSettlementSummary(props.settlement);
     setIsCreateOpen(false);
-    setEditingExpenseId(null);
+    setEditingExpenseId(selectedExpenseExists ? props.selectedExpenseId ?? null : null);
     setRestorableExpense(null);
-  }, [props.expenses, props.month, props.settlement]);
+  }, [props.expenses, props.month, props.selectedExpenseId, props.settlement]);
 
   useEffect(() => {
     const apiBaseUrl = props.apiBaseUrl;
@@ -405,15 +409,11 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
         )}
 
         <section className="list" aria-label="支出明細">
-          {expenses.map((expense) => {
-            const isSelectedExpense = expense.id === props.selectedExpenseId;
-
-            return (
-              <article
-                className={`expense ${payerClassName(expense.userId)}`}
-                data-selected={isSelectedExpense ? "true" : undefined}
-                key={expense.id}
-              >
+          {expenses.map((expense) => (
+            <article
+              className={`expense ${payerClassName(expense.userId)}`}
+              key={expense.id}
+            >
               <button
                 className="expenseTapTarget"
                 type="button"
@@ -431,9 +431,6 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
                 <span className="expenseBody">
                   <span className="expenseName">{expense.memo ?? expense.category}</span>
                   <span className="expenseMeta">
-                    {isSelectedExpense ? (
-                      <span className="selectedPill">通知対象</span>
-                    ) : null}
                     <span
                       className={`payerPill ${payerClassName(expense.userId)}`}
                     >
@@ -457,8 +454,7 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
                 />
               ) : null}
             </article>
-            );
-          })}
+          ))}
         </section>
       </div>
     </main>

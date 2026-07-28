@@ -116,7 +116,7 @@ describe("web dev configuration", () => {
     expect(cssSource).toContain(".monthInput");
   });
 
-  test("notification detail links can highlight the matching expense row", () => {
+  test("notification detail links open the matching expense details", () => {
     const appSource = readText("apps/web/src/app/page.tsx");
     const dashboardSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
     const cssSource = readText("apps/web/src/app/globals.css");
@@ -124,10 +124,13 @@ describe("web dev configuration", () => {
     expect(appSource).toContain("normalizeStringParam(searchParams?.expenseId)");
     expect(appSource).toContain("selectedExpenseId={selectedExpenseId}");
     expect(dashboardSource).toContain("props.selectedExpenseId");
-    expect(dashboardSource).toContain('data-selected={isSelectedExpense ? "true" : undefined}');
-    expect(dashboardSource).toContain("通知対象");
-    expect(cssSource).toContain('.expense[data-selected="true"]');
-    expect(cssSource).toContain(".selectedPill");
+    expect(dashboardSource).toContain("selectedExpenseExists");
+    expect(dashboardSource).toContain(
+      "setEditingExpenseId(selectedExpenseExists ? props.selectedExpenseId ?? null : null)",
+    );
+    expect(dashboardSource).not.toContain("通知対象");
+    expect(cssSource).not.toContain('.expense[data-selected="true"]');
+    expect(cssSource).not.toContain(".selectedPill");
   });
 
   test("web app pins light rendering colors to avoid dark mode text inversion", () => {

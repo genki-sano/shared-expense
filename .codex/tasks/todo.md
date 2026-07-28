@@ -1,5 +1,31 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Open notified expense details
+
+### Checklist
+
+- [x] Inspect current selected expense highlight behavior
+- [x] Open matching expense details from notification links
+- [x] Remove selected row badge/outline styles
+- [x] Update tests
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-28 23:00 JST: User found the selected row highlight hard to understand and suggested opening details directly.
+- 2026-07-28 23:03 JST: Changed notification detail handling to auto-open the matching expense form when the linked expense is present in the monthly list, and removed the selected row pill/outline.
+
+### Verification Log
+
+- 2026-07-28 23:03 JST: `pnpm test apps/web-dev-config.test.ts apps/web/src/features/expenses/page-data.test.ts apps/api/src/core/notifications/expense-mutation-notifier.test.ts apps/api/src/app-env.test.ts` passed with 23 tests.
+- 2026-07-28 23:04 JST: `pnpm test` passed with 113 tests across 20 files.
+- 2026-07-28 23:04 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-28 23:04 JST: `pnpm build` passed; Next.js built `/` as dynamic and Redocly reported the same existing warnings.
+
 ## Task: Highlight notified expense details
 
 ### Checklist
