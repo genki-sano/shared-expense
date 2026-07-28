@@ -11,6 +11,7 @@ import { cors } from "hono/cors";
 import { createLineIdTokenAuthenticator } from "./auth/line-id-token";
 import { createExpenseRoutes } from "./expenses/routes";
 import { InMemoryExpenseRepository, type ExpenseRepository } from "./expenses/repository";
+import type { MonthlySettlementExpenseReader } from "./settlements/repository";
 import { createSettlementRoutes } from "./settlements/routes";
 import {
   InMemoryHouseholdUserRepository,
@@ -20,6 +21,7 @@ import {
 export type AppDependencies = {
   authenticateToken: (token: string) => Promise<User>;
   expenseRepository: ExpenseRepository;
+  monthlyExpenseReader: MonthlySettlementExpenseReader;
   userRepository: HouseholdUserRepository;
 };
 
@@ -36,11 +38,14 @@ export type AppEnvDependencies = {
   signServiceAccountJwt?: ServiceAccountJwtSigner;
 };
 
+const defaultExpenseRepository = new InMemoryExpenseRepository([]);
+
 const defaultDependencies: AppDependencies = {
   authenticateToken: async () => {
     throw new Error("Authentication is not configured");
   },
-  expenseRepository: new InMemoryExpenseRepository([]),
+  expenseRepository: defaultExpenseRepository,
+  monthlyExpenseReader: defaultExpenseRepository,
   userRepository: new InMemoryHouseholdUserRepository(),
 };
 
@@ -64,7 +69,14 @@ export function createApp(dependencies: AppDependencies = defaultDependencies): 
 
   app.get("/health", (c) => c.json({ ok: true }));
   app.route("/api/expenses", createExpenseRoutes(dependencies));
-  app.route("/api/settlements", createSettlementRoutes(dependencies));
+  app.route(
+    "/api/settlements",
+    createSettlementRoutes({
+      authenticateToken: dependencies.authenticateToken,
+      monthlyExpenseReader: dependencies.monthlyExpenseReader,
+      userRepository: dependencies.userRepository,
+    }),
+  );
 
   return app;
 }
@@ -79,6 +91,7 @@ export function createAppFromEnv(
       dependencies.authenticateToken ??
       authenticateTokenFromEnv(env, dependencies, repositories.userRepository),
     expenseRepository: repositories.expenseRepository,
+    monthlyExpenseReader: repositories.monthlyExpenseReader,
     userRepository: repositories.userRepository,
   });
 }
@@ -104,6 +117,7 @@ function repositoriesFromEnv(
   dependencies: AppEnvDependencies,
 ): {
   expenseRepository: ExpenseRepository;
+  monthlyExpenseReader: MonthlySettlementExpenseReader;
   userRepository: HouseholdUserRepository;
 } {
   if (
@@ -111,8 +125,10 @@ function repositoriesFromEnv(
     env.GOOGLE_SERVICE_ACCOUNT_EMAIL === undefined ||
     env.GOOGLE_PRIVATE_KEY === undefined
   ) {
+    const inMemoryExpenseRepository = new InMemoryExpenseRepository([]);
     return {
-      expenseRepository: new InMemoryExpenseRepository([]),
+      expenseRepository: inMemoryExpenseRepository,
+      monthlyExpenseReader: inMemoryExpenseRepository,
       userRepository: new InMemoryHouseholdUserRepository(),
     };
   }
@@ -139,6 +155,7 @@ function repositoriesFromEnv(
 
   return {
     expenseRepository: spreadsheetRepository,
+    monthlyExpenseReader: spreadsheetRepository,
     userRepository: spreadsheetRepository,
   };
 }

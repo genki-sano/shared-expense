@@ -1,5 +1,33 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Decouple settlements from expense repository module
+
+### Checklist
+
+- [x] Inspect settlement to expense dependency
+- [x] Add settlement-local monthly expense reader interface
+- [x] Update settlement routes to depend on the reader interface
+- [x] Wire app dependencies without importing expenses from settlements
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-28 21:00 JST: User pointed out `apps/api/src/settlements` still imports from `apps/api/src/expenses`.
+- 2026-07-28 21:00 JST: Current settlement route only needs monthly expense reads, so it should depend on a small settlement-facing reader interface rather than the full expense CRUD repository module.
+- 2026-07-28 21:26 JST: Added settlement-local `MonthlySettlementExpenseReader`, rewired settlement routes to use it, and removed `apps/api/src/settlements` imports from `apps/api/src/expenses`.
+- 2026-07-28 21:27 JST: Prepared commit for decoupling settlements from the expense repository module.
+
+### Verification Log
+
+- 2026-07-28 21:26 JST: `pnpm test apps/api/src/app.test.ts apps/api/src/app-env.test.ts` passed with 20 tests.
+- 2026-07-28 21:27 JST: `pnpm test` passed with 98 tests across 17 files.
+- 2026-07-28 21:27 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-28 21:27 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+
 ## Task: Separate user repository from expense repository
 
 ### Checklist

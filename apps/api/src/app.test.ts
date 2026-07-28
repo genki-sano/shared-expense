@@ -42,6 +42,7 @@ const expenses: Expense[] = [
 ];
 
 function app() {
+  const expenseRepository = new InMemoryExpenseRepository(expenses);
   return createApp({
     authenticateToken: async (token) => {
       if (token !== "valid") {
@@ -50,7 +51,8 @@ function app() {
 
       return user;
     },
-    expenseRepository: new InMemoryExpenseRepository(expenses),
+    expenseRepository,
+    monthlyExpenseReader: expenseRepository,
     userRepository: new InMemoryHouseholdUserRepository([
       user,
       { ...user, id: "user_b", lineUserId: "line_b", displayName: "B" },
@@ -198,6 +200,7 @@ describe("Expense mutations", () => {
     const response = await createApp({
       authenticateToken: async () => user,
       expenseRepository: failingRepository,
+      monthlyExpenseReader: failingRepository,
       userRepository: new InMemoryHouseholdUserRepository([
         user,
         { ...user, id: "user_b", lineUserId: "line_b", displayName: "B" },
