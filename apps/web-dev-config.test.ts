@@ -101,9 +101,16 @@ describe("web dev configuration", () => {
     expect(appSource).not.toContain('const month = "2026-07"');
     expect(dashboardSource).toContain('className="monthControls"');
     expect(dashboardSource).toContain('type="month"');
-    expect(dashboardSource).toContain("addMonths(props.month, -1)");
-    expect(dashboardSource).toContain("addMonths(props.month, 1)");
+    expect(dashboardSource).toContain("addMonths(displayMonth, -1)");
+    expect(dashboardSource).toContain("addMonths(displayMonth, 1)");
+    expect(dashboardSource).toContain("useRouter()");
+    expect(dashboardSource).toContain("useTransition()");
+    expect(dashboardSource).toContain("router.push(`/?month=${nextMonth}`)");
+    expect(dashboardSource).toContain("setDisplayMonth(nextMonth)");
+    expect(dashboardSource).toContain('className="monthLoading"');
     expect(cssSource).toContain(".monthControls");
+    expect(cssSource).toContain('[data-loading="true"]');
+    expect(cssSource).toContain(".monthLoading");
     expect(cssSource).toContain(".monthInput");
   });
 

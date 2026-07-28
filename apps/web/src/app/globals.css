@@ -93,6 +93,16 @@ button:disabled {
   text-decoration: none;
 }
 
+.monthButton:disabled,
+.monthInput:disabled {
+  opacity: 0.72;
+}
+
+.monthControls[data-loading="true"] .monthButton,
+.monthControls[data-loading="true"] .monthInput {
+  background: #f0f4f2;
+}
+
 .monthToday {
   padding: 0 12px;
   font-size: 0.82rem;
@@ -111,6 +121,17 @@ button:disabled {
   color: #17211f;
   padding: 0 10px;
   font-size: 1rem;
+  font-weight: 750;
+}
+
+.summaryPanel[data-loading="true"] {
+  opacity: 0.68;
+}
+
+.monthLoading {
+  margin: 8px 0 0;
+  color: #40514b;
+  font-size: 0.78rem;
   font-weight: 750;
 }
 

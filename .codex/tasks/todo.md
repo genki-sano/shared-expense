@@ -1,5 +1,35 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Improve monthly navigation feedback
+
+### Checklist
+
+- [x] Inspect current month navigation delay
+- [x] Add client-side month navigation with pending state
+- [x] Sync dashboard state when month props change
+- [x] Add loading feedback styles/tests
+- [x] Update lessons for navigation feedback
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-28 22:00 JST: User reported a visible delay after tapping month navigation before the new month appears.
+- 2026-07-28 22:00 JST: Next.js App Router docs confirm `useRouter` from `next/navigation` can update search params from Client Components, and pending UI can be driven with React transitions.
+- 2026-07-28 22:03 JST: Replaced server-only month anchors with client-side month navigation, immediate visible-month updates, pending styles, and prop-to-state synchronization after navigation completes.
+- 2026-07-28 22:04 JST: Preserved the committed `apps/web/next-env.d.ts` dev types import after `next build`.
+- 2026-07-28 22:04 JST: Prepared commit for monthly navigation loading feedback.
+
+### Verification Log
+
+- 2026-07-28 22:03 JST: `pnpm test apps/web-dev-config.test.ts apps/web/src/features/expenses/month.test.ts apps/web/src/features/expenses/page-data.test.ts` passed with 21 tests.
+- 2026-07-28 22:03 JST: `pnpm test` passed with 105 tests across 18 files.
+- 2026-07-28 22:03 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-28 22:04 JST: `pnpm build` passed; Next.js built `/` as dynamic and Redocly reported the same existing warnings.
+
 ## Task: Add monthly navigation UI
 
 ### Checklist

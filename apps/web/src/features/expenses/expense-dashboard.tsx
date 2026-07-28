@@ -2,7 +2,8 @@
 
 import { calculateMonthlySettlement, type Expense } from "@shared-expense/shared";
 import type { HouseholdUsers, MonthlySettlementSummary } from "@shared-expense/shared";
-import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import {
   createExpense,
   deleteExpense,
@@ -44,15 +45,18 @@ const numberFormatter = new Intl.NumberFormat("ja-JP", {
 });
 
 export function ExpenseDashboard(props: ExpenseDashboardProps) {
+  const router = useRouter();
   const [expenses, setExpenses] = useState(() => sortExpenses(props.expenses));
   const [idToken, setIdToken] = useState<string | undefined>(props.idToken);
   const [settlementSummary, setSettlementSummary] = useState(props.settlement);
+  const [displayMonth, setDisplayMonth] = useState(props.month);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [restorableExpense, setRestorableExpense] = useState<Expense | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [isMonthPending, startMonthTransition] = useTransition();
 
   const total = useMemo(
     () => expenses.reduce((sum, expense) => sum + expense.price, 0),
@@ -63,14 +67,25 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
     [settlementSummary],
   );
   const settlement = useMemo(
-    () => calculateMonthlySettlement(props.month, settlementUsers, expenses),
-    [expenses, props.month, settlementUsers],
+    () => calculateMonthlySettlement(displayMonth, settlementUsers, expenses),
+    [displayMonth, expenses, settlementUsers],
   );
   const isMutationEnabled =
     props.apiBaseUrl !== undefined &&
     props.apiBaseUrl.trim() !== "" &&
     idToken !== undefined &&
     idToken.trim() !== "";
+  const isMonthLoading = isMonthPending || displayMonth !== props.month;
+  const canMutate = isMutationEnabled && !isMonthLoading;
+
+  useEffect(() => {
+    setDisplayMonth(props.month);
+    setExpenses(sortExpenses(props.expenses));
+    setSettlementSummary(props.settlement);
+    setIsCreateOpen(false);
+    setEditingExpenseId(null);
+    setRestorableExpense(null);
+  }, [props.expenses, props.month, props.settlement]);
 
   useEffect(() => {
     const apiBaseUrl = props.apiBaseUrl;
@@ -140,6 +155,20 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
       isCancelled = true;
     };
   }, [props.apiBaseUrl, props.idToken, props.liffId, props.month]);
+
+  function navigateToMonth(nextMonth: string): void {
+    if (nextMonth === displayMonth) {
+      return;
+    }
+
+    setDisplayMonth(nextMonth);
+    setIsCreateOpen(false);
+    setEditingExpenseId(null);
+    setRestorableExpense(null);
+    startMonthTransition(() => {
+      router.push(`/?month=${nextMonth}`);
+    });
+  }
 
   async function handleCreate(payload: CreateExpensePayload): Promise<void> {
     setIsSubmitting(true);
@@ -244,7 +273,7 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
       <div className="app">
         <header className="topbar">
           <div>
-            <p className="month">{formatMonthLabel(props.month)}</p>
+            <p className="month">{formatMonthLabel(displayMonth)}</p>
             <h1 className="title">月次支出</h1>
           </div>
           <button
@@ -252,7 +281,7 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
             type="button"
             aria-label="支出を追加"
             aria-expanded={isCreateOpen}
-            disabled={!isMutationEnabled}
+            disabled={!canMutate}
             onClick={() => {
               setIsCreateOpen((current) => !current);
               setEditingExpenseId(null);
@@ -262,37 +291,58 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
           </button>
         </header>
 
-        <div className="monthControls">
-          <a
+        <div
+          className="monthControls"
+          data-loading={isMonthLoading ? "true" : undefined}
+        >
+          <button
             className="monthButton"
-            href={`/?month=${addMonths(props.month, -1)}`}
+            type="button"
             aria-label="前月を表示"
+            disabled={isMonthLoading}
+            onClick={() => navigateToMonth(addMonths(displayMonth, -1))}
           >
             ‹
-          </a>
-          <form className="monthPicker" action="/">
+          </button>
+          <form
+            className="monthPicker"
+            action="/"
+            onSubmit={(event) => event.preventDefault()}
+          >
             <input
               className="monthInput"
               type="month"
               name="month"
-              defaultValue={props.month}
+              value={displayMonth}
               aria-label="表示月"
-              onChange={(event) => event.currentTarget.form?.requestSubmit()}
+              disabled={isMonthLoading}
+              onChange={(event) => navigateToMonth(event.currentTarget.value)}
             />
           </form>
-          <a className="monthButton monthToday" href={`/?month=${props.currentMonth}`}>
+          <button
+            className="monthButton monthToday"
+            type="button"
+            disabled={isMonthLoading || displayMonth === props.currentMonth}
+            onClick={() => navigateToMonth(props.currentMonth)}
+          >
             今月
-          </a>
-          <a
+          </button>
+          <button
             className="monthButton"
-            href={`/?month=${addMonths(props.month, 1)}`}
+            type="button"
             aria-label="翌月を表示"
+            disabled={isMonthLoading}
+            onClick={() => navigateToMonth(addMonths(displayMonth, 1))}
           >
             ›
-          </a>
+          </button>
         </div>
 
-        <section className="summaryPanel" aria-label="月次サマリ">
+        <section
+          className="summaryPanel"
+          aria-label="月次サマリ"
+          data-loading={isMonthLoading ? "true" : undefined}
+        >
           <div>
             <p className="summaryLabel">精算予定</p>
             <p className="settlementAmount">
@@ -306,9 +356,15 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
           </div>
         </section>
 
+        {isMonthLoading ? (
+          <p className="monthLoading" role="status">
+            {formatMonthLabel(displayMonth)}を読み込んでいます
+          </p>
+        ) : null}
+
         {isCreateOpen ? (
           <ExpenseForm
-            defaultDraft={defaultDraftForMonth(props.month)}
+            defaultDraft={defaultDraftForMonth(displayMonth)}
             disabled={isSubmitting}
             submitLabel="追加"
             onCancel={() => setIsCreateOpen(false)}
@@ -358,7 +414,7 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
                 type="button"
                 aria-label={`支出を編集: ${expense.memo ?? expense.category}`}
                 aria-expanded={editingExpenseId === expense.id}
-                disabled={!isMutationEnabled || isSubmitting}
+                disabled={!canMutate || isSubmitting}
                 onClick={() => {
                   setEditingExpenseId((current) =>
                     current === expense.id ? null : expense.id,
