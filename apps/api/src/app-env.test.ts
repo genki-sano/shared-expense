@@ -175,7 +175,7 @@ describe("createAppFromEnv", () => {
     await expect(response.json()).resolves.toEqual({ expenses: [] });
   });
 
-  it("verifies LIFF ID tokens and resolves the LINE user from Spreadsheet users", async () => {
+  it("verifies LINE ID tokens and resolves the LINE user from Spreadsheet users", async () => {
     const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
     const app = createAppFromEnv(
       {
@@ -237,7 +237,7 @@ describe("createAppFromEnv", () => {
     );
 
     const response = await app.request("/api/expenses?date=2026-07", {
-      headers: { Authorization: "Bearer liff-id-token" },
+      headers: { Authorization: "Bearer line-id-token" },
     });
 
     expect(response.status).toBe(200);
@@ -261,7 +261,7 @@ describe("createAppFromEnv", () => {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({
-          id_token: "liff-id-token",
+          id_token: "line-id-token",
           client_id: "line-channel-1",
         }),
       },

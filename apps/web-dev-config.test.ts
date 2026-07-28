@@ -20,7 +20,7 @@ describe("web dev configuration", () => {
     const rootPackage = readPackageJson("package.json");
 
     expect(rootPackage.scripts).toMatchObject({
-      dev: "NEXT_PUBLIC_API_BASE_URL=http://localhost:8787 NEXT_PUBLIC_DEV_LIFF_ID_TOKEN=local-dev pnpm --parallel --filter @shared-expense/api --filter @shared-expense/web dev",
+      dev: "NEXT_PUBLIC_API_BASE_URL=http://localhost:8787 NEXT_PUBLIC_DEV_ID_TOKEN=local-dev pnpm --parallel --filter @shared-expense/api --filter @shared-expense/web dev",
     });
   });
 

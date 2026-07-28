@@ -14,7 +14,7 @@ export default async function Home() {
       apiBaseUrl={process.env.NEXT_PUBLIC_API_BASE_URL}
       errorMessage={errorMessage}
       expenses={expenses}
-      idToken={process.env.NEXT_PUBLIC_DEV_LIFF_ID_TOKEN}
+      idToken={process.env.NEXT_PUBLIC_DEV_ID_TOKEN}
       month={month}
       settlement={settlement}
       source={source}
@@ -32,7 +32,7 @@ async function loadExpenses(): Promise<{
     return await loadMonthlyExpensesForPage({
       month,
       apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
-      idToken: process.env.NEXT_PUBLIC_DEV_LIFF_ID_TOKEN,
+      idToken: process.env.NEXT_PUBLIC_DEV_ID_TOKEN,
     });
   } catch {
     return {

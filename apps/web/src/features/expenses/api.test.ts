@@ -20,7 +20,7 @@ describe("fetchMonthlyExpenses", () => {
     expect(result.source).toBe("sample");
   });
 
-  it("fetches monthly expenses from the configured API with the LIFF token", async () => {
+  it("fetches monthly expenses from the configured API with the LINE ID token", async () => {
     const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
     const result = await fetchMonthlyExpenses({
       month: "2026-07",
@@ -96,7 +96,7 @@ describe("fetchMonthlySettlement", () => {
     expect(result.settlement.settlement.amount).toBeGreaterThan(0);
   });
 
-  it("fetches monthly settlement from the configured API with the LIFF token", async () => {
+  it("fetches monthly settlement from the configured API with the LINE ID token", async () => {
     const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
     const result = await fetchMonthlySettlement({
       month: "2026-07",

@@ -1,5 +1,33 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Remove stale LIFF auth naming
+
+### Checklist
+
+- [x] Inspect remaining `liff` files and references
+- [x] Remove unused `apps/api/src/auth/liff-token.*`
+- [x] Rename local dev token env to avoid LIFF-specific API naming
+- [x] Update tests and docs for current LINE ID token naming
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-28 21:00 JST: User asked whether remaining `liff` filenames are appropriate after moving LINE verification to integrations.
+- 2026-07-28 21:00 JST: Found `apps/api/src/auth/liff-token.*` is unused and overlaps with current `line-id-token` auth. Also found local dev env naming still uses `NEXT_PUBLIC_DEV_LIFF_ID_TOKEN`.
+- 2026-07-28 21:16 JST: Removed stale `apps/api/src/auth/liff-token.*`, renamed local dev env to `NEXT_PUBLIC_DEV_ID_TOKEN`, and updated tests/comments to current LINE ID token naming.
+- 2026-07-28 21:17 JST: Prepared commit for removing stale LIFF auth naming.
+
+### Verification Log
+
+- 2026-07-28 21:16 JST: `pnpm test apps/web-dev-config.test.ts apps/web/src/features/expenses/api.test.ts apps/web/src/features/expenses/page-data.test.ts apps/api/src/auth/line-id-token.test.ts apps/api/src/app-env.test.ts packages/integrations/src/line/id-token-verifier.test.ts` passed with 35 tests.
+- 2026-07-28 21:16 JST: `pnpm test` passed with 98 tests across 17 files.
+- 2026-07-28 21:17 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-28 21:17 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+
 ## Task: Move LINE ID token verification to integrations package
 
 ### Checklist
