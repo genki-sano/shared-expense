@@ -1,5 +1,6 @@
 import {
   FetchGoogleSheetsValuesClient,
+  FetchLineMessagingClient,
   GoogleServiceAccountAccessTokenProvider,
   SpreadsheetExpenseRepository,
   type GoogleServiceAccountAccessTokenProviderInput,
@@ -11,6 +12,11 @@ import { cors } from "hono/cors";
 import { createLineIdTokenAuthenticator } from "./core/auth/line-id-token";
 import { createExpenseRoutes } from "./expenses/routes";
 import { InMemoryExpenseRepository, type ExpenseRepository } from "./expenses/repository";
+import {
+  createExpenseMutationNotifier,
+  noopExpenseMutationNotifier,
+  type ExpenseMutationNotifier,
+} from "./notifications/expense-mutation-notifier";
 import type { MonthlySettlementExpenseReader } from "./settlements/repository";
 import { createSettlementRoutes } from "./settlements/routes";
 import {
@@ -21,6 +27,7 @@ import {
 export type AppDependencies = {
   authenticateToken: (token: string) => Promise<User>;
   expenseRepository: ExpenseRepository;
+  expenseMutationNotifier?: ExpenseMutationNotifier;
   monthlyExpenseReader: MonthlySettlementExpenseReader;
   userRepository: HouseholdUserRepository;
 };
@@ -30,6 +37,7 @@ export type AppEnv = {
   GOOGLE_SERVICE_ACCOUNT_EMAIL?: string | undefined;
   GOOGLE_PRIVATE_KEY?: string | undefined;
   LINE_LOGIN_CHANNEL_ID?: string | undefined;
+  LINE_MESSAGING_CHANNEL_ACCESS_TOKEN?: string | undefined;
 };
 
 export type AppEnvDependencies = {
@@ -45,6 +53,7 @@ const defaultDependencies: AppDependencies = {
     throw new Error("Authentication is not configured");
   },
   expenseRepository: defaultExpenseRepository,
+  expenseMutationNotifier: noopExpenseMutationNotifier,
   monthlyExpenseReader: defaultExpenseRepository,
   userRepository: new InMemoryHouseholdUserRepository(),
 };
@@ -68,7 +77,16 @@ export function createApp(dependencies: AppDependencies = defaultDependencies): 
   );
 
   app.get("/health", (c) => c.json({ ok: true }));
-  app.route("/api/expenses", createExpenseRoutes(dependencies));
+  app.route(
+    "/api/expenses",
+    createExpenseRoutes({
+      authenticateToken: dependencies.authenticateToken,
+      expenseRepository: dependencies.expenseRepository,
+      ...(dependencies.expenseMutationNotifier === undefined
+        ? {}
+        : { expenseMutationNotifier: dependencies.expenseMutationNotifier }),
+    }),
+  );
   app.route(
     "/api/settlements",
     createSettlementRoutes({
@@ -91,8 +109,34 @@ export function createAppFromEnv(
       dependencies.authenticateToken ??
       authenticateTokenFromEnv(env, dependencies, repositories.userRepository),
     expenseRepository: repositories.expenseRepository,
+    expenseMutationNotifier: expenseMutationNotifierFromEnv(
+      env,
+      dependencies,
+      repositories.userRepository,
+    ),
     monthlyExpenseReader: repositories.monthlyExpenseReader,
     userRepository: repositories.userRepository,
+  });
+}
+
+function expenseMutationNotifierFromEnv(
+  env: AppEnv,
+  dependencies: AppEnvDependencies,
+  userRepository: HouseholdUserRepository,
+): ExpenseMutationNotifier {
+  if (
+    env.LINE_MESSAGING_CHANNEL_ACCESS_TOKEN === undefined ||
+    env.LINE_MESSAGING_CHANNEL_ACCESS_TOKEN.trim() === ""
+  ) {
+    return noopExpenseMutationNotifier;
+  }
+
+  return createExpenseMutationNotifier({
+    userRepository,
+    lineMessagingClient: new FetchLineMessagingClient({
+      channelAccessToken: env.LINE_MESSAGING_CHANNEL_ACCESS_TOKEN,
+      ...(dependencies.fetcher === undefined ? {} : { fetcher: dependencies.fetcher }),
+    }),
   });
 }
 

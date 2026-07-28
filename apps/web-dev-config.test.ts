@@ -42,6 +42,7 @@ describe("web dev configuration", () => {
     expect(envExample).toContain("NEXT_PUBLIC_API_BASE_URL=http://localhost:8787");
     expect(envExample).toContain("NEXT_PUBLIC_LIFF_ID=");
     expect(envExample).toContain("LINE_LOGIN_CHANNEL_ID=");
+    expect(envExample).toContain("LINE_MESSAGING_CHANNEL_ACCESS_TOKEN=");
   });
 
   test("web app exposes Next.js development and verification scripts", () => {

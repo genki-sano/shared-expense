@@ -277,6 +277,107 @@ describe("Expense mutations", () => {
     });
   });
 
+  it("notifies the partner after creating, updating, and deleting expenses", async () => {
+    const notified: unknown[] = [];
+    const expenseRepository = new InMemoryExpenseRepository(expenses);
+    const notificationApp = createApp({
+      authenticateToken: async () => user,
+      expenseRepository,
+      monthlyExpenseReader: expenseRepository,
+      userRepository: new InMemoryHouseholdUserRepository([
+        user,
+        { ...user, id: "user_b", lineUserId: "line_b", displayName: "B" },
+      ]),
+      expenseMutationNotifier: {
+        notify: async (input) => {
+          notified.push(input);
+        },
+      },
+    });
+
+    const createResponse = await notificationApp.request("/api/expenses", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer valid",
+        "Content-Type": "application/json",
+        "Idempotency-Key": "notify-create-1",
+      },
+      body: JSON.stringify({
+        date: "2026-07-26",
+        price: 1200,
+        category: "食費",
+        memo: "昼食",
+      }),
+    });
+    const created = (await createResponse.json()) as Expense;
+
+    const updateResponse = await notificationApp.request(`/api/expenses/${created.id}`, {
+      method: "PUT",
+      headers: {
+        Authorization: "Bearer valid",
+        "Content-Type": "application/json",
+        "Idempotency-Key": "notify-update-1",
+      },
+      body: JSON.stringify({
+        price: 1300,
+        version: created.version,
+      }),
+    });
+    const updated = (await updateResponse.json()) as Expense;
+
+    const deleteResponse = await notificationApp.request(`/api/expenses/${created.id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: "Bearer valid",
+        "Idempotency-Key": "notify-delete-1",
+      },
+    });
+
+    expect(createResponse.status).toBe(201);
+    expect(updateResponse.status).toBe(200);
+    expect(deleteResponse.status).toBe(204);
+    expect(notified).toMatchObject([
+      { eventType: "expense.created", actor: user, expense: created },
+      { eventType: "expense.updated", actor: user, expense: updated },
+      { eventType: "expense.deleted", actor: user, expense: updated },
+    ]);
+  });
+
+  it("keeps mutation responses successful when partner notification fails", async () => {
+    const expenseRepository = new InMemoryExpenseRepository(expenses);
+    const notificationApp = createApp({
+      authenticateToken: async () => user,
+      expenseRepository,
+      monthlyExpenseReader: expenseRepository,
+      userRepository: new InMemoryHouseholdUserRepository([
+        user,
+        { ...user, id: "user_b", lineUserId: "line_b", displayName: "B" },
+      ]),
+      expenseMutationNotifier: {
+        notify: async () => {
+          throw new Error("LINE failed");
+        },
+      },
+    });
+
+    const response = await notificationApp.request("/api/expenses", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer valid",
+        "Content-Type": "application/json",
+        "Idempotency-Key": "notify-failure-1",
+      },
+      body: JSON.stringify({
+        date: "2026-07-26",
+        price: 1200,
+        category: "食費",
+        memo: "昼食",
+      }),
+    });
+
+    expect(response.status).toBe(201);
+  });
+
   it("returns 409 when update version does not match", async () => {
     const response = await app().request("/api/expenses/exp_earlier", {
       method: "PUT",

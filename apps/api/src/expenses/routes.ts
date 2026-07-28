@@ -1,10 +1,15 @@
 import type { User } from "@shared-expense/shared";
 import { Hono } from "hono";
+import {
+  noopExpenseMutationNotifier,
+  type ExpenseMutationNotifier,
+} from "../notifications/expense-mutation-notifier";
 import { ExpenseRepositoryError, type ExpenseRepository } from "./repository";
 
 export type ExpenseRoutesDependencies = {
   authenticateToken: (token: string) => Promise<User>;
   expenseRepository: ExpenseRepository;
+  expenseMutationNotifier?: ExpenseMutationNotifier;
 };
 
 type CreateExpenseBody = {
@@ -89,6 +94,12 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
       );
     }
 
+    await notifyExpenseMutation(dependencies, {
+      eventType: "expense.created",
+      actor,
+      expense,
+    });
+
     return c.json(expense, 201);
   });
 
@@ -124,6 +135,12 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
         },
       });
 
+      await notifyExpenseMutation(dependencies, {
+        eventType: "expense.updated",
+        actor,
+        expense,
+      });
+
       return c.json(expense);
     } catch (error) {
       return repositoryErrorResponse(error);
@@ -142,9 +159,15 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
     }
 
     try {
-      await dependencies.expenseRepository.delete({
+      const expense = await dependencies.expenseRepository.delete({
         id: c.req.param("id"),
         actor,
+      });
+
+      await notifyExpenseMutation(dependencies, {
+        eventType: "expense.deleted",
+        actor,
+        expense,
       });
 
       return c.body(null, 204);
@@ -177,6 +200,17 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
   });
 
   return app;
+}
+
+async function notifyExpenseMutation(
+  dependencies: ExpenseRoutesDependencies,
+  input: Parameters<ExpenseMutationNotifier["notify"]>[0],
+): Promise<void> {
+  try {
+    await (dependencies.expenseMutationNotifier ?? noopExpenseMutationNotifier).notify(input);
+  } catch (error) {
+    console.error("Expense notification failed", error);
+  }
 }
 
 async function authenticateRequest(

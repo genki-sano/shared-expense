@@ -13,6 +13,12 @@ export type {
   VerifyLineIdTokenInput,
 } from "./line/id-token-verifier";
 export type {
+  FetchLineMessagingClientInput,
+  LineMessagingClient,
+  LineTextMessage,
+  PushLineMessageInput,
+} from "./line/messaging-client";
+export type {
   GoogleSheetsValuesClient,
   ListSpreadsheetExpensesInput,
   SpreadsheetExpenseRepositoryInput,
@@ -28,6 +34,10 @@ export {
   LINE_ID_TOKEN_VERIFY_URL,
   verifyLineIdToken,
 } from "./line/id-token-verifier";
+export {
+  FetchLineMessagingClient,
+  LINE_PUSH_MESSAGE_URL,
+} from "./line/messaging-client";
 export {
   expenseFromLegacyPaymentRow,
   expenseToLegacyPaymentRow,

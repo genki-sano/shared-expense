@@ -267,4 +267,91 @@ describe("createAppFromEnv", () => {
       },
     });
   });
+
+  it("wires LINE Messaging API notifications when the channel access token is configured", async () => {
+    const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
+    const app = createAppFromEnv(
+      {
+        GOOGLE_SPREADSHEET_ID: "spreadsheet_1",
+        GOOGLE_SERVICE_ACCOUNT_EMAIL: "sheets-reader@example.iam.gserviceaccount.com",
+        GOOGLE_PRIVATE_KEY: "-----BEGIN PRIVATE KEY-----\\nkey\\n-----END PRIVATE KEY-----\\n",
+        LINE_MESSAGING_CHANNEL_ACCESS_TOKEN: "line-message-token",
+      },
+      {
+        authenticateToken: async () => user,
+        signServiceAccountJwt: async () => "signed-jwt",
+        fetcher: async (url, init) => {
+          calls.push({ url: String(url), init });
+          if (String(url) === "https://oauth2.googleapis.com/token") {
+            return Response.json({
+              access_token: "access-token",
+              token_type: "Bearer",
+              expires_in: 3600,
+            });
+          }
+
+          if (
+            String(url) ===
+            "https://sheets.googleapis.com/v4/spreadsheets/spreadsheet_1/values/users!A2%3AF"
+          ) {
+            return Response.json({
+              values: [
+                ["1", "ひとみ", "line_woman", "line_woman", "2021/03/03", "2021/03/03"],
+                ["2", "げんき", "line_man", "line_man", "2021/03/03", "2021/03/03"],
+              ],
+            });
+          }
+
+          if (
+            String(url) ===
+            "https://sheets.googleapis.com/v4/spreadsheets/spreadsheet_1/values/payments!A2%3AL"
+          ) {
+            return Response.json({ values: [] });
+          }
+
+          if (
+            String(url) ===
+            "https://sheets.googleapis.com/v4/spreadsheets/spreadsheet_1/values/payments!A2%3AK:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS"
+          ) {
+            return Response.json({});
+          }
+
+          if (String(url) === "https://api.line.me/v2/bot/message/push") {
+            return Response.json({});
+          }
+
+          throw new Error(`Unexpected fetch: ${String(url)}`);
+        },
+      },
+    );
+
+    const response = await app.request("/api/expenses", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer valid",
+        "Content-Type": "application/json",
+        "Idempotency-Key": "env-notify-create-1",
+      },
+      body: JSON.stringify({
+        date: "2026-07-26",
+        price: 1200,
+        category: "食費",
+        memo: "昼食",
+      }),
+    });
+
+    expect(response.status).toBe(201);
+    expect(calls.at(-1)).toMatchObject({
+      url: "https://api.line.me/v2/bot/message/push",
+      init: {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer line-message-token",
+          "Content-Type": "application/json",
+        },
+      },
+    });
+    expect(String(calls.at(-1)?.init?.body)).toContain('"to":"line_man"');
+    expect(String(calls.at(-1)?.init?.body)).toContain("Womanさんが支出を追加しました");
+  });
 });

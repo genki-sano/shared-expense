@@ -198,7 +198,8 @@ export class SpreadsheetExpenseRepository {
     return this.#withUserName(nextExpense, updatedRow[1], userNamesByType);
   }
 
-  async delete(input: DeleteSpreadsheetExpenseInput): Promise<void> {
+  async delete(input: DeleteSpreadsheetExpenseInput): Promise<Expense> {
+    const userNamesByType = await this.#userNamesByType();
     const payments = await this.#paymentRows();
     const match = payments.rows.find((row) => row.deletedAt === "" && row.row[0] === input.id);
 
@@ -211,6 +212,9 @@ export class SpreadsheetExpenseRepository {
       range: `payments!L${match.rowNumber}:L${match.rowNumber}`,
       values: [[formatTimestamp(this.#now())]],
     });
+
+    const expense = expenseFromLegacyPaymentRow(match.row, this.#userTypeToUserId);
+    return this.#withUserName(expense, match.row[1], userNamesByType);
   }
 
   async restore(input: RestoreSpreadsheetExpenseInput): Promise<Expense> {

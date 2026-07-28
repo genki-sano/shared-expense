@@ -39,7 +39,7 @@ export type ExpenseRepository = {
   listByMonth(input: ListExpensesInput): Promise<Expense[]>;
   create(input: CreateExpenseInput): Promise<Expense>;
   update(input: UpdateExpenseInput): Promise<Expense>;
-  delete(input: DeleteExpenseInput): Promise<void>;
+  delete(input: DeleteExpenseInput): Promise<Expense>;
   restore(input: RestoreExpenseInput): Promise<Expense>;
 };
 
@@ -111,13 +111,19 @@ export class InMemoryExpenseRepository implements ExpenseRepository {
     return next;
   }
 
-  async delete(input: DeleteExpenseInput): Promise<void> {
+  async delete(input: DeleteExpenseInput): Promise<Expense> {
     const index = this.#expenses.findIndex((expense) => expense.id === input.id);
     if (index === -1) {
       throw new ExpenseRepositoryError("not_found", input.id);
     }
 
+    const deletedExpense = this.#expenses[index];
+    if (deletedExpense === undefined) {
+      throw new ExpenseRepositoryError("not_found", input.id);
+    }
+
     this.#deletedExpenses.push(...this.#expenses.splice(index, 1));
+    return deletedExpense;
   }
 
   async restore(input: RestoreExpenseInput): Promise<Expense> {

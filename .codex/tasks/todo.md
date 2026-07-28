@@ -1,5 +1,38 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Send LINE notifications for expense mutations
+
+### Checklist
+
+- [x] Inspect expense mutation and notification boundaries
+- [x] Add LINE Messaging API push adapter in integrations
+- [x] Add API expense mutation notification service
+- [x] Wire create/update/delete routes to notify the partner
+- [x] Wire env-based LINE Messaging channel access token
+- [x] Update env docs/tests
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-28 22:00 JST: User selected LINE notifications as the next task.
+- 2026-07-28 22:00 JST: LINE official Messaging API docs confirm push messages use `POST https://api.line.me/v2/bot/message/push` with `Content-Type: application/json`, `Authorization: Bearer {channel access token}`, `to`, and `messages`.
+- 2026-07-28 22:00 JST: Current Expense routes persist create/update/delete but do not publish notifications. Shared domain already has partner user and notification dedupe primitives.
+- 2026-07-28 22:13 JST: Added a LINE push adapter, expense mutation notifier, env wiring via `LINE_MESSAGING_CHANNEL_ACCESS_TOKEN`, and route notifications after create/update/delete. Notification failures are logged without failing already-persisted mutations.
+- 2026-07-28 22:14 JST: Fixed optional notifier wiring for `exactOptionalPropertyTypes` and preserved the committed `apps/web/next-env.d.ts` dev types import after `next build`.
+- 2026-07-28 22:15 JST: Prepared commit for LINE expense mutation notifications.
+
+### Verification Log
+
+- 2026-07-28 22:13 JST: `pnpm test packages/integrations/src/line/messaging-client.test.ts apps/api/src/notifications/expense-mutation-notifier.test.ts apps/api/src/app.test.ts apps/api/src/app-env.test.ts packages/integrations/src/spreadsheet/expense-repository.test.ts apps/web-dev-config.test.ts` passed with 49 tests.
+- 2026-07-28 22:14 JST: `pnpm test` passed with 112 tests across 20 files.
+- 2026-07-28 22:14 JST: `pnpm typecheck` initially failed because an optional notifier was passed as explicit `undefined`; fixed by omitting the optional property when absent.
+- 2026-07-28 22:14 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-28 22:14 JST: `pnpm build` passed; Next.js built `/` as dynamic and Redocly reported the same existing warnings.
+
 ## Task: Improve monthly navigation feedback
 
 ### Checklist

@@ -470,7 +470,15 @@ describe("SpreadsheetExpenseRepository", () => {
       now: () => new Date("2026-07-26T12:34:56+09:00"),
     });
 
-    await expect(repository.delete({ id: "10", actor: { id: "user_a" } })).resolves.toBeUndefined();
+    await expect(repository.delete({ id: "10", actor: { id: "user_a" } })).resolves.toEqual({
+      id: "10",
+      userId: "user_a",
+      date: "2026-07-01",
+      price: 1000,
+      category: "食費",
+      memo: "朝食",
+      version: 1,
+    });
     expect(updates).toEqual([
       {
         range: "payments!L2:L2",
