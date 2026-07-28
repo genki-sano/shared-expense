@@ -1,5 +1,35 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Connect monthly settlement summary API and UI
+
+### Checklist
+
+- [x] Inspect settlement domain, API, and UI flow
+- [x] Add household users support to repositories
+- [x] Implement `GET /api/settlements`
+- [x] Fetch settlement page data in the web app
+- [x] Replace fixed settlement UI with calculated summary
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-28 00:00 JST: User asked to connect the monthly settlement summary API/UI.
+- 2026-07-28 00:00 JST: Existing shared domain has `calculateMonthlySettlement`, OpenAPI defines `GET /api/settlements`, but API route is not implemented and web summary shows fixed `4270`.
+- 2026-07-28 20:34 JST: Added household user reads to repositories, implemented `GET /api/settlements`, added web settlement fetch/page data, and replaced the fixed dashboard amount with calculated settlement summary.
+- 2026-07-28 20:35 JST: Prepared commit for monthly settlement summary API/UI connection.
+
+### Verification Log
+
+- 2026-07-28 20:34 JST: `pnpm test apps/api/src/app.test.ts apps/web/src/features/expenses/api.test.ts apps/web/src/features/expenses/page-data.test.ts apps/web-dev-config.test.ts packages/integrations/src/spreadsheet/expense-repository.test.ts` passed with 52 tests.
+- 2026-07-28 20:34 JST: `pnpm test` passed with 97 tests across 16 files.
+- 2026-07-28 20:35 JST: `pnpm typecheck` initially failed because Spreadsheet users array indexing was not narrowed to a two-user tuple; added an explicit tuple guard.
+- 2026-07-28 20:35 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-28 20:35 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+
 ## Task: Add undo for deleted expenses
 
 ### Checklist

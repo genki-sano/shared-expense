@@ -10,6 +10,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { createExpenseRoutes } from "./expenses/routes";
 import { InMemoryExpenseRepository, type ExpenseRepository } from "./expenses/repository";
+import { createSettlementRoutes } from "./settlements/routes";
 
 export type AppDependencies = {
   authenticateToken: (token: string) => Promise<User>;
@@ -55,6 +56,7 @@ export function createApp(dependencies: AppDependencies = defaultDependencies): 
 
   app.get("/health", (c) => c.json({ ok: true }));
   app.route("/api/expenses", createExpenseRoutes(dependencies));
+  app.route("/api/settlements", createSettlementRoutes(dependencies));
 
   return app;
 }

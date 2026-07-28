@@ -1,4 +1,5 @@
-import type { Expense } from "@shared-expense/shared";
+import { calculateMonthlySettlement, type Expense } from "@shared-expense/shared";
+import type { HouseholdUsers, MonthlySettlementSummary } from "@shared-expense/shared";
 
 export type MonthlyExpensesSource = "api" | "sample";
 
@@ -7,12 +8,19 @@ export type MonthlyExpensesResult = {
   expenses: Expense[];
 };
 
+export type MonthlySettlementResult = {
+  source: MonthlyExpensesSource;
+  settlement: MonthlySettlementSummary;
+};
+
 export type FetchMonthlyExpensesInput = {
   month: string;
   apiBaseUrl: string | undefined;
   idToken?: string | undefined;
   fetcher?: typeof fetch;
 };
+
+export type FetchMonthlySettlementInput = FetchMonthlyExpensesInput;
 
 export type CreateExpensePayload = {
   date: string;
@@ -95,6 +103,16 @@ export const sampleExpenses: Expense[] = [
   },
 ];
 
+export const sampleUsers: HouseholdUsers = [
+  { id: "Genki", lineUserId: "sample_genki", displayName: "Genki", notifyEnabled: true },
+  {
+    id: "Partner",
+    lineUserId: "sample_partner",
+    displayName: "Partner",
+    notifyEnabled: true,
+  },
+];
+
 export async function fetchMonthlyExpenses(
   input: FetchMonthlyExpensesInput,
 ): Promise<MonthlyExpensesResult> {
@@ -116,6 +134,32 @@ export async function fetchMonthlyExpenses(
 
   const body = (await response.json()) as { expenses: Expense[] };
   return { source: "api", expenses: body.expenses };
+}
+
+export async function fetchMonthlySettlement(
+  input: FetchMonthlySettlementInput,
+): Promise<MonthlySettlementResult> {
+  if (input.apiBaseUrl === undefined || input.apiBaseUrl.trim() === "") {
+    return {
+      source: "sample",
+      settlement: calculateMonthlySettlement(input.month, sampleUsers, sampleExpenses),
+    };
+  }
+
+  const fetcher = input.fetcher ?? fetch;
+  const url = new URL("/api/settlements", input.apiBaseUrl);
+  url.searchParams.set("month", input.month);
+
+  const response = await fetcher(url.toString(), {
+    headers: authorizationHeaders(input.idToken),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch settlement: ${response.status}`);
+  }
+
+  const settlement = (await response.json()) as MonthlySettlementSummary;
+  return { source: "api", settlement };
 }
 
 export async function createExpense(input: CreateExpenseInput): Promise<Expense> {

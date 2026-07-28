@@ -1,4 +1,4 @@
-import type { Expense } from "@shared-expense/shared";
+import type { Expense, HouseholdUsers, User } from "@shared-expense/shared";
 import {
   expenseFromLegacyPaymentRow,
   expenseToLegacyPaymentRow,
@@ -82,6 +82,26 @@ export class SpreadsheetExpenseRepository {
     this.#userTypeToUserId = input.userTypeToUserId;
     this.#userIdToUserType = input.userIdToUserType;
     this.#now = input.now ?? (() => new Date());
+  }
+
+  async listHouseholdUsers(): Promise<HouseholdUsers> {
+    const response = await this.#valuesClient.getValues({
+      spreadsheetId: this.#spreadsheetId,
+      range: "users!A2:F",
+    });
+    const users = (response.values ?? [])
+      .map((row) => this.#userFromRow(row))
+      .filter((user): user is User => user !== null);
+
+    if (users.length !== 2) {
+      throw new Error(`Expected 2 users but received ${users.length}`);
+    }
+    const [first, second] = users;
+    if (first === undefined || second === undefined) {
+      throw new Error(`Expected 2 users but received ${users.length}`);
+    }
+
+    return [first, second];
   }
 
   async listByMonth(input: ListSpreadsheetExpensesInput): Promise<Expense[]> {
@@ -307,6 +327,27 @@ export class SpreadsheetExpenseRepository {
   ): Expense {
     const userName = userNamesByType.get(userType);
     return userName === undefined ? expense : { ...expense, userName };
+  }
+
+  #userFromRow(row: unknown[]): User | null {
+    const userType = row[0];
+    const displayName = row[1];
+
+    if (userType === undefined || displayName === undefined) {
+      return null;
+    }
+
+    const userId = this.#userTypeToUserId(String(userType).trim());
+    if (userId === null) {
+      return null;
+    }
+
+    return {
+      id: userId,
+      lineUserId: row[2] === undefined ? userId : String(row[2]).trim(),
+      displayName: String(displayName).trim(),
+      notifyEnabled: true,
+    };
   }
 
   async #appendValues(input: {

@@ -176,6 +176,7 @@ describe("Expense mutations", () => {
 
   it("returns structured details when creating an expense fails in the repository", async () => {
     const failingRepository: ExpenseRepository = {
+      listHouseholdUsers: async () => [user, { ...user, id: "user_b" }],
       listByMonth: async () => [],
       create: async () => {
         throw new Error("Failed to append Google Sheets values: 403");
@@ -363,6 +364,55 @@ describe("Expense mutations", () => {
     await expect(response.json()).resolves.toEqual({
       message: "Expense not found",
       details: { id: "exp_earlier" },
+    });
+  });
+});
+
+describe("GET /api/settlements", () => {
+  it("requires a bearer token", async () => {
+    const response = await app().request("/api/settlements?month=2026-07");
+
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toEqual({
+      message: "Unauthorized",
+      details: {},
+    });
+  });
+
+  it("rejects an invalid month query", async () => {
+    const response = await app().request("/api/settlements?month=2026-7", {
+      headers: { Authorization: "Bearer valid" },
+    });
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      message: "Invalid request",
+      details: {
+        field: "month",
+        reason: "must be YYYY-MM",
+      },
+    });
+  });
+
+  it("returns the monthly settlement summary from repository expenses", async () => {
+    const response = await app().request("/api/settlements?month=2026-07", {
+      headers: { Authorization: "Bearer valid" },
+    });
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      month: "2026-07",
+      householdTotal: 9700,
+      userTotals: [
+        { userId: "user_a", displayName: "A", total: 3280 },
+        { userId: "user_b", displayName: "B", total: 6420 },
+      ],
+      difference: 3140,
+      settlement: {
+        fromUserId: "user_a",
+        toUserId: "user_b",
+        amount: 1570,
+      },
     });
   });
 });

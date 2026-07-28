@@ -1,11 +1,13 @@
-import type { Expense } from "@shared-expense/shared";
+import { calculateMonthlySettlement, type Expense } from "@shared-expense/shared";
+import type { MonthlySettlementSummary } from "@shared-expense/shared";
 import { ExpenseDashboard } from "../features/expenses/expense-dashboard";
 import { loadMonthlyExpensesForPage } from "../features/expenses/page-data";
+import { sampleUsers } from "../features/expenses/api";
 
 const month = "2026-07";
 
 export default async function Home() {
-  const { expenses, source, errorMessage } = await loadExpenses();
+  const { expenses, settlement, source, errorMessage } = await loadExpenses();
 
   return (
     <ExpenseDashboard
@@ -14,6 +16,7 @@ export default async function Home() {
       expenses={expenses}
       idToken={process.env.NEXT_PUBLIC_DEV_LIFF_ID_TOKEN}
       month={month}
+      settlement={settlement}
       source={source}
     />
   );
@@ -21,6 +24,7 @@ export default async function Home() {
 
 async function loadExpenses(): Promise<{
   expenses: Expense[];
+  settlement: MonthlySettlementSummary;
   source: "api" | "sample";
   errorMessage?: string;
 }> {
@@ -31,6 +35,11 @@ async function loadExpenses(): Promise<{
       idToken: process.env.NEXT_PUBLIC_DEV_LIFF_ID_TOKEN,
     });
   } catch {
-    return { source: "api", expenses: [], errorMessage: "支出明細を取得できません" };
+    return {
+      source: "api",
+      expenses: [],
+      settlement: calculateMonthlySettlement(month, sampleUsers, []),
+      errorMessage: "支出明細を取得できません",
+    };
   }
 }

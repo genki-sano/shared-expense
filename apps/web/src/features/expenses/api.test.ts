@@ -4,6 +4,7 @@ import {
   deleteExpense,
   ExpenseApiError,
   fetchMonthlyExpenses,
+  fetchMonthlySettlement,
   restoreExpense,
   updateExpense,
 } from "./api";
@@ -80,6 +81,84 @@ describe("fetchMonthlyExpenses", () => {
           Response.json({ message: "Unauthorized", details: {} }, { status: 401 }),
       }),
     ).rejects.toThrow("Failed to fetch expenses: 401");
+  });
+});
+
+describe("fetchMonthlySettlement", () => {
+  it("returns a sample settlement when no API base URL is configured", async () => {
+    const result = await fetchMonthlySettlement({
+      month: "2026-07",
+      apiBaseUrl: undefined,
+    });
+
+    expect(result.source).toBe("sample");
+    expect(result.settlement.month).toBe("2026-07");
+    expect(result.settlement.settlement.amount).toBeGreaterThan(0);
+  });
+
+  it("fetches monthly settlement from the configured API with the LIFF token", async () => {
+    const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
+    const result = await fetchMonthlySettlement({
+      month: "2026-07",
+      apiBaseUrl: "https://api.example.test",
+      idToken: "id-token",
+      fetcher: async (url, init) => {
+        calls.push({ url: String(url), init });
+        return Response.json({
+          month: "2026-07",
+          householdTotal: 10000,
+          userTotals: [
+            { userId: "woman", displayName: "ひとみ", total: 3000 },
+            { userId: "man", displayName: "げんき", total: 7000 },
+          ],
+          difference: 4000,
+          settlement: {
+            fromUserId: "woman",
+            toUserId: "man",
+            amount: 2000,
+          },
+        });
+      },
+    });
+
+    expect(calls).toEqual([
+      {
+        url: "https://api.example.test/api/settlements?month=2026-07",
+        init: {
+          headers: {
+            Authorization: "Bearer id-token",
+          },
+        },
+      },
+    ]);
+    expect(result).toEqual({
+      source: "api",
+      settlement: {
+        month: "2026-07",
+        householdTotal: 10000,
+        userTotals: [
+          { userId: "woman", displayName: "ひとみ", total: 3000 },
+          { userId: "man", displayName: "げんき", total: 7000 },
+        ],
+        difference: 4000,
+        settlement: {
+          fromUserId: "woman",
+          toUserId: "man",
+          amount: 2000,
+        },
+      },
+    });
+  });
+
+  it("throws when the configured settlement API returns an error", async () => {
+    await expect(
+      fetchMonthlySettlement({
+        month: "2026-07",
+        apiBaseUrl: "https://api.example.test",
+        fetcher: async () =>
+          Response.json({ message: "Unauthorized", details: {} }, { status: 401 }),
+      }),
+    ).rejects.toThrow("Failed to fetch settlement: 401");
   });
 });
 

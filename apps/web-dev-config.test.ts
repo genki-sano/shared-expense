@@ -58,9 +58,13 @@ describe("web dev configuration", () => {
 
   test("mobile preview uses a compact dashboard summary instead of stacked metric cards", () => {
     const pageSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
+    const apiSource = readText("apps/web/src/features/expenses/api.ts");
 
     expect(pageSource).toContain('className="summaryPanel"');
     expect(pageSource).toContain('className="summaryDetails"');
+    expect(pageSource).toContain("calculateMonthlySettlement(");
+    expect(pageSource).not.toContain("numberFormatter.format(4270)");
+    expect(apiSource).toContain('new URL("/api/settlements"');
     expect(pageSource).not.toContain('className="metric"');
   });
 

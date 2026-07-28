@@ -27,6 +27,49 @@ const userIdToUserType = (userId: string): string | null => {
 };
 
 describe("SpreadsheetExpenseRepository", () => {
+  it("reads household users from the users sheet", async () => {
+    const repository = new SpreadsheetExpenseRepository({
+      spreadsheetId: "spreadsheet_1",
+      valuesClient: {
+        getValues: async (input) => {
+          expect(input.range).toBe("users!A2:F");
+          return {
+            values: [
+              ["1", "ひとみ", "line_woman", "line_woman", "2021/03/03", "2021/03/03"],
+              ["2", "げんき", "line_man", "line_man", "2021/03/03", "2021/03/03"],
+            ],
+          };
+        },
+      },
+      userTypeToUserId: (userType) => {
+        if (userType === "1") {
+          return "woman";
+        }
+
+        if (userType === "2") {
+          return "man";
+        }
+
+        return null;
+      },
+    });
+
+    await expect(repository.listHouseholdUsers()).resolves.toEqual([
+      {
+        id: "woman",
+        lineUserId: "line_woman",
+        displayName: "ひとみ",
+        notifyEnabled: true,
+      },
+      {
+        id: "man",
+        lineUserId: "line_man",
+        displayName: "げんき",
+        notifyEnabled: true,
+      },
+    ]);
+  });
+
   it("reads legacy payments rows from payments!A2:L and returns requested month expenses newest first", async () => {
     const ranges: string[] = [];
     const client: GoogleSheetsValuesClient = {

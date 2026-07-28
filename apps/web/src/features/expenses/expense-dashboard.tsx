@@ -1,6 +1,7 @@
 "use client";
 
-import type { Expense } from "@shared-expense/shared";
+import { calculateMonthlySettlement, type Expense } from "@shared-expense/shared";
+import type { HouseholdUsers, MonthlySettlementSummary } from "@shared-expense/shared";
 import { useMemo, useState } from "react";
 import {
   createExpense,
@@ -18,6 +19,7 @@ type ExpenseDashboardProps = {
   month: string;
   apiBaseUrl: string | undefined;
   idToken: string | undefined;
+  settlement: MonthlySettlementSummary;
   errorMessage: string | undefined;
 };
 
@@ -46,6 +48,14 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
   const total = useMemo(
     () => expenses.reduce((sum, expense) => sum + expense.price, 0),
     [expenses],
+  );
+  const settlementUsers = useMemo(
+    () => usersFromSettlement(props.settlement),
+    [props.settlement],
+  );
+  const settlement = useMemo(
+    () => calculateMonthlySettlement(props.month, settlementUsers, expenses),
+    [expenses, props.month, settlementUsers],
   );
   const isMutationEnabled =
     props.apiBaseUrl !== undefined && props.apiBaseUrl.trim() !== "";
@@ -174,9 +184,12 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
         <section className="summaryPanel" aria-label="月次サマリ">
           <div>
             <p className="summaryLabel">精算予定</p>
-            <p className="settlementAmount">{numberFormatter.format(4270)}</p>
+            <p className="settlementAmount">
+              {numberFormatter.format(settlement.settlement.amount)}
+            </p>
           </div>
           <div className="summaryDetails" aria-label="合計と件数">
+            <span>{settlementDirectionLabel(settlement, settlementUsers)}</span>
             <span>合計 {numberFormatter.format(total)}</span>
             <span>{expenses.length}件</span>
           </div>
@@ -380,6 +393,39 @@ function draftFromExpense(expense: Expense): ExpenseFormDraft {
 
 function sortExpenses(expenses: Expense[]): Expense[] {
   return [...expenses].sort((a, b) => b.date.localeCompare(a.date));
+}
+
+function usersFromSettlement(settlement: MonthlySettlementSummary): HouseholdUsers {
+  const [first, second] = settlement.userTotals;
+
+  return [
+    {
+      id: first?.userId ?? "user_a",
+      lineUserId: first?.userId ?? "user_a",
+      displayName: first?.displayName ?? "A",
+      notifyEnabled: true,
+    },
+    {
+      id: second?.userId ?? "user_b",
+      lineUserId: second?.userId ?? "user_b",
+      displayName: second?.displayName ?? "B",
+      notifyEnabled: true,
+    },
+  ];
+}
+
+function settlementDirectionLabel(
+  settlement: MonthlySettlementSummary,
+  users: HouseholdUsers,
+): string {
+  if (settlement.settlement.amount === 0) {
+    return "精算なし";
+  }
+
+  const fromUser = users.find((user) => user.id === settlement.settlement.fromUserId);
+  const toUser = users.find((user) => user.id === settlement.settlement.toUserId);
+
+  return `${fromUser?.displayName ?? "支払う人"} → ${toUser?.displayName ?? "受け取る人"}`;
 }
 
 function createIdempotencyKey(prefix: string): string {
