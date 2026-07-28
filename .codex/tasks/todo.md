@@ -1,5 +1,32 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Match Flex notification footer background
+
+### Checklist
+
+- [x] Inspect current Flex body/footer styles
+- [x] Set footer background to match body
+- [x] Update notification test
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-28 22:00 JST: User requested Flex notification body and footer background colors to match.
+- 2026-07-28 22:46 JST: Added a Flex footer style with the same `#F6F7F4` background color as the body.
+- 2026-07-28 22:47 JST: Preserved the committed `apps/web/next-env.d.ts` dev types import after `next build`.
+- 2026-07-28 22:47 JST: Prepared commit for matching Flex notification footer background.
+
+### Verification Log
+
+- 2026-07-28 22:46 JST: `pnpm test apps/api/src/notifications/expense-mutation-notifier.test.ts` passed with 2 tests.
+- 2026-07-28 22:46 JST: `pnpm test` passed with 112 tests across 20 files.
+- 2026-07-28 22:46 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-28 22:47 JST: `pnpm build` passed; Next.js built `/` as dynamic and Redocly reported the same existing warnings.
+
 ## Task: Replace notification ID with detail footer
 
 ### Checklist

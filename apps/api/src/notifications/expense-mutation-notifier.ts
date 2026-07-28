@@ -128,6 +128,9 @@ function expenseMutationFlexMessage(
         body: {
           backgroundColor: "#F6F7F4",
         },
+        footer: {
+          backgroundColor: "#F6F7F4",
+        },
       },
     },
   };
