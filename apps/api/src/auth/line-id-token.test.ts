@@ -5,7 +5,7 @@ describe("createLineIdTokenAuthenticator", () => {
   it("resolves a verified LINE sub to a household user", async () => {
     const authenticate = createLineIdTokenAuthenticator({
       channelId: "channel-1",
-      expenseRepository: {
+      userRepository: {
         listHouseholdUsers: async () => [
           {
             id: "woman",
@@ -39,7 +39,7 @@ describe("createLineIdTokenAuthenticator", () => {
   it("rejects a verified LINE sub that is not in household users", async () => {
     const authenticate = createLineIdTokenAuthenticator({
       channelId: "channel-1",
-      expenseRepository: {
+      userRepository: {
         listHouseholdUsers: async () => [
           {
             id: "woman",

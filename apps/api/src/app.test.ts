@@ -2,6 +2,7 @@ import type { Expense, User } from "@shared-expense/shared";
 import { describe, expect, it } from "vitest";
 import { createApp } from "./app";
 import { InMemoryExpenseRepository, type ExpenseRepository } from "./expenses/repository";
+import { InMemoryHouseholdUserRepository } from "./users/repository";
 
 const user: User = {
   id: "user_a",
@@ -50,6 +51,10 @@ function app() {
       return user;
     },
     expenseRepository: new InMemoryExpenseRepository(expenses),
+    userRepository: new InMemoryHouseholdUserRepository([
+      user,
+      { ...user, id: "user_b", lineUserId: "line_b", displayName: "B" },
+    ]),
   });
 }
 
@@ -176,7 +181,6 @@ describe("Expense mutations", () => {
 
   it("returns structured details when creating an expense fails in the repository", async () => {
     const failingRepository: ExpenseRepository = {
-      listHouseholdUsers: async () => [user, { ...user, id: "user_b" }],
       listByMonth: async () => [],
       create: async () => {
         throw new Error("Failed to append Google Sheets values: 403");
@@ -194,6 +198,10 @@ describe("Expense mutations", () => {
     const response = await createApp({
       authenticateToken: async () => user,
       expenseRepository: failingRepository,
+      userRepository: new InMemoryHouseholdUserRepository([
+        user,
+        { ...user, id: "user_b", lineUserId: "line_b", displayName: "B" },
+      ]),
     }).request("/api/expenses", {
       method: "POST",
       headers: {

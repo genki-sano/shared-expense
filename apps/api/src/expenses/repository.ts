@@ -1,4 +1,4 @@
-import type { Expense, HouseholdUsers, User } from "@shared-expense/shared";
+import type { Expense, User } from "@shared-expense/shared";
 
 export type ListExpensesInput = {
   month: string;
@@ -36,7 +36,6 @@ export type RestoreExpenseInput = {
 };
 
 export type ExpenseRepository = {
-  listHouseholdUsers(): Promise<HouseholdUsers>;
   listByMonth(input: ListExpensesInput): Promise<Expense[]>;
   create(input: CreateExpenseInput): Promise<Expense>;
   update(input: UpdateExpenseInput): Promise<Expense>;
@@ -47,15 +46,9 @@ export type ExpenseRepository = {
 export class InMemoryExpenseRepository implements ExpenseRepository {
   readonly #expenses: Expense[];
   readonly #deletedExpenses: Expense[] = [];
-  readonly #users: HouseholdUsers;
 
-  constructor(expenses: readonly Expense[], users: HouseholdUsers = defaultHouseholdUsers) {
+  constructor(expenses: readonly Expense[]) {
     this.#expenses = [...expenses];
-    this.#users = users;
-  }
-
-  async listHouseholdUsers(): Promise<HouseholdUsers> {
-    return this.#users;
   }
 
   async listByMonth(input: ListExpensesInput): Promise<Expense[]> {
@@ -144,11 +137,6 @@ export class InMemoryExpenseRepository implements ExpenseRepository {
     return restored;
   }
 }
-
-const defaultHouseholdUsers: HouseholdUsers = [
-  { id: "user_a", lineUserId: "line_a", displayName: "A", notifyEnabled: true },
-  { id: "user_b", lineUserId: "line_b", displayName: "B", notifyEnabled: true },
-];
 
 export class ExpenseRepositoryError extends Error {
   readonly code: "not_found" | "version_conflict";

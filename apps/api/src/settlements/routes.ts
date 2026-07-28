@@ -2,10 +2,12 @@ import { calculateMonthlySettlement } from "@shared-expense/shared";
 import type { User } from "@shared-expense/shared";
 import { Hono } from "hono";
 import type { ExpenseRepository } from "../expenses/repository";
+import type { HouseholdUserRepository } from "../users/repository";
 
 export type SettlementRoutesDependencies = {
   authenticateToken: (token: string) => Promise<User>;
   expenseRepository: ExpenseRepository;
+  userRepository: HouseholdUserRepository;
 };
 
 export function createSettlementRoutes(dependencies: SettlementRoutesDependencies): Hono {
@@ -29,7 +31,7 @@ export function createSettlementRoutes(dependencies: SettlementRoutesDependencie
     }
 
     const [users, expenses] = await Promise.all([
-      dependencies.expenseRepository.listHouseholdUsers(),
+      dependencies.userRepository.listHouseholdUsers(),
       dependencies.expenseRepository.listByMonth({ month, actor }),
     ]);
 

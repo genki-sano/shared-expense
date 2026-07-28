@@ -12,10 +12,15 @@ import { createLineIdTokenAuthenticator } from "./auth/line-id-token";
 import { createExpenseRoutes } from "./expenses/routes";
 import { InMemoryExpenseRepository, type ExpenseRepository } from "./expenses/repository";
 import { createSettlementRoutes } from "./settlements/routes";
+import {
+  InMemoryHouseholdUserRepository,
+  type HouseholdUserRepository,
+} from "./users/repository";
 
 export type AppDependencies = {
   authenticateToken: (token: string) => Promise<User>;
   expenseRepository: ExpenseRepository;
+  userRepository: HouseholdUserRepository;
 };
 
 export type AppEnv = {
@@ -36,6 +41,7 @@ const defaultDependencies: AppDependencies = {
     throw new Error("Authentication is not configured");
   },
   expenseRepository: new InMemoryExpenseRepository([]),
+  userRepository: new InMemoryHouseholdUserRepository(),
 };
 
 export function createApp(dependencies: AppDependencies = defaultDependencies): Hono {
@@ -67,19 +73,20 @@ export function createAppFromEnv(
   env: AppEnv,
   dependencies: AppEnvDependencies = defaultDependencies,
 ): Hono {
-  const expenseRepository = expenseRepositoryFromEnv(env, dependencies);
+  const repositories = repositoriesFromEnv(env, dependencies);
   return createApp({
     authenticateToken:
       dependencies.authenticateToken ??
-      authenticateTokenFromEnv(env, dependencies, expenseRepository),
-    expenseRepository,
+      authenticateTokenFromEnv(env, dependencies, repositories.userRepository),
+    expenseRepository: repositories.expenseRepository,
+    userRepository: repositories.userRepository,
   });
 }
 
 function authenticateTokenFromEnv(
   env: AppEnv,
   dependencies: AppEnvDependencies,
-  expenseRepository: ExpenseRepository,
+  userRepository: HouseholdUserRepository,
 ): (token: string) => Promise<User> {
   if (env.LINE_LOGIN_CHANNEL_ID === undefined || env.LINE_LOGIN_CHANNEL_ID.trim() === "") {
     return defaultDependencies.authenticateToken;
@@ -87,21 +94,27 @@ function authenticateTokenFromEnv(
 
   return createLineIdTokenAuthenticator({
     channelId: env.LINE_LOGIN_CHANNEL_ID,
-    expenseRepository,
+    userRepository,
     ...(dependencies.fetcher === undefined ? {} : { fetcher: dependencies.fetcher }),
   });
 }
 
-function expenseRepositoryFromEnv(
+function repositoriesFromEnv(
   env: AppEnv,
   dependencies: AppEnvDependencies,
-): ExpenseRepository {
+): {
+  expenseRepository: ExpenseRepository;
+  userRepository: HouseholdUserRepository;
+} {
   if (
     env.GOOGLE_SPREADSHEET_ID === undefined ||
     env.GOOGLE_SERVICE_ACCOUNT_EMAIL === undefined ||
     env.GOOGLE_PRIVATE_KEY === undefined
   ) {
-    return new InMemoryExpenseRepository([]);
+    return {
+      expenseRepository: new InMemoryExpenseRepository([]),
+      userRepository: new InMemoryHouseholdUserRepository(),
+    };
   }
   const tokenProviderInput: GoogleServiceAccountAccessTokenProviderInput = {
     clientEmail: env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
@@ -114,7 +127,7 @@ function expenseRepositoryFromEnv(
     tokenProviderInput.signJwt = dependencies.signServiceAccountJwt;
   }
 
-  return new SpreadsheetExpenseRepository({
+  const spreadsheetRepository = new SpreadsheetExpenseRepository({
     spreadsheetId: env.GOOGLE_SPREADSHEET_ID,
     valuesClient: new FetchGoogleSheetsValuesClient({
       accessTokenProvider: new GoogleServiceAccountAccessTokenProvider(tokenProviderInput),
@@ -123,6 +136,11 @@ function expenseRepositoryFromEnv(
     userTypeToUserId,
     userIdToUserType,
   });
+
+  return {
+    expenseRepository: spreadsheetRepository,
+    userRepository: spreadsheetRepository,
+  };
 }
 
 function userTypeToUserId(userType: string): string | null {

@@ -1,5 +1,34 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Separate user repository from expense repository
+
+### Checklist
+
+- [x] Inspect auth/expense dependency direction
+- [x] Add `HouseholdUserRepository`
+- [x] Remove user reads from `ExpenseRepository`
+- [x] Wire app dependencies with separate expense/user repositories
+- [x] Update auth and settlement routes
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-28 21:00 JST: User pointed out `apps/api/src/auth` depending on `apps/api/src/expenses` is suspicious.
+- 2026-07-28 21:00 JST: Current `auth/line-id-token.ts` imports `ExpenseRepository` only to call `listHouseholdUsers()`, which is a user/household concern, not an expense concern.
+- 2026-07-28 21:23 JST: Added `HouseholdUserRepository`, removed `listHouseholdUsers()` from `ExpenseRepository`, and rewired auth/settlements to depend on user repository separately.
+- 2026-07-28 21:24 JST: Prepared commit for separating user repository from expense repository.
+
+### Verification Log
+
+- 2026-07-28 21:23 JST: `pnpm test apps/api/src/app.test.ts apps/api/src/app-env.test.ts apps/api/src/auth/line-id-token.test.ts` passed with 22 tests.
+- 2026-07-28 21:23 JST: `pnpm test` passed with 98 tests across 17 files.
+- 2026-07-28 21:24 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-28 21:24 JST: `pnpm build` passed; Next.js built `/` successfully and Redocly reported the same existing warnings.
+
 ## Task: Remove stale LIFF auth naming
 
 ### Checklist

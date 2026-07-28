@@ -1,10 +1,10 @@
 import { verifyLineIdToken } from "@shared-expense/integrations";
 import type { User } from "@shared-expense/shared";
-import type { ExpenseRepository } from "../expenses/repository";
+import type { HouseholdUserRepository } from "../users/repository";
 
 export type LineIdTokenAuthenticatorInput = {
   channelId: string;
-  expenseRepository: Pick<ExpenseRepository, "listHouseholdUsers">;
+  userRepository: HouseholdUserRepository;
   fetcher?: typeof fetch;
 };
 
@@ -17,7 +17,7 @@ export function createLineIdTokenAuthenticator(
       channelId: input.channelId,
       ...(input.fetcher === undefined ? {} : { fetcher: input.fetcher }),
     });
-    const users = await input.expenseRepository.listHouseholdUsers();
+    const users = await input.userRepository.listHouseholdUsers();
     const user = users.find((item) => item.lineUserId === payload.sub);
 
     if (user === undefined) {
