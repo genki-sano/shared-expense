@@ -1,5 +1,30 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Scroll notified expense into view
+
+### Checklist
+
+- [x] Inspect current notification detail auto-open behavior
+- [x] Add selected expense scroll target
+- [x] Update tests
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-28 23:07 JST: User requested that notification detail links also scroll the opened expense into the first viewport.
+- 2026-07-28 23:08 JST: Added element refs for expense rows and scroll the selected notification target to the top of the viewport after the detail form opens.
+
+### Verification Log
+
+- 2026-07-28 23:06 JST: `pnpm test apps/web-dev-config.test.ts apps/web/src/features/expenses/page-data.test.ts` passed with 17 tests.
+- 2026-07-28 23:06 JST: `pnpm test` passed with 113 tests across 20 files.
+- 2026-07-28 23:06 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-28 23:07 JST: `pnpm build` passed; Next.js built `/` as dynamic and Redocly reported the same existing warnings.
+
 ## Task: Open notified expense details
 
 ### Checklist

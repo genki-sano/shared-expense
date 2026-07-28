@@ -3,7 +3,7 @@
 import { calculateMonthlySettlement, type Expense } from "@shared-expense/shared";
 import type { HouseholdUsers, MonthlySettlementSummary } from "@shared-expense/shared";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import {
   createExpense,
   deleteExpense,
@@ -58,6 +58,7 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [isMonthPending, startMonthTransition] = useTransition();
+  const expenseElementsRef = useRef(new Map<string, HTMLElement>());
 
   const total = useMemo(
     () => expenses.reduce((sum, expense) => sum + expense.price, 0),
@@ -160,6 +161,26 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
       isCancelled = true;
     };
   }, [props.apiBaseUrl, props.idToken, props.liffId, props.month]);
+
+  useEffect(() => {
+    if (
+      props.selectedExpenseId === undefined ||
+      editingExpenseId !== props.selectedExpenseId
+    ) {
+      return;
+    }
+
+    const selectedElement = expenseElementsRef.current.get(props.selectedExpenseId);
+    if (selectedElement === undefined) {
+      return;
+    }
+
+    const frameId = window.requestAnimationFrame(() => {
+      selectedElement.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, [editingExpenseId, expenses, props.selectedExpenseId]);
 
   function navigateToMonth(nextMonth: string): void {
     if (nextMonth === displayMonth) {
@@ -413,6 +434,14 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
             <article
               className={`expense ${payerClassName(expense.userId)}`}
               key={expense.id}
+              ref={(element) => {
+                if (element === null) {
+                  expenseElementsRef.current.delete(expense.id);
+                  return;
+                }
+
+                expenseElementsRef.current.set(expense.id, element);
+              }}
             >
               <button
                 className="expenseTapTarget"

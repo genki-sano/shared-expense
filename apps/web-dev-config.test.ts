@@ -128,6 +128,9 @@ describe("web dev configuration", () => {
     expect(dashboardSource).toContain(
       "setEditingExpenseId(selectedExpenseExists ? props.selectedExpenseId ?? null : null)",
     );
+    expect(dashboardSource).toContain("expenseElementsRef");
+    expect(dashboardSource).toContain("selectedElement.scrollIntoView");
+    expect(dashboardSource).toContain('block: "start"');
     expect(dashboardSource).not.toContain("通知対象");
     expect(cssSource).not.toContain('.expense[data-selected="true"]');
     expect(cssSource).not.toContain(".selectedPill");

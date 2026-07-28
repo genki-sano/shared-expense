@@ -6,3 +6,4 @@
 - 2026-07-27: When a referenced Google Sheet initially returns 403, retry connector metadata/range reads after the user updates sharing before locking in assumptions about the sheet shape.
 - 2026-07-28: Month navigation that fetches server data must provide immediate client-side feedback. Update the visible selection and pending style on tap, then sync with server props when the navigation completes.
 - 2026-07-28: Notification deep links should take the user directly to the relevant detail state when possible. Avoid relying on subtle row highlight badges for edit/delete context on mobile.
+- 2026-07-28: When a notification deep link opens an item in a long mobile list, also scroll that item into view so the destination is visible immediately.
