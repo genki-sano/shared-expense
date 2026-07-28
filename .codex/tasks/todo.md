@@ -1,5 +1,33 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Move API notifications under core
+
+### Checklist
+
+- [x] Inspect current notification module placement
+- [x] Move notification service under `apps/api/src/core/notifications`
+- [x] Update imports and tests
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-28 22:00 JST: User questioned whether `apps/api/src/notifications` should live under `apps/api/src/core`.
+- 2026-07-28 22:00 JST: Expense mutation notifications are a cross-cutting API concern used by feature routes, so they align better with `core/auth` and `core/users` than as a top-level feature sibling.
+- 2026-07-28 22:50 JST: Moved expense mutation notification service and tests under `apps/api/src/core/notifications`, and updated app/expense route imports.
+- 2026-07-28 22:51 JST: Preserved the committed `apps/web/next-env.d.ts` dev types import after `next build`.
+- 2026-07-28 22:51 JST: Prepared commit for moving API notifications under core.
+
+### Verification Log
+
+- 2026-07-28 22:50 JST: `pnpm test apps/api/src/core/notifications/expense-mutation-notifier.test.ts apps/api/src/app.test.ts apps/api/src/app-env.test.ts` passed with 25 tests.
+- 2026-07-28 22:50 JST: `pnpm test` passed with 112 tests across 20 files.
+- 2026-07-28 22:50 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-28 22:51 JST: `pnpm build` passed; Next.js built `/` as dynamic and Redocly reported the same existing warnings.
+
 ## Task: Match Flex notification footer background
 
 ### Checklist

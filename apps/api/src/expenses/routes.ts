@@ -3,7 +3,7 @@ import { Hono } from "hono";
 import {
   noopExpenseMutationNotifier,
   type ExpenseMutationNotifier,
-} from "../notifications/expense-mutation-notifier";
+} from "../core/notifications/expense-mutation-notifier";
 import { ExpenseRepositoryError, type ExpenseRepository } from "./repository";
 
 export type ExpenseRoutesDependencies = {

@@ -16,7 +16,7 @@ import {
   createExpenseMutationNotifier,
   noopExpenseMutationNotifier,
   type ExpenseMutationNotifier,
-} from "./notifications/expense-mutation-notifier";
+} from "./core/notifications/expense-mutation-notifier";
 import type { MonthlySettlementExpenseReader } from "./settlements/repository";
 import { createSettlementRoutes } from "./settlements/routes";
 import {

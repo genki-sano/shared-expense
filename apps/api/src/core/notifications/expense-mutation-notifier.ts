@@ -9,7 +9,7 @@ import {
   type ExpenseEventType,
   type User,
 } from "@shared-expense/shared";
-import type { HouseholdUserRepository } from "../core/users/repository";
+import type { HouseholdUserRepository } from "../users/repository";
 
 export type ExpenseMutationNotificationInput = {
   eventType: ExpenseEventType;

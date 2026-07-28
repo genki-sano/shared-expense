@@ -1,7 +1,7 @@
 import type { LineMessagingClient } from "@shared-expense/integrations";
 import type { Expense, User } from "@shared-expense/shared";
 import { describe, expect, it } from "vitest";
-import { InMemoryHouseholdUserRepository } from "../core/users/repository";
+import { InMemoryHouseholdUserRepository } from "../users/repository";
 import { createExpenseMutationNotifier } from "./expense-mutation-notifier";
 
 const actor: User = {
