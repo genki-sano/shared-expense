@@ -27,6 +27,7 @@ type ExpenseDashboardProps = {
   liffId: string | undefined;
   settlement: MonthlySettlementSummary;
   currentMonth: string;
+  selectedExpenseId: string | undefined;
   errorMessage: string | undefined;
 };
 
@@ -404,11 +405,15 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
         )}
 
         <section className="list" aria-label="支出明細">
-          {expenses.map((expense) => (
-            <article
-              className={`expense ${payerClassName(expense.userId)}`}
-              key={expense.id}
-            >
+          {expenses.map((expense) => {
+            const isSelectedExpense = expense.id === props.selectedExpenseId;
+
+            return (
+              <article
+                className={`expense ${payerClassName(expense.userId)}`}
+                data-selected={isSelectedExpense ? "true" : undefined}
+                key={expense.id}
+              >
               <button
                 className="expenseTapTarget"
                 type="button"
@@ -426,6 +431,9 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
                 <span className="expenseBody">
                   <span className="expenseName">{expense.memo ?? expense.category}</span>
                   <span className="expenseMeta">
+                    {isSelectedExpense ? (
+                      <span className="selectedPill">通知対象</span>
+                    ) : null}
                     <span
                       className={`payerPill ${payerClassName(expense.userId)}`}
                     >
@@ -449,7 +457,8 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
                 />
               ) : null}
             </article>
-          ))}
+            );
+          })}
         </section>
       </div>
     </main>

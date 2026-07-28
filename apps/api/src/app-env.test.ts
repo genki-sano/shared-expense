@@ -359,6 +359,7 @@ describe("createAppFromEnv", () => {
     expect(String(calls.at(-1)?.init?.body)).toContain(
       "https://liff.line.me/1234567890-shared-expense?month=2026-07",
     );
+    expect(String(calls.at(-1)?.init?.body)).toContain("expenseId=");
     expect(String(calls.at(-1)?.init?.body)).not.toContain("通知ID");
   });
 });

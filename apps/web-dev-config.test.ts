@@ -116,6 +116,20 @@ describe("web dev configuration", () => {
     expect(cssSource).toContain(".monthInput");
   });
 
+  test("notification detail links can highlight the matching expense row", () => {
+    const appSource = readText("apps/web/src/app/page.tsx");
+    const dashboardSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
+    const cssSource = readText("apps/web/src/app/globals.css");
+
+    expect(appSource).toContain("normalizeStringParam(searchParams?.expenseId)");
+    expect(appSource).toContain("selectedExpenseId={selectedExpenseId}");
+    expect(dashboardSource).toContain("props.selectedExpenseId");
+    expect(dashboardSource).toContain('data-selected={isSelectedExpense ? "true" : undefined}');
+    expect(dashboardSource).toContain("通知対象");
+    expect(cssSource).toContain('.expense[data-selected="true"]');
+    expect(cssSource).toContain(".selectedPill");
+  });
+
   test("web app pins light rendering colors to avoid dark mode text inversion", () => {
     const cssSource = readText("apps/web/src/app/globals.css");
 

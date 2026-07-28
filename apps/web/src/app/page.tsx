@@ -13,6 +13,7 @@ export default async function Home(props: HomeProps) {
   const searchParams = await props.searchParams;
   const currentMonth = currentMonthInJst();
   const month = normalizeMonthParam(searchParams?.month, currentMonth);
+  const selectedExpenseId = normalizeStringParam(searchParams?.expenseId);
   const { expenses, settlement, source, errorMessage } = await loadExpenses(month);
   const devIdToken = process.env.NEXT_PUBLIC_DEV_ID_TOKEN;
   const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
@@ -26,6 +27,7 @@ export default async function Home(props: HomeProps) {
       liffId={liffId}
       month={month}
       currentMonth={currentMonth}
+      selectedExpenseId={selectedExpenseId}
       settlement={settlement}
       source={source}
     />
@@ -67,4 +69,13 @@ async function loadExpenses(month: string): Promise<{
       errorMessage: "支出明細を取得できません",
     };
   }
+}
+
+function normalizeStringParam(value: string | string[] | undefined): string | undefined {
+  const normalized = Array.isArray(value) ? value[0] : value;
+  if (normalized === undefined || normalized.trim() === "") {
+    return undefined;
+  }
+
+  return normalized;
 }

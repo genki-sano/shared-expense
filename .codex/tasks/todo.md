@@ -1,5 +1,34 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Highlight notified expense details
+
+### Checklist
+
+- [x] Inspect current notification detail URL and monthly list UI
+- [x] Add expense ID to notification detail links
+- [x] Read `expenseId` query on the web page
+- [x] Highlight the matching expense row
+- [x] Update tests and styles
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-28 23:00 JST: User noted that after edit/delete notifications, opening only the monthly list may not make it clear which expense changed.
+- 2026-07-28 23:00 JST: Added `expenseId` to notification detail links and made the web monthly list highlight the matching expense row with a `通知対象` pill.
+- 2026-07-28 23:00 JST: Preserved the committed `apps/web/next-env.d.ts` dev types import after `next build`.
+- 2026-07-28 23:00 JST: Prepared commit for highlighting notified expenses in the monthly list.
+
+### Verification Log
+
+- 2026-07-28 23:00 JST: `pnpm test apps/api/src/core/notifications/expense-mutation-notifier.test.ts apps/api/src/app-env.test.ts apps/api/src/app.test.ts apps/web-dev-config.test.ts apps/web/src/features/expenses/page-data.test.ts` passed with 42 tests.
+- 2026-07-28 23:00 JST: `pnpm test` passed with 113 tests across 20 files.
+- 2026-07-28 23:00 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-28 23:00 JST: `pnpm build` passed; Next.js built `/` as dynamic and Redocly reported the same existing warnings.
+
 ## Task: Move API notifications under core
 
 ### Checklist
