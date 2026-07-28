@@ -15,6 +15,7 @@ import {
   type UpdateExpensePayload,
 } from "./api";
 import { getLiffIdToken } from "./liff-client";
+import { addMonths, formatMonthLabel } from "./month";
 
 type ExpenseDashboardProps = {
   expenses: Expense[];
@@ -24,6 +25,7 @@ type ExpenseDashboardProps = {
   idToken: string | undefined;
   liffId: string | undefined;
   settlement: MonthlySettlementSummary;
+  currentMonth: string;
   errorMessage: string | undefined;
 };
 
@@ -242,7 +244,7 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
       <div className="app">
         <header className="topbar">
           <div>
-            <p className="month">2026年7月</p>
+            <p className="month">{formatMonthLabel(props.month)}</p>
             <h1 className="title">月次支出</h1>
           </div>
           <button
@@ -259,6 +261,36 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
             +
           </button>
         </header>
+
+        <div className="monthControls">
+          <a
+            className="monthButton"
+            href={`/?month=${addMonths(props.month, -1)}`}
+            aria-label="前月を表示"
+          >
+            ‹
+          </a>
+          <form className="monthPicker" action="/">
+            <input
+              className="monthInput"
+              type="month"
+              name="month"
+              defaultValue={props.month}
+              aria-label="表示月"
+              onChange={(event) => event.currentTarget.form?.requestSubmit()}
+            />
+          </form>
+          <a className="monthButton monthToday" href={`/?month=${props.currentMonth}`}>
+            今月
+          </a>
+          <a
+            className="monthButton"
+            href={`/?month=${addMonths(props.month, 1)}`}
+            aria-label="翌月を表示"
+          >
+            ›
+          </a>
+        </div>
 
         <section className="summaryPanel" aria-label="月次サマリ">
           <div>

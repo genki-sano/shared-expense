@@ -1,5 +1,35 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Add monthly navigation UI
+
+### Checklist
+
+- [x] Inspect current fixed month flow
+- [x] Add shared web month helpers
+- [x] Read `month` query on the Next page
+- [x] Add mobile-friendly month navigation controls
+- [x] Update source/unit tests
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-28 22:00 JST: User selected monthly navigation UI as the next task.
+- 2026-07-28 22:00 JST: Current web page uses a fixed `2026-07` month in `apps/web/src/app/page.tsx`; the dashboard renders a static `2026年7月` label.
+- 2026-07-28 22:00 JST: Added JST current-month fallback, query month normalization, and mobile month navigation with previous/current/next links plus a native month input.
+- 2026-07-28 22:01 JST: Preserved the committed `apps/web/next-env.d.ts` dev types import after `next build`.
+- 2026-07-28 22:01 JST: Prepared commit for monthly navigation UI.
+
+### Verification Log
+
+- 2026-07-28 22:00 JST: `pnpm test apps/web-dev-config.test.ts apps/web/src/features/expenses/month.test.ts apps/web/src/features/expenses/page-data.test.ts` passed with 21 tests.
+- 2026-07-28 22:01 JST: `pnpm test` passed with 105 tests across 18 files.
+- 2026-07-28 22:01 JST: `pnpm typecheck` passed; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-28 22:01 JST: `pnpm build` passed; Next.js built `/` as dynamic because the page now reads search params, and Redocly reported the same existing warnings.
+
 ## Task: Initialize LIFF frontend ID token
 
 ### Checklist

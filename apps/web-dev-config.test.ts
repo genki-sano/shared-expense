@@ -91,6 +91,22 @@ describe("web dev configuration", () => {
     expect(pageSource).not.toContain('className="metric"');
   });
 
+  test("expense dashboard exposes mobile month navigation", () => {
+    const appSource = readText("apps/web/src/app/page.tsx");
+    const dashboardSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
+    const cssSource = readText("apps/web/src/app/globals.css");
+
+    expect(appSource).toContain("normalizeMonthParam(searchParams?.month");
+    expect(appSource).toContain("currentMonthInJst()");
+    expect(appSource).not.toContain('const month = "2026-07"');
+    expect(dashboardSource).toContain('className="monthControls"');
+    expect(dashboardSource).toContain('type="month"');
+    expect(dashboardSource).toContain("addMonths(props.month, -1)");
+    expect(dashboardSource).toContain("addMonths(props.month, 1)");
+    expect(cssSource).toContain(".monthControls");
+    expect(cssSource).toContain(".monthInput");
+  });
+
   test("web app pins light rendering colors to avoid dark mode text inversion", () => {
     const cssSource = readText("apps/web/src/app/globals.css");
 
