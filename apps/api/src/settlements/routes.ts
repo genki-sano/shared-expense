@@ -1,6 +1,7 @@
 import { calculateMonthlySettlement } from "@shared-expense/shared";
 import type { User } from "@shared-expense/shared";
 import { Hono } from "hono";
+import { unauthorizedErrorResponse } from "../core/http/error-response";
 import type { HouseholdUserRepository } from "../core/users/repository";
 import type { MonthlySettlementExpenseReader } from "./repository";
 
@@ -16,7 +17,7 @@ export function createSettlementRoutes(dependencies: SettlementRoutesDependencie
   app.get("/", async (c) => {
     const actor = await authenticateRequest(c.req.header("Authorization"), dependencies);
     if (actor === null) {
-      return c.json({ message: "Unauthorized", details: {} }, 401);
+      return c.json(unauthorizedErrorResponse, 401);
     }
 
     const month = c.req.query("month");

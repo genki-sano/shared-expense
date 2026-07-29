@@ -225,8 +225,10 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
           example:
-            message: Unauthorized
-            details: {}
+            message: ログイン状態を確認できませんでした
+            details:
+              code: AUTH_REQUIRED
+              action: LINEから開き直して、もう一度お試しください
     Forbidden:
       description: 権限エラー
       content:

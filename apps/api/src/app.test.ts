@@ -101,8 +101,11 @@ describe("GET /api/expenses", () => {
 
     expect(response.status).toBe(401);
     await expect(response.json()).resolves.toEqual({
-      message: "Unauthorized",
-      details: {},
+      message: "ログイン状態を確認できませんでした",
+      details: {
+        code: "AUTH_REQUIRED",
+        action: "LINEから開き直して、もう一度お試しください",
+      },
     });
   });
 
@@ -486,8 +489,11 @@ describe("GET /api/settlements", () => {
 
     expect(response.status).toBe(401);
     await expect(response.json()).resolves.toEqual({
-      message: "Unauthorized",
-      details: {},
+      message: "ログイン状態を確認できませんでした",
+      details: {
+        code: "AUTH_REQUIRED",
+        action: "LINEから開き直して、もう一度お試しください",
+      },
     });
   });
 

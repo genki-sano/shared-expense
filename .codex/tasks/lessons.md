@@ -7,3 +7,4 @@
 - 2026-07-28: Month navigation that fetches server data must provide immediate client-side feedback. Update the visible selection and pending style on tap, then sync with server props when the navigation completes.
 - 2026-07-28: Notification deep links should take the user directly to the relevant detail state when possible. Avoid relying on subtle row highlight badges for edit/delete context on mobile.
 - 2026-07-28: When a notification deep link opens an item in a long mobile list, also scroll that item into view so the destination is visible immediately.
+- 2026-07-29: When an API error response is itself confusing to users, improve the API contract and response body before only masking it in the frontend. Include an actionable next step in `details.action`.

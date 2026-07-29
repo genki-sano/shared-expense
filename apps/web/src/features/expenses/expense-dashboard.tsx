@@ -723,6 +723,10 @@ function logExpenseMutationError(
 
 function errorMessageForUser(error: unknown): string {
   if (error instanceof ExpenseApiError) {
+    if (error.status === 401) {
+      return "ログイン状態を確認できませんでした。LINEから開き直して、もう一度お試しください";
+    }
+
     const detail = error.responseBody.trim();
     if (detail === "") {
       return `API status: ${error.status}`;

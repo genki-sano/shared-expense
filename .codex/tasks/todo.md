@@ -1,5 +1,31 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Improve Unauthorized Error Message
+
+### Checklist
+
+- [x] Inspect current API error handling
+- [x] Convert monthly fetch errors to structured API errors
+- [x] Map 401 responses to a user-facing login message
+- [x] Update API 401 response body with an actionable next step
+- [x] Update OpenAPI unauthorized response example
+- [x] Verify targeted API and web tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-29 21:50 JST: User reported the raw unauthorized response was not actionable enough.
+- 2026-07-29 21:50 JST: Found mutation failures preserved API status/body, but monthly fetch failures only surfaced generic `Failed to fetch ...: 401` errors.
+- 2026-07-29 22:05 JST: User clarified the API response itself should be actionable, so API 401 responses now include `details.code` and `details.action`.
+
+### Verification Log
+
+- 2026-07-29 22:05 JST: `pnpm test apps/api/src/app.test.ts apps/web/src/features/expenses/api.test.ts apps/web/src/features/expenses/page-data.test.ts` passed with 34 tests.
+- 2026-07-29 22:05 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-29 22:06 JST: `pnpm build` passed for 6 workspace projects; Next.js generated `/` and `/_not-found` as static pages.
+
 ## Task: Fix API CORS for Cloudflare Pages Origin
 
 ### Checklist

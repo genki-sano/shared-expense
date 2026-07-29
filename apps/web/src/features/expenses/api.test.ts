@@ -78,9 +78,25 @@ describe("fetchMonthlyExpenses", () => {
         month: "2026-07",
         apiBaseUrl: "https://api.example.test",
         fetcher: async () =>
-          Response.json({ message: "Unauthorized", details: {} }, { status: 401 }),
+          Response.json(
+            {
+              message: "ログイン状態を確認できませんでした",
+              details: {
+                code: "AUTH_REQUIRED",
+                action: "LINEから開き直して、もう一度お試しください",
+              },
+            },
+            { status: 401 },
+          ),
       }),
-    ).rejects.toThrow("Failed to fetch expenses: 401");
+    ).rejects.toMatchObject({
+      message:
+        'Failed to fetch expenses: 401 {"message":"ログイン状態を確認できませんでした","details":{"code":"AUTH_REQUIRED","action":"LINEから開き直して、もう一度お試しください"}}',
+      operation: "fetch expenses",
+      status: 401,
+      responseBody:
+        '{"message":"ログイン状態を確認できませんでした","details":{"code":"AUTH_REQUIRED","action":"LINEから開き直して、もう一度お試しください"}}',
+    });
   });
 });
 
@@ -156,9 +172,25 @@ describe("fetchMonthlySettlement", () => {
         month: "2026-07",
         apiBaseUrl: "https://api.example.test",
         fetcher: async () =>
-          Response.json({ message: "Unauthorized", details: {} }, { status: 401 }),
+          Response.json(
+            {
+              message: "ログイン状態を確認できませんでした",
+              details: {
+                code: "AUTH_REQUIRED",
+                action: "LINEから開き直して、もう一度お試しください",
+              },
+            },
+            { status: 401 },
+          ),
       }),
-    ).rejects.toThrow("Failed to fetch settlement: 401");
+    ).rejects.toMatchObject({
+      message:
+        'Failed to fetch settlement: 401 {"message":"ログイン状態を確認できませんでした","details":{"code":"AUTH_REQUIRED","action":"LINEから開き直して、もう一度お試しください"}}',
+      operation: "fetch settlement",
+      status: 401,
+      responseBody:
+        '{"message":"ログイン状態を確認できませんでした","details":{"code":"AUTH_REQUIRED","action":"LINEから開き直して、もう一度お試しください"}}',
+    });
   });
 });
 

@@ -1,5 +1,6 @@
 import type { User } from "@shared-expense/shared";
 import { Hono } from "hono";
+import { unauthorizedErrorResponse } from "../core/http/error-response";
 import {
   noopExpenseMutationNotifier,
   type ExpenseMutationNotifier,
@@ -33,7 +34,7 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
   app.get("/", async (c) => {
     const actor = await authenticateRequest(c.req.header("Authorization"), dependencies);
     if (actor === null) {
-      return c.json({ message: "Unauthorized", details: {} }, 401);
+      return c.json(unauthorizedErrorResponse, 401);
     }
 
     const month = c.req.query("date");
@@ -58,7 +59,7 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
   app.post("/", async (c) => {
     const actor = await authenticateRequest(c.req.header("Authorization"), dependencies);
     if (actor === null) {
-      return c.json({ message: "Unauthorized", details: {} }, 401);
+      return c.json(unauthorizedErrorResponse, 401);
     }
 
     const idempotencyError = validateIdempotencyKey(c.req.header("Idempotency-Key"));
@@ -106,7 +107,7 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
   app.put("/:id", async (c) => {
     const actor = await authenticateRequest(c.req.header("Authorization"), dependencies);
     if (actor === null) {
-      return c.json({ message: "Unauthorized", details: {} }, 401);
+      return c.json(unauthorizedErrorResponse, 401);
     }
 
     const idempotencyError = validateIdempotencyKey(c.req.header("Idempotency-Key"));
@@ -150,7 +151,7 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
   app.delete("/:id", async (c) => {
     const actor = await authenticateRequest(c.req.header("Authorization"), dependencies);
     if (actor === null) {
-      return c.json({ message: "Unauthorized", details: {} }, 401);
+      return c.json(unauthorizedErrorResponse, 401);
     }
 
     const idempotencyError = validateIdempotencyKey(c.req.header("Idempotency-Key"));
@@ -179,7 +180,7 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
   app.post("/:id/restore", async (c) => {
     const actor = await authenticateRequest(c.req.header("Authorization"), dependencies);
     if (actor === null) {
-      return c.json({ message: "Unauthorized", details: {} }, 401);
+      return c.json(unauthorizedErrorResponse, 401);
     }
 
     const idempotencyError = validateIdempotencyKey(c.req.header("Idempotency-Key"));

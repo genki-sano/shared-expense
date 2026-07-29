@@ -129,7 +129,7 @@ export async function fetchMonthlyExpenses(
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch expenses: ${response.status}`);
+    throw await expenseApiError("fetch expenses", response);
   }
 
   const body = (await response.json()) as { expenses: Expense[] };
@@ -155,7 +155,7 @@ export async function fetchMonthlySettlement(
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch settlement: ${response.status}`);
+    throw await expenseApiError("fetch settlement", response);
   }
 
   const settlement = (await response.json()) as MonthlySettlementSummary;
