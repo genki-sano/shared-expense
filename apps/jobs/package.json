@@ -1,0 +1,13 @@
+{
+  "name": "@shared-expense/jobs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@shared-expense/integrations": "workspace:*",
+    "@shared-expense/shared": "workspace:*"
+  }
+}

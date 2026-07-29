@@ -1,5 +1,37 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Monthly settlement reminder Cron
+
+### Checklist
+
+- [x] Inspect current settlement, notification, and env wiring
+- [x] Add `apps/jobs` workspace package
+- [x] Implement monthly settlement reminder service
+- [x] Add Cloudflare Workers scheduled entrypoint
+- [x] Add tests for target month and Flex notification payload
+- [x] Update env documentation
+- [x] Verify targeted tests pass
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-29 00:00 JST: Started monthly settlement reminder Cron implementation.
+- 2026-07-29 00:00 JST: Confirmed existing docs target `apps/jobs`, schedule `0 10 5 * *` UTC, and monthly notification content with settlement amount plus user total breakdown.
+- 2026-07-29 00:00 JST: Current mutation notifications do not persist notification history yet, so this task will add the Cron sender and leave durable dedupe storage as the next task.
+- 2026-07-29 19:54 JST: Added `@shared-expense/jobs` with a scheduled Worker entrypoint, monthly settlement reminder service, Flex Message payload, JST previous-month calculation, and env sample updates.
+
+### Verification Log
+
+- 2026-07-29 19:54 JST: `pnpm test apps/jobs/src/monthly-settlement-reminder.test.ts` failed because the new `@shared-expense/jobs` workspace package was not linked in `node_modules` yet.
+- 2026-07-29 19:54 JST: Re-run targeted test failed because the test expected one users sheet read, while `SpreadsheetExpenseRepository.listByMonth` also reads users to resolve `userName`.
+- 2026-07-29 19:55 JST: `pnpm test apps/jobs/src/monthly-settlement-reminder.test.ts` passed with 3 tests.
+- 2026-07-29 19:55 JST: `pnpm test` passed with 116 tests across 21 files.
+- 2026-07-29 19:55 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-29 19:55 JST: `pnpm build` passed for 6 workspace projects; Next.js built `/` as dynamic and Redocly reported the same existing warnings.
+
 ## Task: Scroll notified expense into view
 
 ### Checklist
