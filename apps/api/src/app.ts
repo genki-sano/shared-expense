@@ -26,6 +26,7 @@ import {
 
 export type AppDependencies = {
   authenticateToken: (token: string) => Promise<User>;
+  allowedOrigins?: string[];
   expenseRepository: ExpenseRepository;
   expenseMutationNotifier?: ExpenseMutationNotifier;
   monthlyExpenseReader: MonthlySettlementExpenseReader;
@@ -33,6 +34,7 @@ export type AppDependencies = {
 };
 
 export type AppEnv = {
+  API_ALLOWED_ORIGINS?: string | undefined;
   GOOGLE_SPREADSHEET_ID?: string | undefined;
   GOOGLE_SERVICE_ACCOUNT_EMAIL?: string | undefined;
   GOOGLE_PRIVATE_KEY?: string | undefined;
@@ -61,12 +63,16 @@ const defaultDependencies: AppDependencies = {
 
 export function createApp(dependencies: AppDependencies = defaultDependencies): Hono {
   const app = new Hono();
+  const allowedOrigins = dependencies.allowedOrigins ?? [
+    "http://localhost:3000",
+    "http://localhost:3001",
+  ];
 
   app.use(
     "/api/*",
     cors({
       origin: (origin) => {
-        if (origin === "http://localhost:3000" || origin === "http://localhost:3001") {
+        if (allowedOrigins.includes(origin)) {
           return origin;
         }
 
@@ -105,7 +111,9 @@ export function createAppFromEnv(
   dependencies: AppEnvDependencies = defaultDependencies,
 ): Hono {
   const repositories = repositoriesFromEnv(env, dependencies);
+  const allowedOrigins = allowedOriginsFromEnv(env);
   return createApp({
+    ...(allowedOrigins === undefined ? {} : { allowedOrigins }),
     authenticateToken:
       dependencies.authenticateToken ??
       authenticateTokenFromEnv(env, dependencies, repositories.userRepository),
@@ -118,6 +126,16 @@ export function createAppFromEnv(
     monthlyExpenseReader: repositories.monthlyExpenseReader,
     userRepository: repositories.userRepository,
   });
+}
+
+function allowedOriginsFromEnv(env: AppEnv): string[] | undefined {
+  if (env.API_ALLOWED_ORIGINS === undefined || env.API_ALLOWED_ORIGINS.trim() === "") {
+    return undefined;
+  }
+
+  return env.API_ALLOWED_ORIGINS.split(",")
+    .map((origin) => origin.trim())
+    .filter((origin) => origin !== "");
 }
 
 function expenseMutationNotifierFromEnv(

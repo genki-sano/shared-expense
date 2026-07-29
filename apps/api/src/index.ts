@@ -1,3 +1,7 @@
-import { createApp } from "./app";
+import { createAppFromEnv, type AppEnv } from "./app";
 
-export default createApp();
+export default {
+  fetch(request: Request, env: AppEnv): Promise<Response> {
+    return Promise.resolve(createAppFromEnv(env).fetch(request));
+  },
+};

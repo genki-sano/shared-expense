@@ -1,5 +1,40 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Cloudflare API Deploy Configuration
+
+### Checklist
+
+- [x] Inspect current API Worker entrypoint and local dev server
+- [x] Add Wrangler dependency and API scripts
+- [x] Add API `wrangler.jsonc`
+- [x] Change Worker entrypoint to use Cloudflare env
+- [x] Add production CORS origin env
+- [x] Document Cloudflare API secret and deploy commands
+- [x] Add deployment config and Worker entrypoint tests
+- [x] Verify targeted tests pass
+- [x] Run API Wrangler dry-run
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-29 20:05 JST: Started API Cloudflare Workers deployment configuration.
+- 2026-07-29 20:05 JST: Found `apps/api/src/index.ts` still exported `createApp()` with default dependencies, so production Worker would not read env-backed Spreadsheet/auth/LINE dependencies.
+- 2026-07-29 20:07 JST: Added API Wrangler scripts/config, changed the Worker entrypoint to `createAppFromEnv(env)`, added `API_ALLOWED_ORIGINS`, and documented API Worker deployment commands.
+
+### Verification Log
+
+- 2026-07-29 20:15 JST: `pnpm test apps/api/src/deploy-config.test.ts apps/api/src/worker-entrypoint.test.ts apps/api/src/app.test.ts apps/api/src/app-env.test.ts` passed with 26 tests.
+- 2026-07-29 20:16 JST: `pnpm --filter @shared-expense/api dry-run` passed with Wrangler 4.115.0 and bundled the API Worker successfully.
+- 2026-07-29 20:16 JST: `pnpm test` passed with 121 tests across 24 files.
+- 2026-07-29 20:16 JST: Initial `pnpm typecheck` failed on exact optional `allowedOrigins` handling and the Worker `fetch` return type.
+- 2026-07-29 20:17 JST: Re-ran targeted API tests after type fixes; they passed with 26 tests.
+- 2026-07-29 20:17 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-29 20:17 JST: Re-ran `pnpm test`; it passed with 121 tests across 24 files.
+- 2026-07-29 20:17 JST: `pnpm build` passed for 6 workspace projects; Next.js built `/` as dynamic and Redocly reported the same existing warnings.
+
 ## Task: Cloudflare Jobs Deploy Configuration
 
 ### Checklist

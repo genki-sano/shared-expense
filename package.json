@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "NEXT_PUBLIC_API_BASE_URL=http://localhost:8787 NEXT_PUBLIC_DEV_ID_TOKEN=local-dev pnpm --parallel --filter @shared-expense/api --filter @shared-expense/web dev",
     "build": "pnpm -r build",
+    "deploy:api": "pnpm --filter @shared-expense/api deploy",
     "deploy:jobs": "pnpm --filter @shared-expense/jobs deploy",
     "test": "vitest run",
     "test:watch": "vitest",
