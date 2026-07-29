@@ -29,6 +29,7 @@ export async function authenticateRequest(
     return { ok: true, actor: await authenticateToken(token) };
   } catch (error) {
     if (isAuthenticationError(error)) {
+      logAuthenticationFailure(error.code, error);
       if (error.code === "user_not_registered") {
         return { ok: false, status: 403, body: userNotRegisteredErrorResponse };
       }
@@ -38,8 +39,33 @@ export async function authenticateRequest(
       }
     }
 
+    logAuthenticationFailure("invalid", error);
     return { ok: false, status: 401, body: authInvalidErrorResponse };
   }
+}
+
+function logAuthenticationFailure(code: string, error: unknown): void {
+  console.error("Authentication failed", {
+    code,
+    reason: errorMessage(error),
+    cause: errorCauseMessage(error),
+  });
+}
+
+function errorCauseMessage(error: unknown): string | undefined {
+  if (typeof error !== "object" || error === null || !("cause" in error)) {
+    return undefined;
+  }
+
+  return errorMessage(error.cause);
+}
+
+function errorMessage(error: unknown): string {
+  if (error instanceof Error && error.message.trim() !== "") {
+    return error.message;
+  }
+
+  return String(error);
 }
 
 function bearerToken(authorizationHeader: string | undefined): string | null {

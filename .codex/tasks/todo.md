@@ -1,5 +1,28 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Log Authentication Failure Causes
+
+### Checklist
+
+- [x] Inspect current authentication failure handling
+- [x] Add server-side authentication failure logging without tokens or secrets
+- [x] Add focused tests for authentication failure logs
+- [x] Verify targeted auth tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-29 22:25 JST: User hit `AUTH_UNAVAILABLE` in production and needs API logs to identify whether the cause is LINE verification, users sheet access, or auth configuration.
+- 2026-07-29 22:25 JST: Found `authenticateRequest` returned categorized responses but did not log the underlying authentication error cause.
+
+### Verification Log
+
+- 2026-07-29 22:37 JST: `pnpm test apps/api/src/core/auth/request-auth.test.ts apps/api/src/core/auth/line-id-token.test.ts apps/api/src/app.test.ts` passed with 30 tests and confirmed authentication failure log output.
+- 2026-07-29 22:37 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-29 22:38 JST: `pnpm build` passed for 6 workspace projects; Next.js generated `/` and `/_not-found` as static pages.
+
 ## Task: Split Authentication Error Responses
 
 ### Checklist
