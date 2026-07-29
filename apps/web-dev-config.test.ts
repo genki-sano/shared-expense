@@ -48,14 +48,33 @@ describe("web dev configuration", () => {
 
   test("web app exposes Next.js development and verification scripts", () => {
     const webPackage = readPackageJson("apps/web/package.json");
+    const nextConfig = readText("apps/web/next.config.ts");
+    const webWranglerConfig = readText("apps/web/wrangler.jsonc");
+    const rootPackage = readPackageJson("package.json");
 
     expect(webPackage).toMatchObject({
       name: "@shared-expense/web",
       scripts: {
         dev: "next dev",
         build: "next build",
+        "pages:build": "opennextjs-cloudflare build",
+        "pages:deploy": "opennextjs-cloudflare deploy",
+        "pages:preview": "opennextjs-cloudflare preview",
         typecheck: "tsc -p tsconfig.json --noEmit",
       },
+    });
+    expect(webPackage.devDependencies).toMatchObject({
+      "@opennextjs/cloudflare": expect.any(String),
+      wrangler: expect.any(String),
+    });
+    expect(nextConfig).toContain('output: "standalone"');
+    expect(existsSync(join(rootDir, "apps/web/open-next.config.ts"))).toBe(true);
+    expect(webWranglerConfig).toContain('"name": "shared-expense-web"');
+    expect(webWranglerConfig).toContain('"main": ".open-next/worker.js"');
+    expect(webWranglerConfig).toContain('"directory": ".open-next/assets"');
+    expect(webWranglerConfig).toContain('"nodejs_compat"');
+    expect(rootPackage.scripts).toMatchObject({
+      "deploy:web": "pnpm --filter @shared-expense/web run pages:deploy",
     });
     expect(existsSync(join(rootDir, "apps/web/src/app/page.tsx"))).toBe(true);
   });

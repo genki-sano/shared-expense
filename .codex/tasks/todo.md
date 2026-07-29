@@ -1,5 +1,42 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Add OpenNext Cloudflare Web Adapter
+
+### Checklist
+
+- [x] Inspect current web build and Next config
+- [x] Check OpenNext Cloudflare setup docs
+- [x] Add OpenNext Cloudflare dependencies
+- [x] Align Next.js version with adapter peer dependency
+- [x] Configure Next standalone output
+- [x] Add OpenNext Cloudflare config and scripts
+- [x] Add Web Wrangler config for OpenNext output
+- [x] Document web deployment commands
+- [x] Update web configuration tests
+- [x] Verify targeted tests pass
+- [x] Run web OpenNext build
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-29 20:35 JST: Started OpenNext Cloudflare adapter support for the web app.
+- 2026-07-29 20:35 JST: Confirmed OpenNext Cloudflare requires `output: "standalone"` and uses `opennextjs-cloudflare build` to adapt Next.js output for Cloudflare.
+- 2026-07-29 20:36 JST: Added `@opennextjs/cloudflare`, `wrangler`, upgraded Next.js to satisfy the adapter peer dependency, and added web build/deploy/preview scripts plus deployment docs.
+- 2026-07-29 21:05 JST: Initial OpenNext build failed because `apps/web` did not have a Wrangler config; added `apps/web/wrangler.jsonc` pointing to `.open-next/worker.js` and `.open-next/assets`.
+
+### Verification Log
+
+- 2026-07-29 21:04 JST: `pnpm test apps/web-dev-config.test.ts` passed with 14 tests.
+- 2026-07-29 21:05 JST: Initial `pnpm --filter @shared-expense/web run pages:build` failed because OpenNext requires a local `wrangler.(toml|json|jsonc)` config file.
+- 2026-07-29 21:05 JST: Re-ran `pnpm test apps/web-dev-config.test.ts`; it passed with 14 tests.
+- 2026-07-29 21:05 JST: Re-ran `pnpm --filter @shared-expense/web run pages:build`; OpenNext built the Next.js app and generated `.open-next/worker.js` successfully.
+- 2026-07-29 21:06 JST: `pnpm test` passed with 122 tests across 24 files.
+- 2026-07-29 21:06 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-29 21:06 JST: `pnpm build` passed for 6 workspace projects; Next.js built `/` as dynamic and Redocly reported the same existing warnings.
+
 ## Task: Fix Cloudflare deploy script invocation
 
 ### Checklist
