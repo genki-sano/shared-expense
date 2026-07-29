@@ -1,5 +1,33 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Fix Cloudflare deploy script invocation
+
+### Checklist
+
+- [x] Inspect Cloudflare build log failure
+- [x] Change root deploy scripts to use `pnpm --filter ... run deploy`
+- [x] Update deployment docs
+- [x] Update deploy config tests
+- [x] Verify targeted tests pass
+- [x] Run API Wrangler dry-run
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-29 20:26 JST: Cloudflare deploy failed because `pnpm --filter @shared-expense/api deploy` invoked pnpm's built-in `deploy` command instead of the package script.
+- 2026-07-29 20:26 JST: Updated root API and Jobs deploy scripts to explicitly call `run deploy` and documented the direct package command.
+
+### Verification Log
+
+- 2026-07-29 20:27 JST: `pnpm test apps/api/src/deploy-config.test.ts apps/jobs/src/deploy-config.test.ts` passed with 5 tests.
+- 2026-07-29 20:27 JST: `pnpm --filter @shared-expense/api dry-run` passed with Wrangler 4.115.0 and bundled the API Worker successfully.
+- 2026-07-29 20:27 JST: `pnpm test` passed with 122 tests across 24 files.
+- 2026-07-29 20:28 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-29 20:28 JST: `pnpm build` passed for 6 workspace projects; Next.js built `/` as dynamic and Redocly reported the same existing warnings.
+
 ## Task: Cloudflare API Deploy Configuration
 
 ### Checklist

@@ -34,6 +34,12 @@ pnpm --filter @shared-expense/api dry-run
 pnpm deploy:api
 ```
 
+When running the package deploy script directly, use `run deploy`:
+
+```sh
+pnpm --filter @shared-expense/api run deploy
+```
+
 ## Smoke Check
 
 After deployment, check:

@@ -23,4 +23,15 @@ describe("jobs Cloudflare deployment configuration", () => {
     expect(packageJson).toContain('"deploy": "wrangler deploy"');
     expect(packageJson).toContain('"tail": "wrangler tail"');
   });
+
+  it("uses pnpm run to avoid the built-in pnpm deploy command", () => {
+    const rootPackageJson = readFileSync(
+      new URL("../../../package.json", import.meta.url),
+      "utf8",
+    );
+
+    expect(rootPackageJson).toContain(
+      '"deploy:jobs": "pnpm --filter @shared-expense/jobs run deploy"',
+    );
+  });
 });

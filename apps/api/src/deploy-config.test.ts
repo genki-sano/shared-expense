@@ -27,6 +27,8 @@ describe("api Cloudflare deployment configuration", () => {
     expect(packageJson).toContain('"dry-run": "wrangler deploy --dry-run"');
     expect(packageJson).toContain('"deploy": "wrangler deploy"');
     expect(packageJson).toContain('"tail": "wrangler tail"');
-    expect(rootPackageJson).toContain('"deploy:api": "pnpm --filter @shared-expense/api deploy"');
+    expect(rootPackageJson).toContain(
+      '"deploy:api": "pnpm --filter @shared-expense/api run deploy"',
+    );
   });
 });

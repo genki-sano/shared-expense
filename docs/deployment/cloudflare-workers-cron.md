@@ -28,6 +28,12 @@ pnpm --filter @shared-expense/jobs dry-run
 pnpm deploy:jobs
 ```
 
+When running the package deploy script directly, use `run deploy`:
+
+```sh
+pnpm --filter @shared-expense/jobs run deploy
+```
+
 ## Local Scheduled Test
 
 ```sh
