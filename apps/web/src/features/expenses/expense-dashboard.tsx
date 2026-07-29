@@ -163,6 +163,63 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
   }, [props.apiBaseUrl, props.idToken, props.liffId, props.month]);
 
   useEffect(() => {
+    const apiBaseUrl = props.apiBaseUrl;
+    const currentIdToken = props.idToken;
+    if (
+      apiBaseUrl === undefined ||
+      apiBaseUrl.trim() === "" ||
+      currentIdToken === undefined ||
+      currentIdToken.trim() === ""
+    ) {
+      return;
+    }
+
+    let isCancelled = false;
+
+    async function loadInitialApiData(): Promise<void> {
+      setStatusMessage("支出明細を読み込んでいます");
+      try {
+        const [expensesResult, settlementResult] = await Promise.all([
+          fetchMonthlyExpenses({
+            month: props.month,
+            apiBaseUrl,
+            idToken: currentIdToken,
+          }),
+          fetchMonthlySettlement({
+            month: props.month,
+            apiBaseUrl,
+            idToken: currentIdToken,
+          }),
+        ]);
+
+        if (isCancelled) {
+          return;
+        }
+
+        setExpenses(sortExpenses(expensesResult.expenses));
+        setSettlementSummary(settlementResult.settlement);
+        setStatusMessage(null);
+        setEditingExpenseId(
+          expensesResult.expenses.some((expense) => expense.id === props.selectedExpenseId)
+            ? props.selectedExpenseId ?? null
+            : null,
+        );
+      } catch (error) {
+        logExpenseMutationError("load", error);
+        if (!isCancelled) {
+          setStatusMessage(`支出明細を取得できませんでした。${errorMessageForUser(error)}`);
+        }
+      }
+    }
+
+    void loadInitialApiData();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [props.apiBaseUrl, props.idToken, props.month, props.selectedExpenseId]);
+
+  useEffect(() => {
     if (
       props.selectedExpenseId === undefined ||
       editingExpenseId !== props.selectedExpenseId
@@ -658,7 +715,7 @@ function payerClassName(userId: string): "payerWoman" | "payerMan" | "payerUnkno
 }
 
 function logExpenseMutationError(
-  operation: "authenticate" | "create" | "update" | "delete" | "restore",
+  operation: "authenticate" | "load" | "create" | "update" | "delete" | "restore",
   error: unknown,
 ): void {
   console.error(`Expense ${operation} failed`, error);

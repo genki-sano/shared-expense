@@ -49,7 +49,6 @@ describe("web dev configuration", () => {
   test("web app exposes Next.js development and verification scripts", () => {
     const webPackage = readPackageJson("apps/web/package.json");
     const nextConfig = readText("apps/web/next.config.ts");
-    const webWranglerConfig = readText("apps/web/wrangler.jsonc");
     const rootPackage = readPackageJson("package.json");
 
     expect(webPackage).toMatchObject({
@@ -57,42 +56,31 @@ describe("web dev configuration", () => {
       scripts: {
         dev: "next dev",
         build: "next build",
-        "worker:build": "opennextjs-cloudflare build",
-        "worker:deploy": "opennextjs-cloudflare deploy",
-        "worker:preview": "opennextjs-cloudflare preview",
-        "pages:build": "opennextjs-cloudflare build",
-        "pages:deploy": "opennextjs-cloudflare deploy",
-        "pages:preview": "opennextjs-cloudflare preview",
+        "pages:build": "next build",
         typecheck: "tsc -p tsconfig.json --noEmit",
       },
     });
-    expect(webPackage.devDependencies).toMatchObject({
-      "@opennextjs/cloudflare": expect.any(String),
-      wrangler: expect.any(String),
-    });
-    expect(nextConfig).toContain('output: "standalone"');
-    expect(existsSync(join(rootDir, "apps/web/open-next.config.ts"))).toBe(true);
-    expect(webWranglerConfig).toContain('"name": "shared-expense-web"');
-    expect(webWranglerConfig).toContain('"main": ".open-next/worker.js"');
-    expect(webWranglerConfig).toContain('"directory": ".open-next/assets"');
-    expect(webWranglerConfig).toContain('"nodejs_compat"');
-    expect(rootPackage.scripts).toMatchObject({
-      "deploy:web": "pnpm --filter @shared-expense/web run worker:deploy",
-    });
+    expect(webPackage.devDependencies).not.toHaveProperty("@opennextjs/cloudflare");
+    expect(webPackage.devDependencies).not.toHaveProperty("wrangler");
+    expect(nextConfig).toContain('output: "export"');
+    expect(existsSync(join(rootDir, "apps/web/open-next.config.ts"))).toBe(false);
+    expect(existsSync(join(rootDir, "apps/web/wrangler.jsonc"))).toBe(false);
+    expect(rootPackage.scripts).not.toHaveProperty("deploy:web");
     expect(existsSync(join(rootDir, "apps/web/src/app/page.tsx"))).toBe(true);
+    expect(existsSync(join(rootDir, "apps/web/src/app/home-client.tsx"))).toBe(true);
   });
 
   test("web app can initialize LIFF ID tokens for production auth", () => {
     const webPackage = readPackageJson("apps/web/package.json");
-    const pageSource = readText("apps/web/src/app/page.tsx");
+    const homeClientSource = readText("apps/web/src/app/home-client.tsx");
     const dashboardSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
     const liffClientSource = readText("apps/web/src/features/expenses/liff-client.ts");
 
     expect(webPackage.dependencies).toMatchObject({
       "@line/liff": expect.any(String),
     });
-    expect(pageSource).toContain("NEXT_PUBLIC_LIFF_ID");
-    expect(pageSource).toContain("NEXT_PUBLIC_DEV_ID_TOKEN");
+    expect(homeClientSource).toContain("NEXT_PUBLIC_LIFF_ID");
+    expect(homeClientSource).toContain("NEXT_PUBLIC_DEV_ID_TOKEN");
     expect(dashboardSource).toContain("getLiffIdToken(");
     expect(dashboardSource).toContain("fetchMonthlyExpenses({");
     expect(dashboardSource).toContain("fetchMonthlySettlement({");
@@ -117,11 +105,12 @@ describe("web dev configuration", () => {
 
   test("expense dashboard exposes mobile month navigation", () => {
     const appSource = readText("apps/web/src/app/page.tsx");
+    const homeClientSource = readText("apps/web/src/app/home-client.tsx");
     const dashboardSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
     const cssSource = readText("apps/web/src/app/globals.css");
 
-    expect(appSource).toContain("normalizeMonthParam(searchParams?.month");
-    expect(appSource).toContain("currentMonthInJst()");
+    expect(homeClientSource).toContain("normalizeMonthParam(searchParams.get(\"month\")");
+    expect(homeClientSource).toContain("currentMonthInJst()");
     expect(appSource).not.toContain('const month = "2026-07"');
     expect(dashboardSource).toContain('className="monthControls"');
     expect(dashboardSource).toContain('type="month"');
@@ -140,11 +129,13 @@ describe("web dev configuration", () => {
 
   test("notification detail links open the matching expense details", () => {
     const appSource = readText("apps/web/src/app/page.tsx");
+    const homeClientSource = readText("apps/web/src/app/home-client.tsx");
     const dashboardSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
     const cssSource = readText("apps/web/src/app/globals.css");
 
-    expect(appSource).toContain("normalizeStringParam(searchParams?.expenseId)");
-    expect(appSource).toContain("selectedExpenseId={selectedExpenseId}");
+    expect(homeClientSource).toContain("normalizeStringParam(");
+    expect(homeClientSource).toContain("searchParams.get(\"expenseId\")");
+    expect(homeClientSource).toContain("selectedExpenseId={selectedExpenseId}");
     expect(dashboardSource).toContain("props.selectedExpenseId");
     expect(dashboardSource).toContain("selectedExpenseExists");
     expect(dashboardSource).toContain(
@@ -187,11 +178,11 @@ describe("web dev configuration", () => {
   });
 
   test("expense dashboard exposes create, edit, and delete controls backed by the API client", () => {
-    const pageSource = readText("apps/web/src/app/page.tsx");
+    const homeClientSource = readText("apps/web/src/app/home-client.tsx");
     const dashboardSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
     const cssSource = readText("apps/web/src/app/globals.css");
 
-    expect(pageSource).toContain("<ExpenseDashboard");
+    expect(homeClientSource).toContain("<ExpenseDashboard");
     expect(dashboardSource).toContain('"use client"');
     expect(dashboardSource).toContain("createExpense(");
     expect(dashboardSource).toContain("updateExpense(");

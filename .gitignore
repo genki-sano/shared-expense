@@ -3,6 +3,7 @@ node_modules/
 .pnpm-store/
 .next/
 .open-next/
+out/
 dist/
 .env
 .env.*

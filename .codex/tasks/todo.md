@@ -1,5 +1,37 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Switch Web to Cloudflare Pages Static Export
+
+### Checklist
+
+- [x] Inspect Cloudflare Pages output validation failure
+- [x] Remove OpenNext Cloudflare dependencies and Worker config
+- [x] Switch Next.js output to static export
+- [x] Move URL query handling to client component
+- [x] Load API data from the client after LIFF/dev token is available
+- [x] Add Cloudflare Pages deployment docs
+- [x] Update web configuration tests
+- [x] Verify targeted tests pass
+- [x] Run web Pages build
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-29 21:20 JST: User chose Cloudflare Pages deployment, which requires static export instead of the OpenNext Worker bundle.
+- 2026-07-29 21:20 JST: Removed OpenNext/Wrangler from the web app, changed Next.js output to `export`, moved page query parsing into a client component, and added client-side initial API loading.
+
+### Verification Log
+
+- 2026-07-29 21:27 JST: `pnpm test apps/web-dev-config.test.ts apps/web/src/features/expenses/api.test.ts apps/web/src/features/expenses/page-data.test.ts` passed with 29 tests.
+- 2026-07-29 21:27 JST: Initial `pnpm --filter @shared-expense/web run pages:build` failed because the dashboard error logger operation type did not include the new client-side `load` operation.
+- 2026-07-29 21:28 JST: Re-ran `pnpm --filter @shared-expense/web run pages:build`; it passed and generated static routes under `out`.
+- 2026-07-29 21:29 JST: `pnpm test` passed with 122 tests across 24 files.
+- 2026-07-29 21:29 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-29 21:30 JST: `pnpm build` passed for 6 workspace projects; Next.js generated `/` and `/_not-found` as static pages.
+
 ## Task: Clarify OpenNext Web Worker Deployment
 
 ### Checklist
