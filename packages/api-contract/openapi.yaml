@@ -44,6 +44,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
         '500':
           $ref: '#/components/responses/InternalServerError'
     post:
@@ -72,6 +74,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /api/expenses/{id}:
@@ -106,6 +110,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
         '500':
           $ref: '#/components/responses/InternalServerError'
     delete:
@@ -125,6 +131,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /api/expenses/{id}/restore:
@@ -151,6 +159,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /api/settlements:
@@ -181,6 +191,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
         '500':
           $ref: '#/components/responses/InternalServerError'
 components:
@@ -224,11 +236,21 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-          example:
-            message: ログイン状態を確認できませんでした
-            details:
-              code: AUTH_REQUIRED
-              action: LINEから開き直して、もう一度お試しください
+          examples:
+            required:
+              summary: 認証情報なし
+              value:
+                message: 認証情報が見つかりません
+                details:
+                  code: AUTH_REQUIRED
+                  action: LINEから開き直して、もう一度お試しください
+            invalid:
+              summary: 認証情報が無効
+              value:
+                message: 認証情報の有効期限が切れているか、正しくありません
+                details:
+                  code: AUTH_INVALID
+                  action: LINEから開き直して、もう一度お試しください
     Forbidden:
       description: 権限エラー
       content:
@@ -236,8 +258,21 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
           example:
-            message: Forbidden
-            details: {}
+            message: このLINEユーザーは家計簿に登録されていません
+            details:
+              code: USER_NOT_REGISTERED
+              action: 管理者にusersシートへの登録を依頼してください
+    ServiceUnavailable:
+      description: 認証基盤または外部連携の一時エラー
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: 認証処理を利用できません
+            details:
+              code: AUTH_UNAVAILABLE
+              action: 時間をおいて再度お試しください。解消しない場合は管理者に連絡してください
     NotFound:
       description: 対象なし
       content:

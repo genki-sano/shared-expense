@@ -9,6 +9,7 @@ import {
 import type { User } from "@shared-expense/shared";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { AuthenticationError } from "./core/auth/authentication-error";
 import { createLineIdTokenAuthenticator } from "./core/auth/line-id-token";
 import { createExpenseRoutes } from "./expenses/routes";
 import { InMemoryExpenseRepository, type ExpenseRepository } from "./expenses/repository";
@@ -53,7 +54,7 @@ const defaultExpenseRepository = new InMemoryExpenseRepository([]);
 
 const defaultDependencies: AppDependencies = {
   authenticateToken: async () => {
-    throw new Error("Authentication is not configured");
+    throw new AuthenticationError("unavailable", "Authentication is not configured");
   },
   expenseRepository: defaultExpenseRepository,
   expenseMutationNotifier: noopExpenseMutationNotifier,

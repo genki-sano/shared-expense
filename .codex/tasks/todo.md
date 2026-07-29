@@ -1,5 +1,33 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Split Authentication Error Responses
+
+### Checklist
+
+- [x] Inspect current authentication error handling
+- [x] Add typed authentication errors
+- [x] Split missing token, invalid token, unregistered user, and unavailable auth responses
+- [x] Update frontend error display to use API `details.action`
+- [x] Update OpenAPI auth error responses
+- [x] Verify targeted auth/API/web tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-29 22:15 JST: User asked to distinguish authentication failure patterns instead of collapsing everything into one unauthorized message.
+- 2026-07-29 22:15 JST: Current route authentication returned `null` for missing headers, invalid tokens, unknown LINE users, and authentication infrastructure errors.
+- 2026-07-29 22:18 JST: Added typed authentication errors and split API responses into `AUTH_REQUIRED`, `AUTH_INVALID`, `USER_NOT_REGISTERED`, and `AUTH_UNAVAILABLE`.
+
+### Verification Log
+
+- 2026-07-29 22:18 JST: `pnpm test apps/api/src/app.test.ts apps/api/src/core/auth/line-id-token.test.ts packages/integrations/src/line/id-token-verifier.test.ts apps/web/src/features/expenses/api.test.ts` passed with 43 tests.
+- 2026-07-29 22:18 JST: Initial `pnpm typecheck` failed because some test user fixtures did not satisfy the two-user `HouseholdUsers` tuple type.
+- 2026-07-29 22:18 JST: Re-ran `pnpm test apps/api/src/app.test.ts apps/api/src/core/auth/line-id-token.test.ts packages/integrations/src/line/id-token-verifier.test.ts apps/web/src/features/expenses/api.test.ts`; it passed with 43 tests.
+- 2026-07-29 22:18 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-29 22:19 JST: `pnpm build` passed for 6 workspace projects; Next.js generated `/` and `/_not-found` as static pages.
+
 ## Task: Improve Unauthorized Error Message
 
 ### Checklist

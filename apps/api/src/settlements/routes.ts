@@ -1,7 +1,7 @@
 import { calculateMonthlySettlement } from "@shared-expense/shared";
 import type { User } from "@shared-expense/shared";
 import { Hono } from "hono";
-import { unauthorizedErrorResponse } from "../core/http/error-response";
+import { authenticateRequest } from "../core/auth/request-auth";
 import type { HouseholdUserRepository } from "../core/users/repository";
 import type { MonthlySettlementExpenseReader } from "./repository";
 
@@ -15,9 +15,12 @@ export function createSettlementRoutes(dependencies: SettlementRoutesDependencie
   const app = new Hono();
 
   app.get("/", async (c) => {
-    const actor = await authenticateRequest(c.req.header("Authorization"), dependencies);
-    if (actor === null) {
-      return c.json(unauthorizedErrorResponse, 401);
+    const auth = await authenticateRequest(
+      c.req.header("Authorization"),
+      dependencies.authenticateToken,
+    );
+    if (!auth.ok) {
+      return c.json(auth.body, auth.status);
     }
 
     const month = c.req.query("month");
@@ -33,36 +36,11 @@ export function createSettlementRoutes(dependencies: SettlementRoutesDependencie
 
     const [users, expenses] = await Promise.all([
       dependencies.userRepository.listHouseholdUsers(),
-      dependencies.monthlyExpenseReader.listByMonth({ month, actor }),
+      dependencies.monthlyExpenseReader.listByMonth({ month, actor: auth.actor }),
     ]);
 
     return c.json(calculateMonthlySettlement(month, users, expenses));
   });
 
   return app;
-}
-
-async function authenticateRequest(
-  authorizationHeader: string | undefined,
-  dependencies: SettlementRoutesDependencies,
-): Promise<User | null> {
-  const token = bearerToken(authorizationHeader);
-  if (token === null) {
-    return null;
-  }
-
-  try {
-    return await dependencies.authenticateToken(token);
-  } catch {
-    return null;
-  }
-}
-
-function bearerToken(authorizationHeader: string | undefined): string | null {
-  if (authorizationHeader === undefined) {
-    return null;
-  }
-
-  const match = /^Bearer (?<token>.+)$/.exec(authorizationHeader);
-  return match?.groups?.token ?? null;
 }

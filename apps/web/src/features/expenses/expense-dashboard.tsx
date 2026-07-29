@@ -723,8 +723,9 @@ function logExpenseMutationError(
 
 function errorMessageForUser(error: unknown): string {
   if (error instanceof ExpenseApiError) {
-    if (error.status === 401) {
-      return "ログイン状態を確認できませんでした。LINEから開き直して、もう一度お試しください";
+    const apiMessage = apiErrorMessageForUser(error.responseBody);
+    if (apiMessage !== null) {
+      return apiMessage;
     }
 
     const detail = error.responseBody.trim();
@@ -740,4 +741,33 @@ function errorMessageForUser(error: unknown): string {
   }
 
   return "詳細はブラウザ console を確認してください";
+}
+
+function apiErrorMessageForUser(responseBody: string): string | null {
+  try {
+    const body = JSON.parse(responseBody) as unknown;
+    if (typeof body !== "object" || body === null || !("message" in body)) {
+      return null;
+    }
+
+    const message = typeof body.message === "string" ? body.message.trim() : "";
+    const details =
+      "details" in body && typeof body.details === "object" && body.details !== null
+        ? body.details
+        : undefined;
+    const action =
+      details !== undefined &&
+      "action" in details &&
+      typeof details.action === "string"
+        ? details.action.trim()
+        : "";
+
+    if (message === "") {
+      return action === "" ? null : action;
+    }
+
+    return action === "" ? message : `${message}。${action}`;
+  } catch {
+    return null;
+  }
 }

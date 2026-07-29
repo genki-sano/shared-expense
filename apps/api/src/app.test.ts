@@ -1,6 +1,7 @@
 import type { Expense, User } from "@shared-expense/shared";
 import { describe, expect, it } from "vitest";
 import { createApp } from "./app";
+import { AuthenticationError } from "./core/auth/authentication-error";
 import { InMemoryExpenseRepository, type ExpenseRepository } from "./expenses/repository";
 import { InMemoryHouseholdUserRepository } from "./core/users/repository";
 
@@ -101,10 +102,81 @@ describe("GET /api/expenses", () => {
 
     expect(response.status).toBe(401);
     await expect(response.json()).resolves.toEqual({
-      message: "ログイン状態を確認できませんでした",
+      message: "認証情報が見つかりません",
       details: {
         code: "AUTH_REQUIRED",
         action: "LINEから開き直して、もう一度お試しください",
+      },
+    });
+  });
+
+  it("reports invalid authentication separately", async () => {
+    const response = await app().request("/api/expenses?date=2026-07", {
+      headers: { Authorization: "Bearer invalid" },
+    });
+
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toEqual({
+      message: "認証情報の有効期限が切れているか、正しくありません",
+      details: {
+        code: "AUTH_INVALID",
+        action: "LINEから開き直して、もう一度お試しください",
+      },
+    });
+  });
+
+  it("reports unregistered LINE users separately", async () => {
+    const expenseRepository = new InMemoryExpenseRepository(expenses);
+    const response = await createApp({
+      authenticateToken: async () => {
+        throw new AuthenticationError(
+          "user_not_registered",
+          "Unknown LINE user: line_unknown",
+        );
+      },
+      expenseRepository,
+      monthlyExpenseReader: expenseRepository,
+      userRepository: new InMemoryHouseholdUserRepository([
+        user,
+        { ...user, id: "user_b", lineUserId: "line_b", displayName: "B" },
+      ]),
+    }).request("/api/expenses?date=2026-07", {
+      headers: { Authorization: "Bearer valid" },
+    });
+
+    expect(response.status).toBe(403);
+    await expect(response.json()).resolves.toEqual({
+      message: "このLINEユーザーは家計簿に登録されていません",
+      details: {
+        code: "USER_NOT_REGISTERED",
+        action: "管理者にusersシートへの登録を依頼してください",
+      },
+    });
+  });
+
+  it("reports unavailable authentication separately", async () => {
+    const expenseRepository = new InMemoryExpenseRepository(expenses);
+    const response = await createApp({
+      authenticateToken: async () => {
+        throw new AuthenticationError("unavailable", "Users sheet is unavailable");
+      },
+      expenseRepository,
+      monthlyExpenseReader: expenseRepository,
+      userRepository: new InMemoryHouseholdUserRepository([
+        user,
+        { ...user, id: "user_b", lineUserId: "line_b", displayName: "B" },
+      ]),
+    }).request("/api/expenses?date=2026-07", {
+      headers: { Authorization: "Bearer valid" },
+    });
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toEqual({
+      message: "認証処理を利用できません",
+      details: {
+        code: "AUTH_UNAVAILABLE",
+        action:
+          "時間をおいて再度お試しください。解消しない場合は管理者に連絡してください",
       },
     });
   });
@@ -489,7 +561,7 @@ describe("GET /api/settlements", () => {
 
     expect(response.status).toBe(401);
     await expect(response.json()).resolves.toEqual({
-      message: "ログイン状態を確認できませんでした",
+      message: "認証情報が見つかりません",
       details: {
         code: "AUTH_REQUIRED",
         action: "LINEから開き直して、もう一度お試しください",

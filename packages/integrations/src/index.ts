@@ -41,6 +41,7 @@ export {
   signServiceAccountJwt,
 } from "./google/service-account-auth-provider";
 export {
+  LineIdTokenVerificationError,
   LINE_ID_TOKEN_VERIFY_URL,
   verifyLineIdToken,
 } from "./line/id-token-verifier";

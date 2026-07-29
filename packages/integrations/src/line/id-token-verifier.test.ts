@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { LINE_ID_TOKEN_VERIFY_URL, verifyLineIdToken } from "./id-token-verifier";
+import {
+  LineIdTokenVerificationError,
+  LINE_ID_TOKEN_VERIFY_URL,
+  verifyLineIdToken,
+} from "./id-token-verifier";
 
 describe("verifyLineIdToken", () => {
   it("verifies the LIFF ID token through the LINE verify endpoint", async () => {
@@ -47,6 +51,24 @@ describe("verifyLineIdToken", () => {
           Response.json({ error_description: "Invalid IdToken." }, { status: 400 }),
       }),
     ).rejects.toThrow("LINE ID token verification failed: 400");
+    await expect(
+      verifyLineIdToken({
+        idToken: "bad-token",
+        channelId: "channel-1",
+        fetcher: async () =>
+          Response.json({ error_description: "Invalid IdToken." }, { status: 400 }),
+      }),
+    ).rejects.toMatchObject({
+      status: 400,
+    });
+    await expect(
+      verifyLineIdToken({
+        idToken: "bad-token",
+        channelId: "channel-1",
+        fetcher: async () =>
+          Response.json({ error_description: "Invalid IdToken." }, { status: 400 }),
+      }),
+    ).rejects.toBeInstanceOf(LineIdTokenVerificationError);
   });
 
   it("rejects an audience mismatch", async () => {

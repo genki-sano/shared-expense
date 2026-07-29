@@ -1,6 +1,6 @@
 import type { User } from "@shared-expense/shared";
 import { Hono } from "hono";
-import { unauthorizedErrorResponse } from "../core/http/error-response";
+import { authenticateRequest } from "../core/auth/request-auth";
 import {
   noopExpenseMutationNotifier,
   type ExpenseMutationNotifier,
@@ -32,9 +32,12 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
   const app = new Hono();
 
   app.get("/", async (c) => {
-    const actor = await authenticateRequest(c.req.header("Authorization"), dependencies);
-    if (actor === null) {
-      return c.json(unauthorizedErrorResponse, 401);
+    const auth = await authenticateRequest(
+      c.req.header("Authorization"),
+      dependencies.authenticateToken,
+    );
+    if (!auth.ok) {
+      return c.json(auth.body, auth.status);
     }
 
     const month = c.req.query("date");
@@ -50,16 +53,19 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
 
     const expenses = await dependencies.expenseRepository.listByMonth({
       month,
-      actor,
+      actor: auth.actor,
     });
 
     return c.json({ expenses });
   });
 
   app.post("/", async (c) => {
-    const actor = await authenticateRequest(c.req.header("Authorization"), dependencies);
-    if (actor === null) {
-      return c.json(unauthorizedErrorResponse, 401);
+    const auth = await authenticateRequest(
+      c.req.header("Authorization"),
+      dependencies.authenticateToken,
+    );
+    if (!auth.ok) {
+      return c.json(auth.body, auth.status);
     }
 
     const idempotencyError = validateIdempotencyKey(c.req.header("Idempotency-Key"));
@@ -76,7 +82,7 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
     let expense;
     try {
       expense = await dependencies.expenseRepository.create({
-        actor,
+        actor: auth.actor,
         date: parsedBody.value.date,
         price: parsedBody.value.price,
         category: parsedBody.value.category,
@@ -97,7 +103,7 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
 
     await notifyExpenseMutation(dependencies, {
       eventType: "expense.created",
-      actor,
+      actor: auth.actor,
       expense,
     });
 
@@ -105,9 +111,12 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
   });
 
   app.put("/:id", async (c) => {
-    const actor = await authenticateRequest(c.req.header("Authorization"), dependencies);
-    if (actor === null) {
-      return c.json(unauthorizedErrorResponse, 401);
+    const auth = await authenticateRequest(
+      c.req.header("Authorization"),
+      dependencies.authenticateToken,
+    );
+    if (!auth.ok) {
+      return c.json(auth.body, auth.status);
     }
 
     const idempotencyError = validateIdempotencyKey(c.req.header("Idempotency-Key"));
@@ -124,7 +133,7 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
     try {
       const expense = await dependencies.expenseRepository.update({
         id: c.req.param("id"),
-        actor,
+        actor: auth.actor,
         version: parsedBody.value.version,
         patch: {
           ...(parsedBody.value.date === undefined ? {} : { date: parsedBody.value.date }),
@@ -138,7 +147,7 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
 
       await notifyExpenseMutation(dependencies, {
         eventType: "expense.updated",
-        actor,
+        actor: auth.actor,
         expense,
       });
 
@@ -149,9 +158,12 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
   });
 
   app.delete("/:id", async (c) => {
-    const actor = await authenticateRequest(c.req.header("Authorization"), dependencies);
-    if (actor === null) {
-      return c.json(unauthorizedErrorResponse, 401);
+    const auth = await authenticateRequest(
+      c.req.header("Authorization"),
+      dependencies.authenticateToken,
+    );
+    if (!auth.ok) {
+      return c.json(auth.body, auth.status);
     }
 
     const idempotencyError = validateIdempotencyKey(c.req.header("Idempotency-Key"));
@@ -162,12 +174,12 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
     try {
       const expense = await dependencies.expenseRepository.delete({
         id: c.req.param("id"),
-        actor,
+        actor: auth.actor,
       });
 
       await notifyExpenseMutation(dependencies, {
         eventType: "expense.deleted",
-        actor,
+        actor: auth.actor,
         expense,
       });
 
@@ -178,9 +190,12 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
   });
 
   app.post("/:id/restore", async (c) => {
-    const actor = await authenticateRequest(c.req.header("Authorization"), dependencies);
-    if (actor === null) {
-      return c.json(unauthorizedErrorResponse, 401);
+    const auth = await authenticateRequest(
+      c.req.header("Authorization"),
+      dependencies.authenticateToken,
+    );
+    if (!auth.ok) {
+      return c.json(auth.body, auth.status);
     }
 
     const idempotencyError = validateIdempotencyKey(c.req.header("Idempotency-Key"));
@@ -191,7 +206,7 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
     try {
       const expense = await dependencies.expenseRepository.restore({
         id: c.req.param("id"),
-        actor,
+        actor: auth.actor,
       });
 
       return c.json(expense);
@@ -212,31 +227,6 @@ async function notifyExpenseMutation(
   } catch (error) {
     console.error("Expense notification failed", error);
   }
-}
-
-async function authenticateRequest(
-  authorizationHeader: string | undefined,
-  dependencies: ExpenseRoutesDependencies,
-): Promise<User | null> {
-  const token = bearerToken(authorizationHeader);
-  if (token === null) {
-    return null;
-  }
-
-  try {
-    return await dependencies.authenticateToken(token);
-  } catch {
-    return null;
-  }
-}
-
-function bearerToken(authorizationHeader: string | undefined): string | null {
-  if (authorizationHeader === undefined) {
-    return null;
-  }
-
-  const match = /^Bearer (?<token>.+)$/.exec(authorizationHeader);
-  return match?.groups?.token ?? null;
 }
 
 function validateIdempotencyKey(value: string | undefined):

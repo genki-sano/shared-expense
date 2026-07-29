@@ -11,6 +11,16 @@ export type VerifyLineIdTokenInput = {
   fetcher?: typeof fetch;
 };
 
+export class LineIdTokenVerificationError extends Error {
+  readonly status: number;
+
+  constructor(status: number) {
+    super(`LINE ID token verification failed: ${status}`);
+    this.name = "LineIdTokenVerificationError";
+    this.status = status;
+  }
+}
+
 export async function verifyLineIdToken(
   input: VerifyLineIdTokenInput,
 ): Promise<LineIdTokenPayload> {
@@ -26,7 +36,7 @@ export async function verifyLineIdToken(
   });
 
   if (!response.ok) {
-    throw new Error(`LINE ID token verification failed: ${response.status}`);
+    throw new LineIdTokenVerificationError(response.status);
   }
 
   const payload = (await response.json()) as unknown;

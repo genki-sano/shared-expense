@@ -80,9 +80,9 @@ describe("fetchMonthlyExpenses", () => {
         fetcher: async () =>
           Response.json(
             {
-              message: "ログイン状態を確認できませんでした",
+              message: "認証情報の有効期限が切れているか、正しくありません",
               details: {
-                code: "AUTH_REQUIRED",
+                code: "AUTH_INVALID",
                 action: "LINEから開き直して、もう一度お試しください",
               },
             },
@@ -91,11 +91,11 @@ describe("fetchMonthlyExpenses", () => {
       }),
     ).rejects.toMatchObject({
       message:
-        'Failed to fetch expenses: 401 {"message":"ログイン状態を確認できませんでした","details":{"code":"AUTH_REQUIRED","action":"LINEから開き直して、もう一度お試しください"}}',
+        'Failed to fetch expenses: 401 {"message":"認証情報の有効期限が切れているか、正しくありません","details":{"code":"AUTH_INVALID","action":"LINEから開き直して、もう一度お試しください"}}',
       operation: "fetch expenses",
       status: 401,
       responseBody:
-        '{"message":"ログイン状態を確認できませんでした","details":{"code":"AUTH_REQUIRED","action":"LINEから開き直して、もう一度お試しください"}}',
+        '{"message":"認証情報の有効期限が切れているか、正しくありません","details":{"code":"AUTH_INVALID","action":"LINEから開き直して、もう一度お試しください"}}',
     });
   });
 });
@@ -174,9 +174,9 @@ describe("fetchMonthlySettlement", () => {
         fetcher: async () =>
           Response.json(
             {
-              message: "ログイン状態を確認できませんでした",
+              message: "認証情報の有効期限が切れているか、正しくありません",
               details: {
-                code: "AUTH_REQUIRED",
+                code: "AUTH_INVALID",
                 action: "LINEから開き直して、もう一度お試しください",
               },
             },
@@ -185,11 +185,11 @@ describe("fetchMonthlySettlement", () => {
       }),
     ).rejects.toMatchObject({
       message:
-        'Failed to fetch settlement: 401 {"message":"ログイン状態を確認できませんでした","details":{"code":"AUTH_REQUIRED","action":"LINEから開き直して、もう一度お試しください"}}',
+        'Failed to fetch settlement: 401 {"message":"認証情報の有効期限が切れているか、正しくありません","details":{"code":"AUTH_INVALID","action":"LINEから開き直して、もう一度お試しください"}}',
       operation: "fetch settlement",
       status: 401,
       responseBody:
-        '{"message":"ログイン状態を確認できませんでした","details":{"code":"AUTH_REQUIRED","action":"LINEから開き直して、もう一度お試しください"}}',
+        '{"message":"認証情報の有効期限が切れているか、正しくありません","details":{"code":"AUTH_INVALID","action":"LINEから開き直して、もう一度お試しください"}}',
     });
   });
 });
