@@ -4,10 +4,17 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev --test-scheduled",
+    "dry-run": "wrangler deploy --dry-run",
+    "tail": "wrangler tail",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@shared-expense/integrations": "workspace:*",
     "@shared-expense/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "wrangler": "^4.115.0"
   }
 }

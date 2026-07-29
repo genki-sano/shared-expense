@@ -1,5 +1,37 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Cloudflare Jobs Deploy Configuration
+
+### Checklist
+
+- [x] Check current Wrangler Cron configuration docs
+- [x] Add Wrangler dependency and jobs scripts
+- [x] Add jobs `wrangler.jsonc` with monthly Cron trigger
+- [x] Document Cloudflare secret and deploy commands
+- [x] Add deployment config tests
+- [x] Verify targeted tests pass
+- [x] Run jobs Wrangler dry-run
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-29 20:00 JST: Started Cloudflare Workers / Cron deployment configuration.
+- 2026-07-29 20:00 JST: Confirmed current Wrangler Cron syntax uses `triggers.crons` and scheduled handlers receive `scheduled(controller, env, ctx)`.
+- 2026-07-29 20:00 JST: Added Wrangler scripts, `apps/jobs/wrangler.jsonc`, deployment documentation, and source tests for the Cron/deploy configuration.
+
+### Verification Log
+
+- 2026-07-29 20:00 JST: `pnpm test apps/jobs/src/deploy-config.test.ts apps/jobs/src/monthly-settlement-reminder.test.ts` failed because the new deploy config test read root files instead of `apps/jobs` files.
+- 2026-07-29 20:01 JST: `pnpm test apps/jobs/src/deploy-config.test.ts apps/jobs/src/monthly-settlement-reminder.test.ts` passed with 5 tests.
+- 2026-07-29 20:01 JST: Initial `pnpm --filter @shared-expense/jobs dry-run` failed in sandbox because Wrangler writes logs under `~/Library/Preferences/.wrangler`.
+- 2026-07-29 20:01 JST: Re-ran `pnpm --filter @shared-expense/jobs dry-run` with filesystem approval; Wrangler 4.115.0 bundled the Worker successfully and exited dry-run.
+- 2026-07-29 20:02 JST: `pnpm test` passed with 118 tests across 22 files.
+- 2026-07-29 20:02 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-29 20:02 JST: `pnpm build` passed for 6 workspace projects; Next.js built `/` as dynamic and Redocly reported the same existing warnings.
+
 ## Task: Monthly settlement reminder Cron
 
 ### Checklist
