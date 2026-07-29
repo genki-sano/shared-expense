@@ -1,4 +1,4 @@
-# Cloudflare Web Deployment
+# Cloudflare Workers Web Deployment
 
 ## Web App
 
@@ -9,6 +9,8 @@
 - Worker name: `shared-expense-web`
 
 OpenNext Cloudflare adapts the Next.js build output for the Cloudflare runtime. Use this path because the monthly expense page is dynamic and reads API data at request time.
+
+This deployment must use Cloudflare Workers, not a static Cloudflare Pages output directory. The OpenNext output contains a Worker bundle plus assets, so pointing Cloudflare Pages at `.open-next` can fail with inaccessible link validation errors.
 
 ## Required Environment Variables
 
@@ -26,7 +28,7 @@ Do not set `NEXT_PUBLIC_DEV_ID_TOKEN` in production.
 Cloudflare build command:
 
 ```sh
-pnpm --filter @shared-expense/web run pages:build
+pnpm --filter @shared-expense/web run worker:build
 ```
 
 OpenNext writes the Cloudflare runtime bundle to:
@@ -52,11 +54,13 @@ pnpm deploy:web
 When running the package deploy script directly, use:
 
 ```sh
-pnpm --filter @shared-expense/web run pages:deploy
+pnpm --filter @shared-expense/web run worker:deploy
 ```
 
 ## Preview
 
 ```sh
-pnpm --filter @shared-expense/web run pages:preview
+pnpm --filter @shared-expense/web run worker:preview
 ```
+
+The older `pages:*` scripts are kept as aliases, but `worker:*` is the preferred naming because OpenNext Cloudflare deploys this dynamic Next.js app as a Worker.

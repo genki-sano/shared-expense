@@ -57,6 +57,9 @@ describe("web dev configuration", () => {
       scripts: {
         dev: "next dev",
         build: "next build",
+        "worker:build": "opennextjs-cloudflare build",
+        "worker:deploy": "opennextjs-cloudflare deploy",
+        "worker:preview": "opennextjs-cloudflare preview",
         "pages:build": "opennextjs-cloudflare build",
         "pages:deploy": "opennextjs-cloudflare deploy",
         "pages:preview": "opennextjs-cloudflare preview",
@@ -74,7 +77,7 @@ describe("web dev configuration", () => {
     expect(webWranglerConfig).toContain('"directory": ".open-next/assets"');
     expect(webWranglerConfig).toContain('"nodejs_compat"');
     expect(rootPackage.scripts).toMatchObject({
-      "deploy:web": "pnpm --filter @shared-expense/web run pages:deploy",
+      "deploy:web": "pnpm --filter @shared-expense/web run worker:deploy",
     });
     expect(existsSync(join(rootDir, "apps/web/src/app/page.tsx"))).toBe(true);
   });

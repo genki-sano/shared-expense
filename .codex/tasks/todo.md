@@ -1,5 +1,35 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Clarify OpenNext Web Worker Deployment
+
+### Checklist
+
+- [x] Inspect Cloudflare Pages build log failure
+- [x] Rename web deployment docs from Pages to Workers
+- [x] Add preferred `worker:*` web scripts
+- [x] Update root web deploy script
+- [x] Update web config tests and docs
+- [x] Verify targeted tests pass
+- [x] Run web OpenNext build
+- [x] Run `pnpm test`
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-29 21:15 JST: Cloudflare Pages build completed OpenNext but then failed validating `.open-next` as a static output directory.
+- 2026-07-29 21:15 JST: OpenNext Cloudflare output is a Worker bundle plus assets, so the dynamic web app should be deployed as a Cloudflare Worker rather than as a static Pages output directory.
+- 2026-07-29 21:16 JST: Renamed deployment guidance to Workers Web, added preferred `worker:*` scripts, and kept `pages:*` as compatibility aliases.
+
+### Verification Log
+
+- 2026-07-29 21:11 JST: `pnpm test apps/web-dev-config.test.ts` passed with 14 tests.
+- 2026-07-29 21:12 JST: `pnpm --filter @shared-expense/web run worker:build` passed and generated `.open-next/worker.js` successfully.
+- 2026-07-29 21:12 JST: `pnpm test` passed with 122 tests across 24 files.
+- 2026-07-29 21:12 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-29 21:12 JST: `pnpm build` passed for 6 workspace projects; Next.js built `/` as dynamic and Redocly reported the same existing warnings.
+
 ## Task: Add OpenNext Cloudflare Web Adapter
 
 ### Checklist

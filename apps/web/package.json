@@ -5,6 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "worker:build": "opennextjs-cloudflare build",
+    "worker:deploy": "opennextjs-cloudflare deploy",
+    "worker:preview": "opennextjs-cloudflare preview",
     "pages:build": "opennextjs-cloudflare build",
     "pages:deploy": "opennextjs-cloudflare deploy",
     "pages:preview": "opennextjs-cloudflare preview",
