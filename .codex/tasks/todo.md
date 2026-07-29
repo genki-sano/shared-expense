@@ -1,5 +1,55 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Fix API Wrangler Config Syntax
+
+### Checklist
+
+- [x] Inspect Cloudflare deploy parse error
+- [x] Fix API Wrangler config JSON syntax
+- [x] Keep only public production Worker vars
+- [x] Update deploy config test to parse the Wrangler config
+- [x] Verify targeted deploy config test passes
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Run API Wrangler dry-run
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-29 22:50 JST: Cloudflare deploy failed with `PropertyNameExpected` at `apps/api/wrangler.jsonc:11`, caused by a missing closing brace and trailing comma in the Worker config.
+- 2026-07-29 22:50 JST: Fixed the config as valid JSON and changed the deploy config test to parse the file so syntax errors fail locally.
+- 2026-07-29 22:52 JST: Removed `GOOGLE_SPREADSHEET_ID` and `LINE_LOGIN_CHANNEL_ID` from committed Worker vars so those identifiers stay in Cloudflare secrets/settings only.
+
+### Verification Log
+
+- 2026-07-29 22:47 JST: `pnpm test apps/api/src/deploy-config.test.ts` passed with 2 tests.
+- 2026-07-29 22:47 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-29 22:48 JST: `pnpm build` passed for 6 workspace projects; Next.js generated `/` and `/_not-found` as static pages.
+- 2026-07-29 22:48 JST: `pnpm --filter @shared-expense/api dry-run` passed and showed only public Worker vars in bindings.
+
+## Task: Add Public Production API Worker Vars
+
+### Checklist
+
+- [x] Inspect pending API Wrangler vars
+- [x] Remove Spreadsheet and LINE Login identifiers from committed Worker vars
+- [x] Update deploy config test expectations
+- [x] Verify targeted deploy config test passes
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-29 22:45 JST: User asked to keep the pending `apps/api/wrangler.jsonc` production vars.
+- 2026-07-29 22:45 JST: User clarified `GOOGLE_SPREADSHEET_ID` and `LINE_LOGIN_CHANNEL_ID` should not be committed, so only public frontend origins and notification detail base URL remain in Worker vars.
+
+### Verification Log
+
+- 2026-07-29 22:40 JST: `pnpm test apps/api/src/deploy-config.test.ts` passed with 2 tests.
+- 2026-07-29 22:41 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-29 22:41 JST: `pnpm build` passed for 6 workspace projects; Next.js generated `/` and `/_not-found` as static pages.
+
 ## Task: Log Authentication Failure Causes
 
 ### Checklist
