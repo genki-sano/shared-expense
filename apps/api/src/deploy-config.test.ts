@@ -13,6 +13,9 @@ describe("api Cloudflare deployment configuration", () => {
     expect(wranglerConfig).toContain('"name": "shared-expense-api"');
     expect(wranglerConfig).toContain('"main": "src/index.ts"');
     expect(wranglerConfig).toContain('"compatibility_date": "2026-07-29"');
+    expect(wranglerConfig).toContain(
+      '"API_ALLOWED_ORIGINS": "https://shared-expense.pages.dev,http://localhost:3000,http://localhost:3001"',
+    );
     expect(indexSource).toContain("createAppFromEnv(env)");
   });
 

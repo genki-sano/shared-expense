@@ -18,13 +18,16 @@ pnpm --filter @shared-expense/api exec wrangler secret put GOOGLE_PRIVATE_KEY
 pnpm --filter @shared-expense/api exec wrangler secret put LINE_LOGIN_CHANNEL_ID
 pnpm --filter @shared-expense/api exec wrangler secret put LINE_MESSAGING_CHANNEL_ACCESS_TOKEN
 pnpm --filter @shared-expense/api exec wrangler secret put LINE_NOTIFICATION_DETAIL_BASE_URL
-pnpm --filter @shared-expense/api exec wrangler secret put API_ALLOWED_ORIGINS
 ```
 
-`API_ALLOWED_ORIGINS` is a comma-separated list of allowed frontend origins, for example:
+## Required Variables
+
+`API_ALLOWED_ORIGINS` is a comma-separated list of allowed frontend origins. It is not a secret and is configured in `apps/api/wrangler.jsonc`.
+
+Production currently allows the Cloudflare Pages frontend and local dev origins:
 
 ```text
-https://liff.line.me,https://example.com
+https://shared-expense.pages.dev,http://localhost:3000,http://localhost:3001
 ```
 
 ## Deploy

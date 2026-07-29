@@ -1,5 +1,28 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Fix API CORS for Cloudflare Pages Origin
+
+### Checklist
+
+- [x] Inspect API CORS implementation and deployment config
+- [x] Add the Cloudflare Pages origin to API Worker vars
+- [x] Update deployment docs for the production Pages origin
+- [x] Verify targeted deployment tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-07-29 21:35 JST: Production Pages frontend was blocked by API Worker CORS because `https://shared-expense.pages.dev` was not included in the allowed origins.
+- 2026-07-29 21:35 JST: Confirmed API CORS only returns `Access-Control-Allow-Origin` when the request origin exactly matches `API_ALLOWED_ORIGINS`.
+
+### Verification Log
+
+- 2026-07-29 21:44 JST: `pnpm test apps/api/src/deploy-config.test.ts apps/api/src/worker-entrypoint.test.ts apps/api/src/app.test.ts` passed with 22 tests.
+- 2026-07-29 21:44 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-07-29 21:45 JST: `pnpm build` passed for 6 workspace projects; Next.js generated `/` and `/_not-found` as static pages.
+
 ## Task: Switch Web to Cloudflare Pages Static Export
 
 ### Checklist
