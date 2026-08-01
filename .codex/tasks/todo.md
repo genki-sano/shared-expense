@@ -1,5 +1,29 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Stop LIFF Login Loop
+
+### Checklist
+
+- [x] Inspect current expired ID token redirect behavior
+- [x] Clear stale LIFF login state before re-login
+- [x] Add redirect loop guard for expired ID token refresh
+- [x] Verify targeted LIFF/web tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-01 21:45 JST: User reported being prompted to log in endlessly after expired ID token handling was deployed.
+- 2026-08-01 21:45 JST: Found expired token handling called `liff.login()` while still logged in, which can keep returning the same stale LIFF session.
+- 2026-08-01 21:45 JST: Updated expired token handling based on LINE Login docs: avoid `liff.login()` inside the LIFF browser, and only use logout + login once in external browsers.
+
+### Verification Log
+
+- 2026-08-01 21:46 JST: `pnpm test apps/web/src/features/expenses/liff-client.test.ts apps/web-dev-config.test.ts apps/web/src/features/expenses/api.test.ts` passed with 31 tests.
+- 2026-08-01 21:46 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-08-01 21:46 JST: `pnpm build:web` passed; Next.js generated `/` and `/_not-found` as static pages.
+
 ## Task: Refresh LIFF ID Token Before API Calls
 
 ### Checklist
