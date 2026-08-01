@@ -19,7 +19,7 @@ describe("api Cloudflare deployment configuration", () => {
 
     expect(parsedWranglerConfig.name).toBe("shared-expense-api");
     expect(parsedWranglerConfig.main).toBe("src/index.ts");
-    expect(parsedWranglerConfig.compatibility_date).toBe("2026-07-29");
+    expect(parsedWranglerConfig.compatibility_date).toBe("2026-08-01");
     expect(parsedWranglerConfig.vars).toMatchObject({
       API_ALLOWED_ORIGINS: "https://liff.line.me,https://shared-expense.pages.dev",
       LINE_NOTIFICATION_DETAIL_BASE_URL: "https://shared-expense.pages.dev",

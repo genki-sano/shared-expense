@@ -1,5 +1,30 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Update Worker Compatibility Date
+
+### Checklist
+
+- [x] Inspect current Worker compatibility dates
+- [x] Update API and Jobs Wrangler compatibility date to 2026-08-01
+- [x] Update deploy config tests
+- [x] Verify targeted deploy config tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Run API and Jobs Wrangler dry-runs
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-01 20:06 JST: User confirmed updating the Worker `compatibility_date` after observability settings were added.
+- 2026-08-01 20:06 JST: Updated API and Jobs Worker `compatibility_date` to `2026-08-01` and aligned deploy config tests.
+
+### Verification Log
+
+- 2026-08-01 20:06 JST: `pnpm test apps/api/src/deploy-config.test.ts apps/jobs/src/deploy-config.test.ts` passed with 5 tests.
+- 2026-08-01 20:06 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-08-01 20:06 JST: `pnpm build` passed for 6 workspace projects; Next.js generated `/` and `/_not-found` as static pages.
+- 2026-08-01 20:06 JST: `pnpm --filter @shared-expense/api dry-run` and `pnpm --filter @shared-expense/jobs dry-run` both passed with Wrangler 4.115.0.
+
 ## Task: Enable Workers Logs Observability
 
 ### Checklist

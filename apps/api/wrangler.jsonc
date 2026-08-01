@@ -2,7 +2,7 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "shared-expense-api",
   "main": "src/index.ts",
-  "compatibility_date": "2026-07-29",
+  "compatibility_date": "2026-08-01",
   "vars": {
     "API_ALLOWED_ORIGINS": "https://liff.line.me,https://shared-expense.pages.dev",
     "LINE_NOTIFICATION_DETAIL_BASE_URL": "https://shared-expense.pages.dev"

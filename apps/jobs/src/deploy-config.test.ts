@@ -17,7 +17,7 @@ describe("jobs Cloudflare deployment configuration", () => {
 
     expect(wranglerConfig.name).toBe("shared-expense-jobs");
     expect(wranglerConfig.main).toBe("src/index.ts");
-    expect(wranglerConfig.compatibility_date).toBe("2026-07-29");
+    expect(wranglerConfig.compatibility_date).toBe("2026-08-01");
     expect(wranglerConfig.triggers?.crons).toEqual(["0 10 5 * *"]);
     expect(wranglerConfig.observability).toMatchObject({
       enabled: true,
