@@ -56,10 +56,10 @@ describe("web dev configuration", () => {
       scripts: {
         dev: "next dev",
         build: "next build",
-        "pages:build": "next build",
         typecheck: "tsc -p tsconfig.json --noEmit",
       },
     });
+    expect(webPackage.scripts).not.toHaveProperty("pages:build");
     expect(webPackage.devDependencies).not.toHaveProperty("@opennextjs/cloudflare");
     expect(webPackage.devDependencies).not.toHaveProperty("wrangler");
     expect(nextConfig).toContain('output: "export"');

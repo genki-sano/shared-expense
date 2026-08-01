@@ -6,9 +6,7 @@
     "dev": "tsx src/dev.ts",
     "build": "tsc -p tsconfig.json",
     "deploy": "wrangler deploy",
-    "dev:worker": "wrangler dev",
     "dry-run": "wrangler deploy --dry-run",
-    "tail": "wrangler tail",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

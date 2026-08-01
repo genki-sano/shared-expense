@@ -25,14 +25,14 @@ Do not set `NEXT_PUBLIC_DEV_ID_TOKEN` in production.
 If the Pages project root directory is the repository root:
 
 ```text
-Build command: pnpm --filter @shared-expense/web run pages:build
+Build command: pnpm --filter @shared-expense/web build
 Build output directory: apps/web/out
 ```
 
 If the Pages project root directory is `apps/web`:
 
 ```text
-Build command: pnpm run pages:build
+Build command: pnpm run build
 Build output directory: out
 ```
 

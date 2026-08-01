@@ -1,5 +1,29 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Simplify App Package Scripts
+
+### Checklist
+
+- [x] Compare API, Web, and Jobs package scripts
+- [x] Remove redundant package scripts
+- [x] Update docs and tests that reference removed scripts
+- [x] Keep Wrangler config parseable for deploy config tests
+- [x] Verify targeted config tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-01 14:50 JST: User asked to compare `apps/api/package.json`, `apps/web/package.json`, and `apps/jobs/package.json` and keep only necessary scripts.
+- 2026-08-01 14:50 JST: Decided to keep common `dev`, `build`, and `typecheck`; keep Worker `deploy` and `dry-run`; remove convenience-only `tail`, duplicate web `pages:build`, and API's extra `dev:worker`.
+
+### Verification Log
+
+- 2026-08-01 19:47 JST: `pnpm test apps/api/src/deploy-config.test.ts apps/jobs/src/deploy-config.test.ts apps/web-dev-config.test.ts` passed with 19 tests.
+- 2026-08-01 19:47 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-08-01 19:47 JST: `pnpm build` passed for 6 workspace projects; Next.js generated `/` and `/_not-found` as static pages.
+
 ## Task: Fix API Wrangler Config Syntax
 
 ### Checklist

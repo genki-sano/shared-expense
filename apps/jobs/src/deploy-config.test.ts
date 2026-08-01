@@ -7,21 +7,31 @@ function readText(path: string): string {
 
 describe("jobs Cloudflare deployment configuration", () => {
   it("configures the monthly settlement reminder Cron trigger", () => {
-    const wranglerConfig = readText("wrangler.jsonc");
+    const wranglerConfig = JSON.parse(readText("wrangler.jsonc")) as {
+      name?: unknown;
+      main?: unknown;
+      compatibility_date?: unknown;
+      triggers?: { crons?: unknown };
+    };
 
-    expect(wranglerConfig).toContain('"name": "shared-expense-jobs"');
-    expect(wranglerConfig).toContain('"main": "src/index.ts"');
-    expect(wranglerConfig).toContain('"compatibility_date": "2026-07-29"');
-    expect(wranglerConfig).toContain('"crons": ["0 10 5 * *"]');
+    expect(wranglerConfig.name).toBe("shared-expense-jobs");
+    expect(wranglerConfig.main).toBe("src/index.ts");
+    expect(wranglerConfig.compatibility_date).toBe("2026-07-29");
+    expect(wranglerConfig.triggers?.crons).toEqual(["0 10 5 * *"]);
   });
 
-  it("exposes Wrangler scripts for local scheduled testing and deployment", () => {
-    const packageJson = readText("package.json");
+  it("exposes only necessary Jobs Worker scripts", () => {
+    const packageJson = JSON.parse(readText("package.json")) as {
+      scripts?: Record<string, unknown>;
+    };
 
-    expect(packageJson).toContain('"dev": "wrangler dev --test-scheduled"');
-    expect(packageJson).toContain('"dry-run": "wrangler deploy --dry-run"');
-    expect(packageJson).toContain('"deploy": "wrangler deploy"');
-    expect(packageJson).toContain('"tail": "wrangler tail"');
+    expect(packageJson.scripts).toEqual({
+      build: "tsc -p tsconfig.json",
+      deploy: "wrangler deploy",
+      dev: "wrangler dev --test-scheduled",
+      "dry-run": "wrangler deploy --dry-run",
+      typecheck: "tsc -p tsconfig.json --noEmit",
+    });
   });
 
   it("uses pnpm run to avoid the built-in pnpm deploy command", () => {

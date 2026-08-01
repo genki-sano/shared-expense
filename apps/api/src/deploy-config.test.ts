@@ -28,17 +28,23 @@ describe("api Cloudflare deployment configuration", () => {
     expect(indexSource).toContain("createAppFromEnv(env)");
   });
 
-  it("exposes Wrangler scripts for API Worker deployment", () => {
+  it("exposes only necessary API Worker scripts", () => {
     const packageJson = readText("package.json");
+    const parsedPackageJson = JSON.parse(packageJson) as {
+      scripts?: Record<string, unknown>;
+    };
     const rootPackageJson = readFileSync(
       new URL("../../../package.json", import.meta.url),
       "utf8",
     );
 
-    expect(packageJson).toContain('"dev:worker": "wrangler dev"');
-    expect(packageJson).toContain('"dry-run": "wrangler deploy --dry-run"');
-    expect(packageJson).toContain('"deploy": "wrangler deploy"');
-    expect(packageJson).toContain('"tail": "wrangler tail"');
+    expect(parsedPackageJson.scripts).toEqual({
+      dev: "tsx src/dev.ts",
+      build: "tsc -p tsconfig.json",
+      deploy: "wrangler deploy",
+      "dry-run": "wrangler deploy --dry-run",
+      typecheck: "tsc -p tsconfig.json --noEmit",
+    });
     expect(rootPackageJson).toContain(
       '"deploy:api": "pnpm --filter @shared-expense/api run deploy"',
     );

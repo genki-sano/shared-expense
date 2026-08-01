@@ -7,7 +7,6 @@
     "deploy": "wrangler deploy",
     "dev": "wrangler dev --test-scheduled",
     "dry-run": "wrangler deploy --dry-run",
-    "tail": "wrangler tail",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

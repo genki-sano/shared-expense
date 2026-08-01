@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "pages:build": "next build",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

@@ -5,7 +5,6 @@
 - Worker: `shared-expense-api`
 - Entrypoint: `apps/api/src/index.ts`
 - Local Node dev server: `pnpm --filter @shared-expense/api dev`
-- Worker dev server: `pnpm --filter @shared-expense/api dev:worker`
 
 ## Required Secrets
 
