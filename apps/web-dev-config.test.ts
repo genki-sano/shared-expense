@@ -84,6 +84,7 @@ describe("web dev configuration", () => {
     });
     expect(homeClientSource).toContain("NEXT_PUBLIC_LIFF_ID");
     expect(homeClientSource).toContain("NEXT_PUBLIC_DEV_ID_TOKEN");
+    expect(homeClientSource).toContain('process.env.NODE_ENV === "development"');
     expect(dashboardSource).toContain("getLiffIdToken(");
     expect(dashboardSource).toContain("fetchMonthlyExpenses({");
     expect(dashboardSource).toContain("fetchMonthlySettlement({");

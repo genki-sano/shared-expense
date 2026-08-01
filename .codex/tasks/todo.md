@@ -1,5 +1,29 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Ignore Dev ID Token in Production Web
+
+### Checklist
+
+- [x] Inspect frontend ID token source and API LINE verify failure
+- [x] Ignore `NEXT_PUBLIC_DEV_ID_TOKEN` outside development builds
+- [x] Update web configuration tests
+- [x] Verify targeted web config/API tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-01 21:30 JST: Production API now reaches LINE verification and returns `AUTH_INVALID` with `LINE ID token verification failed: 400`.
+- 2026-08-01 21:30 JST: Found web startup passes `NEXT_PUBLIC_DEV_ID_TOKEN` directly to the dashboard; when set in Pages production, LIFF initialization is skipped and the dev token is sent to the API.
+- 2026-08-01 21:30 JST: Changed the web app to only use `NEXT_PUBLIC_DEV_ID_TOKEN` when `NODE_ENV` is `development`.
+
+### Verification Log
+
+- 2026-08-01 21:26 JST: `pnpm test apps/web-dev-config.test.ts apps/web/src/features/expenses/api.test.ts` passed with 26 tests.
+- 2026-08-01 21:26 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-08-01 21:26 JST: `pnpm build:web` passed; Next.js generated `/` and `/_not-found` as static pages.
+
 ## Task: Fix Env Authentication Wiring
 
 ### Checklist

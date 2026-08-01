@@ -14,7 +14,10 @@ export function HomeClient() {
     searchParams.get("expenseId") ?? undefined,
   );
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-  const devIdToken = process.env.NEXT_PUBLIC_DEV_ID_TOKEN;
+  const devIdToken =
+    process.env.NODE_ENV === "development"
+      ? process.env.NEXT_PUBLIC_DEV_ID_TOKEN
+      : undefined;
   const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
   const shouldUseSampleData = apiBaseUrl === undefined || apiBaseUrl.trim() === "";
   const expenses = shouldUseSampleData ? sampleExpenses : [];
