@@ -1,12 +1,14 @@
 import type { LineMessagingClient } from "@shared-expense/integrations";
 import type { Expense, User } from "@shared-expense/shared";
 import { Hono } from "hono";
+import { expenseMutationFlexMessage } from "../core/notifications/expense-mutation-notifier";
 import type { HouseholdUserRepository } from "../core/users/repository";
 import type { ExpenseRepository } from "../expenses/repository";
 
 export type LineWebhookRoutesDependencies = {
   channelSecret: string;
   expenseRepository: ExpenseRepository;
+  detailBaseUrl?: string | undefined;
   lineMessagingClient: LineMessagingClient;
   userRepository: HouseholdUserRepository;
   now?: () => Date;
@@ -125,16 +127,22 @@ async function handleLineWebhookEvent(
   }
 
   try {
-    await notifyAllUsers(dependencies, {
-      actor,
-      expense,
+    await dependencies.lineMessagingClient.replyMessage({
+      replyToken: event.replyToken,
+      messages: [successFlexMessage(dependencies, { actor, expense })],
     });
   } catch (error) {
-    console.error("LINE webhook expense notification failed", {
+    console.error("LINE webhook expense success reply failed", {
       reason: errorMessage(error),
       webhookEventId: event.webhookEventId,
     });
   }
+
+  await notifyPartnerUsers(dependencies, {
+    actor,
+    expense,
+    webhookEventId: event.webhookEventId,
+  });
 }
 
 export function parseExpenseMessage(
@@ -185,25 +193,47 @@ export async function verifyLineWebhookSignature(input: {
   return timingSafeEqual(expected, input.signature);
 }
 
-async function notifyAllUsers(
+async function notifyPartnerUsers(
   dependencies: LineWebhookRoutesDependencies,
-  input: { actor: User; expense: Expense },
+  input: { actor: User; expense: Expense; webhookEventId?: string | undefined },
 ): Promise<void> {
   const users = await dependencies.userRepository.listHouseholdUsers();
-  await Promise.all(
+  const results = await Promise.allSettled(
     users
-      .filter((user) => user.notifyEnabled)
+      .filter((user) => user.id !== input.actor.id && user.notifyEnabled)
       .map((user) =>
         dependencies.lineMessagingClient.pushMessage({
           to: user.lineUserId,
-          messages: [
-            {
-              type: "text",
-              text: `${input.actor.displayName}さんが支出を登録しました\n${input.expense.memo ?? input.expense.category} ${formatYen(input.expense.price)}`,
-            },
-          ],
+          messages: [successFlexMessage(dependencies, input)],
         }),
       ),
+  );
+
+  for (const [index, result] of results.entries()) {
+    if (result.status === "fulfilled") {
+      continue;
+    }
+
+    const recipient = users.filter((user) => user.id !== input.actor.id && user.notifyEnabled)[index];
+    console.error("LINE webhook expense partner notification failed", {
+      reason: errorMessage(result.reason),
+      recipientUserId: recipient?.id,
+      webhookEventId: input.webhookEventId,
+    });
+  }
+}
+
+function successFlexMessage(
+  dependencies: Pick<LineWebhookRoutesDependencies, "detailBaseUrl">,
+  input: { actor: User; expense: Expense },
+) {
+  return expenseMutationFlexMessage(
+    {
+      eventType: "expense.created",
+      actor: input.actor,
+      expense: input.expense,
+    },
+    dependencies.detailBaseUrl,
   );
 }
 
@@ -292,14 +322,6 @@ function timingSafeEqual(left: string, right: string): boolean {
   }
 
   return diff === 0;
-}
-
-function formatYen(amount: number): string {
-  return new Intl.NumberFormat("ja-JP", {
-    style: "currency",
-    currency: "JPY",
-    maximumFractionDigits: 0,
-  }).format(amount);
 }
 
 function errorMessage(error: unknown): string {

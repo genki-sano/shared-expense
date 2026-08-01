@@ -1,5 +1,33 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Reply on LINE Webhook Success
+
+### Checklist
+
+- [x] Inspect webhook success notification path
+- [x] Reply to the sender after successful LINE webhook expense creation
+- [x] Push the success notification only to the partner users
+- [x] Use the same expense-created Flex Message as normal expense registration
+- [x] Verify targeted LINE webhook tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-01 23:15 JST: User reported that the expense was registered from LINE, but no LINE message was received. Current implementation only used push messages on success and did not use the webhook reply token.
+- 2026-08-01 23:16 JST: Changed successful webhook registration to reply to the sender and push the same success message to partner users.
+- 2026-08-01 23:13 JST: User asked for the success message to use the same Flex Message style as normal expense registration, so webhook success replies and partner pushes now reuse the existing expense-created Flex payload.
+- 2026-08-01 23:17 JST: Created the webhook success Flex reply commit.
+
+### Verification Log
+
+- 2026-08-01 23:12 JST: `pnpm test apps/api/src/line-webhook/routes.test.ts apps/api/src/app-env.test.ts packages/integrations/src/line/messaging-client.test.ts` passed. `app-env.test.ts` intentionally logs auth failures for invalid-token cases.
+- 2026-08-01 23:14 JST: `pnpm test apps/api/src/line-webhook/routes.test.ts apps/api/src/app-env.test.ts packages/integrations/src/line/messaging-client.test.ts apps/api/src/core/notifications/expense-mutation-notifier.test.ts` passed after switching success messages to Flex. `app-env.test.ts` intentionally logs auth failures for invalid-token cases.
+- 2026-08-01 23:13 JST: `pnpm typecheck` failed because `webhookEventId` was passed as `string | undefined` under `exactOptionalPropertyTypes`.
+- 2026-08-01 23:13 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-08-01 23:16 JST: `pnpm build` passed. Redocly still reports the same existing OpenAPI warnings.
+
 ## Task: LINE Webhook Expense Creation
 
 ### Checklist

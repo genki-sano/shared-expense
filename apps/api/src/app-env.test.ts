@@ -434,6 +434,7 @@ describe("createAppFromEnv", () => {
         GOOGLE_PRIVATE_KEY: "-----BEGIN PRIVATE KEY-----\\nkey\\n-----END PRIVATE KEY-----\\n",
         LINE_MESSAGING_CHANNEL_ACCESS_TOKEN: "line-message-token",
         LINE_MESSAGING_CHANNEL_SECRET: "line-channel-secret",
+        LINE_LIFF_ID: "1234567890-shared-expense",
       },
       {
         signServiceAccountJwt: async () => "signed-jwt",
@@ -507,13 +508,27 @@ describe("createAppFromEnv", () => {
     });
 
     expect(response.status).toBe(200);
+    const replyBodies = calls
+      .filter((call) => call.url === "https://api.line.me/v2/bot/message/reply")
+      .map((call) => String(call.init?.body));
+    expect(replyBodies).toHaveLength(1);
+    expect(replyBodies[0]).toContain('"replyToken":"reply-token-1"');
+    expect(replyBodies[0]).toContain('"type":"flex"');
+    expect(replyBodies[0]).toContain("支出を追加しました");
+    expect(replyBodies[0]).toContain("コンビニ");
+    expect(replyBodies[0]).toContain("￥1,200");
+    expect(replyBodies[0]).toContain(
+      "https://liff.line.me/1234567890-shared-expense?month=",
+    );
+
     const pushBodies = calls
       .filter((call) => call.url === "https://api.line.me/v2/bot/message/push")
       .map((call) => String(call.init?.body));
-    expect(pushBodies).toHaveLength(2);
-    expect(pushBodies[0]).toContain('"to":"line_woman"');
-    expect(pushBodies[1]).toContain('"to":"line_man"');
-    expect(pushBodies.join("\n")).toContain("コンビニ ￥1,200");
+    expect(pushBodies).toHaveLength(1);
+    expect(pushBodies[0]).toContain('"to":"line_man"');
+    expect(pushBodies[0]).toContain('"type":"flex"');
+    expect(pushBodies.join("\n")).toContain("コンビニ");
+    expect(pushBodies.join("\n")).toContain("￥1,200");
   });
 });
 

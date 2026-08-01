@@ -193,6 +193,7 @@ function optionalLineWebhookFromEnv(
     lineWebhook: {
       channelSecret: env.LINE_MESSAGING_CHANNEL_SECRET,
       expenseRepository: repositories.expenseRepository,
+      ...optionalDetailBaseUrlFromEnv(env),
       lineMessagingClient: new FetchLineMessagingClient({
         channelAccessToken: env.LINE_MESSAGING_CHANNEL_ACCESS_TOKEN,
         ...(dependencies.fetcher === undefined ? {} : { fetcher: dependencies.fetcher }),

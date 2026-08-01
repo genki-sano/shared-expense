@@ -52,7 +52,7 @@ export const noopExpenseMutationNotifier: ExpenseMutationNotifier = {
   notify: async () => {},
 };
 
-function expenseMutationFlexMessage(
+export function expenseMutationFlexMessage(
   input: ExpenseMutationNotificationInput,
   detailBaseUrl: string | undefined,
 ): LineFlexMessage {

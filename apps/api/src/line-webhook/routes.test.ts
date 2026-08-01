@@ -1,4 +1,8 @@
-import type { LineMessage, ReplyLineMessageInput } from "@shared-expense/integrations";
+import type {
+  LineFlexMessage,
+  LineMessage,
+  ReplyLineMessageInput,
+} from "@shared-expense/integrations";
 import type { HouseholdUsers, User } from "@shared-expense/shared";
 import { describe, expect, it } from "vitest";
 import { InMemoryHouseholdUserRepository } from "../core/users/repository";
@@ -65,12 +69,13 @@ describe("verifyLineWebhookSignature", () => {
 });
 
 describe("createLineWebhookRoutes", () => {
-  it("creates today's expense from a LINE text message and pushes notifications to both users", async () => {
+  it("creates today's expense from a LINE text message, replies to the sender, and pushes to the partner", async () => {
     const repository = new InMemoryExpenseRepository([]);
     const pushed: Array<{ to: string; messages: LineMessage[] }> = [];
     const replied: ReplyLineMessageInput[] = [];
     const app = createLineWebhookRoutes({
       channelSecret: "channel-secret",
+      detailBaseUrl: "https://liff.line.me/1234567890-shared-expense",
       expenseRepository: repository,
       lineMessagingClient: {
         pushMessage: async (input) => {
@@ -117,9 +122,25 @@ describe("createLineWebhookRoutes", () => {
         memo: "コンビニ",
       },
     ]);
-    expect(pushed.map((message) => message.to)).toEqual(["line_woman", "line_man"]);
-    expect(JSON.stringify(pushed)).toContain("コンビニ ￥1,200");
-    expect(replied).toEqual([]);
+    expect(pushed.map((message) => message.to)).toEqual(["line_man"]);
+    expect((pushed[0]?.messages[0] as LineFlexMessage | undefined)?.type).toBe("flex");
+    expect(JSON.stringify(pushed)).toContain("支出を追加しました");
+    expect(JSON.stringify(pushed)).toContain("コンビニ");
+    expect(JSON.stringify(pushed)).toContain("￥1,200");
+    expect(JSON.stringify(pushed)).toContain(
+      "https://liff.line.me/1234567890-shared-expense?month=2026-08",
+    );
+    expect(replied).toEqual([
+      {
+        replyToken: "reply-token-1",
+        messages: [
+          expect.objectContaining({
+            type: "flex",
+            altText: "ひとみさんが支出を追加しました: コンビニ ￥1,200",
+          }),
+        ],
+      },
+    ]);
   });
 
   it("replies when registration fails because the text format is invalid", async () => {
