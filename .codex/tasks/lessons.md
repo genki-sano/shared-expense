@@ -10,3 +10,4 @@
 - 2026-07-29: When an API error response is itself confusing to users, improve the API contract and response body before only masking it in the frontend. Include an actionable next step in `details.action`.
 - 2026-07-29: For Wrangler JSON/JSONC configuration changes, tests must parse the config instead of only checking string snippets so missing braces and trailing commas are caught before deployment.
 - 2026-08-01: When production auth reports missing configuration even though Worker secrets exist, verify the application env wiring path before assuming the Cloudflare value is absent. Add tests that exercise `createAppFromEnv(env)` without injected auth dependencies.
+- 2026-08-01: When an auth failure log names a specific API method such as `GET /api/expenses`, fix the token lifecycle at the token acquisition boundary, not only mutation callers. Expired LIFF ID tokens must be prevented before any API request.

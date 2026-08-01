@@ -1,5 +1,32 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Refresh LIFF ID Token Before API Calls
+
+### Checklist
+
+- [x] Inspect current frontend ID token lifecycle
+- [x] Add a dashboard helper to resolve the latest available ID token
+- [x] Use the latest token for expense mutations
+- [x] Redirect expired LIFF ID tokens back through LINE login
+- [x] Verify targeted web/API tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-01 21:40 JST: Production LINE verify now reports `IdToken expired.`, confirming the frontend is reusing an expired LIFF ID token.
+- 2026-08-01 21:40 JST: Found the dashboard stores the initial token in state and reuses it for create, update, delete, and restore operations.
+- 2026-08-01 21:40 JST: Added `resolveIdToken` so expense mutations use the latest LIFF ID token instead of stale state.
+- 2026-08-01 21:40 JST: Added LIFF decoded ID token expiration check so expired tokens are not sent to the API.
+
+### Verification Log
+
+- 2026-08-01 21:40 JST: `pnpm test apps/web/src/features/expenses/liff-client.test.ts apps/web-dev-config.test.ts apps/web/src/features/expenses/api.test.ts` passed with 29 tests.
+- 2026-08-01 21:40 JST: Initial `pnpm typecheck` and `pnpm build:web` failed because the LIFF `login` helper type was too wide for `exactOptionalPropertyTypes`; fixed by calling `liff.login` directly after narrowing `redirectUri`.
+- 2026-08-01 21:40 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-08-01 21:40 JST: `pnpm build:web` passed; Next.js generated `/` and `/_not-found` as static pages.
+
 ## Task: Surface LINE Verify Error Details
 
 ### Checklist

@@ -253,14 +253,37 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
     });
   }
 
+  async function resolveIdToken(): Promise<string | undefined> {
+    if (props.idToken !== undefined && props.idToken.trim() !== "") {
+      return props.idToken;
+    }
+
+    const liffId = props.liffId;
+    if (liffId === undefined || liffId.trim() === "") {
+      return idToken;
+    }
+
+    const token = await getLiffIdToken({
+      liffId,
+      redirectUri: window.location.href,
+    });
+    if (token === null) {
+      return undefined;
+    }
+
+    setIdToken(token);
+    return token;
+  }
+
   async function handleCreate(payload: CreateExpensePayload): Promise<void> {
     setIsSubmitting(true);
     setStatusMessage(null);
     setRestorableExpense(null);
     try {
+      const currentIdToken = await resolveIdToken();
       const created = await createExpense({
         apiBaseUrl: props.apiBaseUrl,
-        idToken,
+        idToken: currentIdToken,
         idempotencyKey: createIdempotencyKey("expense-create"),
         expense: payload,
       });
@@ -283,9 +306,10 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
     setStatusMessage(null);
     setRestorableExpense(null);
     try {
+      const currentIdToken = await resolveIdToken();
       const updated = await updateExpense({
         apiBaseUrl: props.apiBaseUrl,
-        idToken,
+        idToken: currentIdToken,
         idempotencyKey: createIdempotencyKey(`expense-update-${expense.id}`),
         id: expense.id,
         expense: payload,
@@ -313,9 +337,10 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
     setIsSubmitting(true);
     setStatusMessage(null);
     try {
+      const currentIdToken = await resolveIdToken();
       await deleteExpense({
         apiBaseUrl: props.apiBaseUrl,
-        idToken,
+        idToken: currentIdToken,
         idempotencyKey: createIdempotencyKey(`expense-delete-${expense.id}`),
         id: expense.id,
       });
@@ -334,9 +359,10 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
   async function handleRestore(expense: Expense): Promise<void> {
     setIsSubmitting(true);
     try {
+      const currentIdToken = await resolveIdToken();
       const restored = await restoreExpense({
         apiBaseUrl: props.apiBaseUrl,
-        idToken,
+        idToken: currentIdToken,
         idempotencyKey: createIdempotencyKey(`expense-restore-${expense.id}`),
         id: expense.id,
       });
