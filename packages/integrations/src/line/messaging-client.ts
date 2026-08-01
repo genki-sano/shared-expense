@@ -1,6 +1,8 @@
 import { defaultFetcher } from "../fetcher";
 
 export const LINE_PUSH_MESSAGE_URL = "https://api.line.me/v2/bot/message/push";
+export const LINE_VALIDATE_PUSH_MESSAGE_URL =
+  "https://api.line.me/v2/bot/message/validate/push";
 
 export type LineTextMessage = {
   type: "text";
@@ -54,7 +56,6 @@ export type LineFlexText = {
 export type LineFlexSeparator = {
   type: "separator";
   margin?: string;
-  color?: string;
 };
 
 export type LineFlexButton = {
@@ -96,14 +97,24 @@ export type FetchLineMessagingClientInput = {
 export class LineMessagingApiError extends Error {
   readonly status: number;
   readonly responseBody: string;
+  readonly validationStatus: number | undefined;
+  readonly validationResponseBody: string | undefined;
 
-  constructor(input: { status: number; responseBody: string }) {
+  constructor(input: {
+    status: number;
+    responseBody: string;
+    validationStatus?: number | undefined;
+    validationResponseBody?: string | undefined;
+  }) {
     const detail =
       input.responseBody.trim() === "" ? "" : ` ${input.responseBody.trim()}`;
-    super(`LINE push message failed: ${input.status}${detail}`);
+    const validationDetail = formatValidationDetail(input);
+    super(`LINE push message failed: ${input.status}${detail}${validationDetail}`);
     this.name = "LineMessagingApiError";
     this.status = input.status;
     this.responseBody = input.responseBody;
+    this.validationStatus = input.validationStatus;
+    this.validationResponseBody = input.validationResponseBody;
   }
 }
 
@@ -130,12 +141,57 @@ export class FetchLineMessagingClient implements LineMessagingClient {
     });
 
     if (!response.ok) {
+      const responseBody = await safeResponseText(response);
+      const validation = shouldValidateMessageObject(response.status)
+        ? await this.#validatePushMessages(input.messages)
+        : undefined;
+
       throw new LineMessagingApiError({
         status: response.status,
-        responseBody: await safeResponseText(response),
+        responseBody,
+        validationStatus: validation?.status,
+        validationResponseBody: validation?.responseBody,
       });
     }
   }
+
+  async #validatePushMessages(
+    messages: LineMessage[],
+  ): Promise<{ status: number; responseBody: string }> {
+    const response = await this.#fetcher(LINE_VALIDATE_PUSH_MESSAGE_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${this.#channelAccessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ messages }),
+    });
+
+    return {
+      status: response.status,
+      responseBody: await safeResponseText(response),
+    };
+  }
+}
+
+function shouldValidateMessageObject(status: number): boolean {
+  return status === 400;
+}
+
+function formatValidationDetail(input: {
+  validationStatus?: number | undefined;
+  validationResponseBody?: string | undefined;
+}): string {
+  if (input.validationStatus === undefined) {
+    return "";
+  }
+
+  const body = input.validationResponseBody?.trim();
+  if (body === undefined || body === "") {
+    return ` validation: ${input.validationStatus}`;
+  }
+
+  return ` validation: ${input.validationStatus} ${body}`;
 }
 
 async function safeResponseText(response: Response): Promise<string> {

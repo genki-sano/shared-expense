@@ -87,7 +87,6 @@ describe("createExpenseMutationNotifier", () => {
                   {
                     type: "separator",
                     margin: "md",
-                    color: "#D7DED9",
                   },
                   expect.objectContaining({
                     type: "box",
@@ -131,6 +130,7 @@ describe("createExpenseMutationNotifier", () => {
     ]);
     expect(JSON.stringify(pushed[0]?.messages[0])).not.toContain("通知ID");
     expect(JSON.stringify(pushed[0]?.messages[0])).not.toContain("expense.created");
+    expect(JSON.stringify(pushed[0]?.messages[0])).not.toContain("#D7DED9");
   });
 
   it("skips when the partner disabled notifications", async () => {

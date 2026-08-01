@@ -1,5 +1,35 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Align Flex Notification Payload
+
+### Checklist
+
+- [x] Review LINE Flex Message docs for current notification payload
+- [x] Remove nonessential separator styling from Flex payload
+- [x] Add LINE push message validation fallback for generic send failures
+- [x] Verify targeted notification/messaging tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-01 22:15 JST: User confirmed LINE Login and Messaging API channels are under the same Provider and asked to reference LINE Flex Message docs.
+- 2026-08-01 22:15 JST: LINE docs show Flex messages are JSON bubble containers and separator examples use a plain `type: "separator"` component; current payload adds extra separator color styling.
+- 2026-08-01 22:19 JST: Removed the custom separator color and added push-message validation on LINE 400 responses so malformed Flex details appear in the notification error log.
+- 2026-08-01 22:13 JST: Adjusted optional validation error fields for TypeScript `exactOptionalPropertyTypes`.
+- 2026-08-01 22:14 JST: Removed the same unsupported separator color from the monthly settlement reminder Flex payload.
+- 2026-08-01 22:16 JST: Created the LINE notification payload validation commit.
+
+### Verification Log
+
+- 2026-08-01 22:12 JST: `pnpm test packages/integrations/src/line/messaging-client.test.ts apps/api/src/core/notifications/expense-mutation-notifier.test.ts` passed.
+- 2026-08-01 22:15 JST: `pnpm test packages/integrations/src/line/messaging-client.test.ts apps/api/src/core/notifications/expense-mutation-notifier.test.ts apps/jobs/src/monthly-settlement-reminder.test.ts` passed.
+- 2026-08-01 22:13 JST: `pnpm typecheck` failed because optional validation fields were passed as `number | undefined` under `exactOptionalPropertyTypes`.
+- 2026-08-01 22:14 JST: `pnpm typecheck` failed again because `apps/jobs` had the same separator `color` property after tightening the Flex separator type.
+- 2026-08-01 22:15 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-08-01 22:16 JST: `pnpm build` passed. Redocly still reports the same existing OpenAPI warnings.
+
 ## Task: Surface LINE Push Failure Details
 
 ### Checklist

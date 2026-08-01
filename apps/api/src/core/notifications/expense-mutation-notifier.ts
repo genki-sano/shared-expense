@@ -97,7 +97,6 @@ function expenseMutationFlexMessage(
           {
             type: "separator",
             margin: "md",
-            color: "#D7DED9",
           },
           labelValueBox("日付", formatDate(input.expense.date)),
           labelValueBox("支払者", input.actor.displayName),

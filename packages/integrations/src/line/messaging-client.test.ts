@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   FetchLineMessagingClient,
   LINE_PUSH_MESSAGE_URL,
+  LINE_VALIDATE_PUSH_MESSAGE_URL,
   LineMessagingApiError,
 } from "./messaging-client";
 
@@ -88,5 +89,46 @@ describe("FetchLineMessagingClient", () => {
         messages: [{ type: "text", text: "支出が追加されました" }],
       }),
     ).rejects.toBeInstanceOf(LineMessagingApiError);
+  });
+
+  it("validates message objects when LINE rejects a push request as malformed", async () => {
+    const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
+    const client = new FetchLineMessagingClient({
+      channelAccessToken: "channel-access-token",
+      fetcher: async (url, init) => {
+        calls.push({ url: String(url), init });
+        if (String(url) === LINE_VALIDATE_PUSH_MESSAGE_URL) {
+          return Response.json(
+            {
+              message: "The request body has 1 error(s)",
+              details: [{ message: "invalid flex message" }],
+            },
+            { status: 400 },
+          );
+        }
+
+        return Response.json({ message: "Failed to send messages" }, { status: 400 });
+      },
+    });
+
+    await expect(
+      client.pushMessage({
+        to: "line_man",
+        messages: [{ type: "text", text: "支出が追加されました" }],
+      }),
+    ).rejects.toMatchObject({
+      name: "LineMessagingApiError",
+      status: 400,
+      responseBody: '{"message":"Failed to send messages"}',
+      validationStatus: 400,
+      validationResponseBody:
+        '{"message":"The request body has 1 error(s)","details":[{"message":"invalid flex message"}]}',
+      message:
+        'LINE push message failed: 400 {"message":"Failed to send messages"} validation: 400 {"message":"The request body has 1 error(s)","details":[{"message":"invalid flex message"}]}',
+    });
+    expect(calls.map((call) => call.url)).toEqual([
+      LINE_PUSH_MESSAGE_URL,
+      LINE_VALIDATE_PUSH_MESSAGE_URL,
+    ]);
   });
 });

@@ -143,7 +143,6 @@ export function monthlySettlementReminderFlexMessage(input: {
           {
             type: "separator",
             margin: "md",
-            color: "#D7DED9",
           },
           labelValueBox("FROM", payer?.displayName ?? "-"),
           labelValueBox("TO", receiver?.displayName ?? "-"),

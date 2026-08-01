@@ -12,3 +12,4 @@
 - 2026-08-01: When production auth reports missing configuration even though Worker secrets exist, verify the application env wiring path before assuming the Cloudflare value is absent. Add tests that exercise `createAppFromEnv(env)` without injected auth dependencies.
 - 2026-08-01: When an auth failure log names a specific API method such as `GET /api/expenses`, fix the token lifecycle at the token acquisition boundary, not only mutation callers. Expired LIFF ID tokens must be prevented before any API request.
 - 2026-08-01: Do not label post-token user lookup or Spreadsheet failures as if LINE login itself failed. User-facing auth errors must distinguish invalid LINE credentials from unavailable household user data.
+- 2026-08-01: When LINE Messaging API returns a generic `Failed to send messages` error, validate the message object before assuming Provider or user-id mismatch. Log validation details without exposing tokens or recipient ids.
