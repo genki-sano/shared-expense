@@ -12,12 +12,17 @@ describe("jobs Cloudflare deployment configuration", () => {
       main?: unknown;
       compatibility_date?: unknown;
       triggers?: { crons?: unknown };
+      observability?: Record<string, unknown>;
     };
 
     expect(wranglerConfig.name).toBe("shared-expense-jobs");
     expect(wranglerConfig.main).toBe("src/index.ts");
     expect(wranglerConfig.compatibility_date).toBe("2026-07-29");
     expect(wranglerConfig.triggers?.crons).toEqual(["0 10 5 * *"]);
+    expect(wranglerConfig.observability).toMatchObject({
+      enabled: true,
+      head_sampling_rate: 1,
+    });
   });
 
   it("exposes only necessary Jobs Worker scripts", () => {

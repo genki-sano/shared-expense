@@ -1,5 +1,31 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Enable Workers Logs Observability
+
+### Checklist
+
+- [x] Inspect current API and Jobs Wrangler configs
+- [x] Enable Workers Logs observability for API Worker
+- [x] Enable Workers Logs observability for Jobs Worker
+- [x] Update deploy config tests
+- [x] Verify targeted deploy config tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Run API and Jobs Wrangler dry-runs
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-01 20:00 JST: User asked to enable Workers Logs observability based on Cloudflare documentation.
+- 2026-08-01 20:00 JST: Added `observability.enabled: true` and `head_sampling_rate: 1` to API and Jobs Worker configs.
+
+### Verification Log
+
+- 2026-08-01 20:03 JST: `pnpm test apps/api/src/deploy-config.test.ts apps/jobs/src/deploy-config.test.ts` passed with 5 tests.
+- 2026-08-01 20:03 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-08-01 20:03 JST: `pnpm build` passed for 6 workspace projects; Next.js generated `/` and `/_not-found` as static pages.
+- 2026-08-01 20:03 JST: `pnpm --filter @shared-expense/api dry-run` and `pnpm --filter @shared-expense/jobs dry-run` both passed with Wrangler 4.115.0.
+
 ## Task: Add Root Build Scripts for Cloudflare
 
 ### Checklist

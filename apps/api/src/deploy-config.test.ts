@@ -13,6 +13,7 @@ describe("api Cloudflare deployment configuration", () => {
       main?: unknown;
       compatibility_date?: unknown;
       vars?: Record<string, unknown>;
+      observability?: Record<string, unknown>;
     };
     const indexSource = readText("src/index.ts");
 
@@ -25,6 +26,10 @@ describe("api Cloudflare deployment configuration", () => {
     });
     expect(parsedWranglerConfig.vars).not.toHaveProperty("GOOGLE_SPREADSHEET_ID");
     expect(parsedWranglerConfig.vars).not.toHaveProperty("LINE_LOGIN_CHANNEL_ID");
+    expect(parsedWranglerConfig.observability).toMatchObject({
+      enabled: true,
+      head_sampling_rate: 1,
+    });
     expect(indexSource).toContain("createAppFromEnv(env)");
   });
 
