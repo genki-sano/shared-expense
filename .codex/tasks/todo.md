@@ -1,5 +1,29 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Clarify Auth Unavailable Message
+
+### Checklist
+
+- [x] Inspect current API auth error response mapping
+- [x] Update `AUTH_UNAVAILABLE` wording for post-LINE user data failures
+- [x] Update API/OpenAPI/frontend expectations
+- [x] Verify targeted API/web contract tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-01 22:05 JST: User pointed out the web error wording is wrong when LINE authentication has already succeeded and user data loading fails.
+- 2026-08-01 22:05 JST: Found `AUTH_UNAVAILABLE` currently says `認証処理を利用できません`, which conflates LINE token verification with household user lookup failures.
+- 2026-08-01 22:05 JST: Changed `AUTH_UNAVAILABLE` to say the household user information could not be confirmed/read.
+
+### Verification Log
+
+- 2026-08-01 21:55 JST: `pnpm test apps/api/src/app.test.ts apps/api/src/core/auth/request-auth.test.ts apps/web/src/features/expenses/api.test.ts` passed with 37 tests.
+- 2026-08-01 21:55 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-08-01 21:55 JST: `pnpm build` passed for 6 workspace projects; Next.js generated `/` and `/_not-found` as static pages.
+
 ## Task: Bind Fetch for Workers Runtime
 
 ### Checklist

@@ -172,11 +172,11 @@ describe("GET /api/expenses", () => {
 
     expect(response.status).toBe(503);
     await expect(response.json()).resolves.toEqual({
-      message: "認証処理を利用できません",
+      message: "ユーザー情報を確認できません",
       details: {
         code: "AUTH_UNAVAILABLE",
         action:
-          "時間をおいて再度お試しください。解消しない場合は管理者に連絡してください",
+          "家計簿のユーザー情報を読み込めません。時間をおいて再度お試しください。解消しない場合は管理者に連絡してください",
       },
     });
   });
