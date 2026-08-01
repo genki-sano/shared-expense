@@ -1,5 +1,29 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Surface LINE Verify Error Details
+
+### Checklist
+
+- [x] Inspect current LINE ID token verification error handling
+- [x] Capture LINE verify `error_description` for failed responses
+- [x] Add regression tests for LINE verify error details
+- [x] Verify targeted LINE/auth tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-01 21:35 JST: User confirmed LIFF ID and LINE Login Channel ID should match, so the API needs better LINE verify diagnostics.
+- 2026-08-01 21:35 JST: Current LINE verify implementation throws only the HTTP status and drops the LINE error response body.
+- 2026-08-01 21:35 JST: Added `error_description` capture to `LineIdTokenVerificationError` without logging token values.
+
+### Verification Log
+
+- 2026-08-01 21:31 JST: `pnpm test packages/integrations/src/line/id-token-verifier.test.ts apps/api/src/core/auth/line-id-token.test.ts apps/api/src/app-env.test.ts` passed with 15 tests.
+- 2026-08-01 21:32 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-08-01 21:32 JST: `pnpm build` passed for 6 workspace projects; Next.js generated `/` and `/_not-found` as static pages.
+
 ## Task: Ignore Dev ID Token in Production Web
 
 ### Checklist

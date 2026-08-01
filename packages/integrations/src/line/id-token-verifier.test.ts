@@ -48,9 +48,14 @@ describe("verifyLineIdToken", () => {
         idToken: "bad-token",
         channelId: "channel-1",
         fetcher: async () =>
-          Response.json({ error_description: "Invalid IdToken." }, { status: 400 }),
+          Response.json(
+            { error_description: "Invalid IdToken Audience." },
+            { status: 400 },
+          ),
       }),
-    ).rejects.toThrow("LINE ID token verification failed: 400");
+    ).rejects.toThrow(
+      "LINE ID token verification failed: 400: Invalid IdToken Audience.",
+    );
     await expect(
       verifyLineIdToken({
         idToken: "bad-token",
@@ -60,6 +65,7 @@ describe("verifyLineIdToken", () => {
       }),
     ).rejects.toMatchObject({
       status: 400,
+      description: "Invalid IdToken.",
     });
     await expect(
       verifyLineIdToken({
@@ -69,6 +75,20 @@ describe("verifyLineIdToken", () => {
           Response.json({ error_description: "Invalid IdToken." }, { status: 400 }),
       }),
     ).rejects.toBeInstanceOf(LineIdTokenVerificationError);
+  });
+
+  it("rejects failed LINE verification responses without JSON details", async () => {
+    await expect(
+      verifyLineIdToken({
+        idToken: "bad-token",
+        channelId: "channel-1",
+        fetcher: async () => new Response("Bad Request", { status: 400 }),
+      }),
+    ).rejects.toMatchObject({
+      message: "LINE ID token verification failed: 400",
+      status: 400,
+      description: undefined,
+    });
   });
 
   it("rejects an audience mismatch", async () => {

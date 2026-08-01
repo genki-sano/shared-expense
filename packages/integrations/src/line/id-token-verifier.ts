@@ -13,11 +13,17 @@ export type VerifyLineIdTokenInput = {
 
 export class LineIdTokenVerificationError extends Error {
   readonly status: number;
+  readonly description: string | undefined;
 
-  constructor(status: number) {
-    super(`LINE ID token verification failed: ${status}`);
+  constructor(status: number, description?: string | undefined) {
+    super(
+      description === undefined
+        ? `LINE ID token verification failed: ${status}`
+        : `LINE ID token verification failed: ${status}: ${description}`,
+    );
     this.name = "LineIdTokenVerificationError";
     this.status = status;
+    this.description = description;
   }
 }
 
@@ -36,7 +42,10 @@ export async function verifyLineIdToken(
   });
 
   if (!response.ok) {
-    throw new LineIdTokenVerificationError(response.status);
+    throw new LineIdTokenVerificationError(
+      response.status,
+      await lineErrorDescription(response),
+    );
   }
 
   const payload = (await response.json()) as unknown;
@@ -49,6 +58,25 @@ export async function verifyLineIdToken(
   }
 
   return { sub: payload.sub, aud: payload.aud };
+}
+
+async function lineErrorDescription(response: Response): Promise<string | undefined> {
+  try {
+    const body = (await response.json()) as unknown;
+    if (
+      typeof body === "object" &&
+      body !== null &&
+      "error_description" in body &&
+      typeof body.error_description === "string" &&
+      body.error_description.trim() !== ""
+    ) {
+      return body.error_description;
+    }
+  } catch {
+    return undefined;
+  }
+
+  return undefined;
 }
 
 function isLineIdTokenPayload(value: unknown): value is LineIdTokenPayload {
