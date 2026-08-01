@@ -1,3 +1,5 @@
+import { defaultFetcher } from "../fetcher";
+
 export const LINE_ID_TOKEN_VERIFY_URL = "https://api.line.me/oauth2/v2.1/verify";
 
 export type LineIdTokenPayload = {
@@ -30,7 +32,7 @@ export class LineIdTokenVerificationError extends Error {
 export async function verifyLineIdToken(
   input: VerifyLineIdTokenInput,
 ): Promise<LineIdTokenPayload> {
-  const fetcher = input.fetcher ?? fetch;
+  const fetcher = input.fetcher ?? defaultFetcher();
   const body = new URLSearchParams({
     id_token: input.idToken,
     client_id: input.channelId,

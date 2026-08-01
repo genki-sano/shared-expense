@@ -1,5 +1,6 @@
 import type { GoogleSheetsValuesClient } from "./expense-repository";
 import type { GoogleAccessTokenProvider } from "../google/service-account-auth-provider";
+import { defaultFetcher } from "../fetcher";
 
 export type FetchGoogleSheetsValuesClientInput = {
   accessTokenProvider: GoogleAccessTokenProvider;
@@ -12,7 +13,7 @@ export class FetchGoogleSheetsValuesClient implements GoogleSheetsValuesClient {
 
   constructor(input: FetchGoogleSheetsValuesClientInput) {
     this.#accessTokenProvider = input.accessTokenProvider;
-    this.#fetcher = input.fetcher ?? fetch;
+    this.#fetcher = input.fetcher ?? defaultFetcher();
   }
 
   async getValues(input: {

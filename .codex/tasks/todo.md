@@ -1,5 +1,31 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Bind Fetch for Workers Runtime
+
+### Checklist
+
+- [x] Inspect `Illegal invocation` failure path for Spreadsheet user loading
+- [x] Wrap default global `fetch` before storing or passing it in integrations
+- [x] Add regression tests for unbound default fetch handling
+- [x] Verify targeted integration/API tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Run API Wrangler dry-run
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-01 22:00 JST: Production auth reached Spreadsheet household user loading but failed with Workers `Illegal invocation`.
+- 2026-08-01 22:00 JST: Found integration clients store `input.fetcher ?? fetch` and call it later, which can lose the required Workers binding for global `fetch`.
+- 2026-08-01 22:00 JST: Added a shared `defaultFetcher` that calls `globalThis.fetch(...)` and wired it into Google Sheets, Google service account auth, LINE Messaging, and LINE ID token verification.
+
+### Verification Log
+
+- 2026-08-01 21:51 JST: `pnpm test packages/integrations/src/fetcher.test.ts packages/integrations/src/google/service-account-auth-provider.test.ts packages/integrations/src/spreadsheet/google-sheets-values-client.test.ts packages/integrations/src/line/id-token-verifier.test.ts packages/integrations/src/line/messaging-client.test.ts apps/api/src/app-env.test.ts` passed with 18 tests.
+- 2026-08-01 21:51 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-08-01 21:51 JST: `pnpm build` passed for 6 workspace projects; Next.js generated `/` and `/_not-found` as static pages.
+- 2026-08-01 21:51 JST: `pnpm --filter @shared-expense/api dry-run` passed with Wrangler 4.115.0.
+
 ## Task: Stop LIFF Login Loop
 
 ### Checklist

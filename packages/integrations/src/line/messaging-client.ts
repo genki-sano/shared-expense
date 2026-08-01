@@ -1,3 +1,5 @@
+import { defaultFetcher } from "../fetcher";
+
 export const LINE_PUSH_MESSAGE_URL = "https://api.line.me/v2/bot/message/push";
 
 export type LineTextMessage = {
@@ -97,7 +99,7 @@ export class FetchLineMessagingClient implements LineMessagingClient {
 
   constructor(input: FetchLineMessagingClientInput) {
     this.#channelAccessToken = input.channelAccessToken;
-    this.#fetcher = input.fetcher ?? fetch;
+    this.#fetcher = input.fetcher ?? defaultFetcher();
   }
 
   async pushMessage(input: PushLineMessageInput): Promise<void> {

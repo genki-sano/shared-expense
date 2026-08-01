@@ -1,3 +1,5 @@
+import { defaultFetcher } from "../fetcher";
+
 export const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 export const GOOGLE_SHEETS_SCOPE = "https://www.googleapis.com/auth/spreadsheets";
 
@@ -47,7 +49,7 @@ export class GoogleServiceAccountAccessTokenProvider implements GoogleAccessToke
     this.#clientEmail = input.clientEmail;
     this.#privateKey = normalizePrivateKey(input.privateKey);
     this.#scope = input.scope ?? GOOGLE_SHEETS_SCOPE;
-    this.#fetcher = input.fetcher ?? fetch;
+    this.#fetcher = input.fetcher ?? defaultFetcher();
     this.#now = input.now ?? (() => new Date());
     this.#signJwt = input.signJwt ?? signServiceAccountJwt;
   }
