@@ -41,9 +41,9 @@ describe("api Cloudflare deployment configuration", () => {
     expect(parsedPackageJson.scripts).toEqual({
       dev: "tsx src/dev.ts",
       build: "tsc -p tsconfig.json",
+      typecheck: "tsc -p tsconfig.json --noEmit",
       deploy: "wrangler deploy",
       "dry-run": "wrangler deploy --dry-run",
-      typecheck: "tsc -p tsconfig.json --noEmit",
     });
     expect(rootPackageJson).toContain(
       '"deploy:api": "pnpm --filter @shared-expense/api run deploy"',

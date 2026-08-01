@@ -3,11 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "deploy": "wrangler deploy",
     "dev": "wrangler dev --test-scheduled",
-    "dry-run": "wrangler deploy --dry-run",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "deploy": "wrangler deploy",
+    "dry-run": "wrangler deploy --dry-run"
   },
   "dependencies": {
     "@shared-expense/integrations": "workspace:*",

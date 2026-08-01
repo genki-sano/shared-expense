@@ -1,5 +1,27 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Align App Package Script Order
+
+### Checklist
+
+- [x] Inspect API, Web, and Jobs script order
+- [x] Reorder scripts consistently
+- [x] Verify targeted config tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-01 19:50 JST: User asked to align script order across API, Web, and Jobs packages.
+- 2026-08-01 19:50 JST: Chose common order `dev`, `build`, `typecheck`, `deploy`, `dry-run`, with packages omitting unavailable scripts.
+
+### Verification Log
+
+- 2026-08-01 19:49 JST: `pnpm test apps/api/src/deploy-config.test.ts apps/jobs/src/deploy-config.test.ts apps/web-dev-config.test.ts` passed with 19 tests.
+- 2026-08-01 19:49 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-08-01 19:50 JST: `pnpm build` passed for 6 workspace projects; Next.js generated `/` and `/_not-found` as static pages.
+
 ## Task: Simplify App Package Scripts
 
 ### Checklist

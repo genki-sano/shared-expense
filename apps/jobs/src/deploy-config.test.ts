@@ -26,11 +26,11 @@ describe("jobs Cloudflare deployment configuration", () => {
     };
 
     expect(packageJson.scripts).toEqual({
-      build: "tsc -p tsconfig.json",
-      deploy: "wrangler deploy",
       dev: "wrangler dev --test-scheduled",
-      "dry-run": "wrangler deploy --dry-run",
+      build: "tsc -p tsconfig.json",
       typecheck: "tsc -p tsconfig.json --noEmit",
+      deploy: "wrangler deploy",
+      "dry-run": "wrangler deploy --dry-run",
     });
   });
 
