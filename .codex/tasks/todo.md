@@ -1,5 +1,27 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Diagnose LINE Push Recipient Failures
+
+### Checklist
+
+- [x] Interpret production LINE push log with message validation status
+- [x] Add recipient profile diagnostic for LINE push 400 failures
+- [x] Verify targeted LINE messaging tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [ ] Commit changes
+
+### Progress Log
+
+- 2026-08-01 22:30 JST: Production log shows `LINE push message failed: 400 ... validation: 200 {}`, so the Flex message object is valid and the failure is likely outside payload structure.
+- 2026-08-01 22:31 JST: Added recipient profile diagnostics after a push 400 when message validation succeeds, without logging the recipient id or access token.
+
+### Verification Log
+
+- 2026-08-01 22:21 JST: `pnpm test packages/integrations/src/line/messaging-client.test.ts` passed.
+- 2026-08-01 22:22 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-08-01 22:22 JST: `pnpm build` passed. Redocly still reports the same existing OpenAPI warnings.
+
 ## Task: Align Flex Notification Payload
 
 ### Checklist

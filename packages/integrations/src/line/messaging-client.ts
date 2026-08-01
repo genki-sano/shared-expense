@@ -3,6 +3,7 @@ import { defaultFetcher } from "../fetcher";
 export const LINE_PUSH_MESSAGE_URL = "https://api.line.me/v2/bot/message/push";
 export const LINE_VALIDATE_PUSH_MESSAGE_URL =
   "https://api.line.me/v2/bot/message/validate/push";
+export const LINE_PROFILE_URL_BASE = "https://api.line.me/v2/bot/profile";
 
 export type LineTextMessage = {
   type: "text";
@@ -99,22 +100,31 @@ export class LineMessagingApiError extends Error {
   readonly responseBody: string;
   readonly validationStatus: number | undefined;
   readonly validationResponseBody: string | undefined;
+  readonly recipientProfileStatus: number | undefined;
+  readonly recipientProfileResponseBody: string | undefined;
 
   constructor(input: {
     status: number;
     responseBody: string;
     validationStatus?: number | undefined;
     validationResponseBody?: string | undefined;
+    recipientProfileStatus?: number | undefined;
+    recipientProfileResponseBody?: string | undefined;
   }) {
     const detail =
       input.responseBody.trim() === "" ? "" : ` ${input.responseBody.trim()}`;
     const validationDetail = formatValidationDetail(input);
-    super(`LINE push message failed: ${input.status}${detail}${validationDetail}`);
+    const recipientProfileDetail = formatRecipientProfileDetail(input);
+    super(
+      `LINE push message failed: ${input.status}${detail}${validationDetail}${recipientProfileDetail}`,
+    );
     this.name = "LineMessagingApiError";
     this.status = input.status;
     this.responseBody = input.responseBody;
     this.validationStatus = input.validationStatus;
     this.validationResponseBody = input.validationResponseBody;
+    this.recipientProfileStatus = input.recipientProfileStatus;
+    this.recipientProfileResponseBody = input.recipientProfileResponseBody;
   }
 }
 
@@ -145,12 +155,18 @@ export class FetchLineMessagingClient implements LineMessagingClient {
       const validation = shouldValidateMessageObject(response.status)
         ? await this.#validatePushMessages(input.messages)
         : undefined;
+      const recipientProfile =
+        validation?.status === 200
+          ? await this.#getRecipientProfile(input.to)
+          : undefined;
 
       throw new LineMessagingApiError({
         status: response.status,
         responseBody,
         validationStatus: validation?.status,
         validationResponseBody: validation?.responseBody,
+        recipientProfileStatus: recipientProfile?.status,
+        recipientProfileResponseBody: recipientProfile?.responseBody,
       });
     }
   }
@@ -166,6 +182,25 @@ export class FetchLineMessagingClient implements LineMessagingClient {
       },
       body: JSON.stringify({ messages }),
     });
+
+    return {
+      status: response.status,
+      responseBody: await safeResponseText(response),
+    };
+  }
+
+  async #getRecipientProfile(
+    recipientId: string,
+  ): Promise<{ status: number; responseBody: string }> {
+    const response = await this.#fetcher(
+      `${LINE_PROFILE_URL_BASE}/${encodeURIComponent(recipientId)}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${this.#channelAccessToken}`,
+        },
+      },
+    );
 
     return {
       status: response.status,
@@ -192,6 +227,22 @@ function formatValidationDetail(input: {
   }
 
   return ` validation: ${input.validationStatus} ${body}`;
+}
+
+function formatRecipientProfileDetail(input: {
+  recipientProfileStatus?: number | undefined;
+  recipientProfileResponseBody?: string | undefined;
+}): string {
+  if (input.recipientProfileStatus === undefined) {
+    return "";
+  }
+
+  const body = input.recipientProfileResponseBody?.trim();
+  if (body === undefined || body === "") {
+    return ` recipient profile: ${input.recipientProfileStatus}`;
+  }
+
+  return ` recipient profile: ${input.recipientProfileStatus} ${body}`;
 }
 
 async function safeResponseText(response: Response): Promise<string> {
