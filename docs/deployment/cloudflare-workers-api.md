@@ -15,9 +15,11 @@ pnpm --filter @shared-expense/api exec wrangler secret put GOOGLE_SPREADSHEET_ID
 pnpm --filter @shared-expense/api exec wrangler secret put GOOGLE_SERVICE_ACCOUNT_EMAIL
 pnpm --filter @shared-expense/api exec wrangler secret put GOOGLE_PRIVATE_KEY
 pnpm --filter @shared-expense/api exec wrangler secret put LINE_LOGIN_CHANNEL_ID
+pnpm --filter @shared-expense/api exec wrangler secret put LINE_LIFF_ID
 pnpm --filter @shared-expense/api exec wrangler secret put LINE_MESSAGING_CHANNEL_ACCESS_TOKEN
-pnpm --filter @shared-expense/api exec wrangler secret put LINE_NOTIFICATION_DETAIL_BASE_URL
 ```
+
+Notification detail links are generated as `https://liff.line.me/${LINE_LIFF_ID}`.
 
 ## Required Variables
 

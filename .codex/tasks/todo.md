@@ -1,5 +1,33 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Derive Notification Detail LIFF URL
+
+### Checklist
+
+- [x] Inspect current API/Jobs notification detail URL env wiring
+- [x] Prefer `https://liff.line.me/${LINE_LIFF_ID}` over legacy detail URL env
+- [x] Remove committed Worker config/docs/env-template references to `LINE_NOTIFICATION_DETAIL_BASE_URL`
+- [x] Verify targeted env/deployment/jobs tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-01 22:40 JST: User found `LINE_NOTIFICATION_DETAIL_BASE_URL` was misconfigured and wants notification detail URLs to use the LIFF endpoint.
+- 2026-08-01 22:41 JST: API and Jobs initially derived detail links from `LINE_LOGIN_CHANNEL_ID`.
+- 2026-08-01 22:43 JST: User corrected the source env to LIFF ID, first using `NEXT_PUBLIC_LIFF_ID`.
+- 2026-08-01 22:35 JST: User noted `NEXT_PUBLIC_LIFF_ID` overlaps with web public env, so API and Jobs now use server-side `LINE_LIFF_ID` and derive links as `https://liff.line.me/${LINE_LIFF_ID}` first.
+- 2026-08-01 22:38 JST: Created the notification LIFF URL env commit.
+- 2026-08-01 22:42 JST: Removed `LINE_NOTIFICATION_DETAIL_BASE_URL` from committed API Worker vars, env template, and deployment docs.
+
+### Verification Log
+
+- 2026-08-01 22:34 JST: `pnpm test apps/api/src/app-env.test.ts apps/api/src/deploy-config.test.ts apps/jobs/src/monthly-settlement-reminder.test.ts apps/web-dev-config.test.ts` passed. `app-env.test.ts` intentionally logs auth failures for invalid-token cases.
+- 2026-08-01 22:36 JST: Re-ran the same targeted tests after renaming the server-side LIFF env to `LINE_LIFF_ID`; all passed.
+- 2026-08-01 22:37 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-08-01 22:37 JST: `pnpm build` passed. Redocly still reports the same existing OpenAPI warnings.
+
 ## Task: Diagnose LINE Push Recipient Failures
 
 ### Checklist

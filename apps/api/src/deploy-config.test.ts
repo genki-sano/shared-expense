@@ -22,10 +22,12 @@ describe("api Cloudflare deployment configuration", () => {
     expect(parsedWranglerConfig.compatibility_date).toBe("2026-08-01");
     expect(parsedWranglerConfig.vars).toMatchObject({
       API_ALLOWED_ORIGINS: "https://liff.line.me,https://shared-expense.pages.dev",
-      LINE_NOTIFICATION_DETAIL_BASE_URL: "https://shared-expense.pages.dev",
     });
     expect(parsedWranglerConfig.vars).not.toHaveProperty("GOOGLE_SPREADSHEET_ID");
     expect(parsedWranglerConfig.vars).not.toHaveProperty("LINE_LOGIN_CHANNEL_ID");
+    expect(parsedWranglerConfig.vars).not.toHaveProperty(
+      "LINE_NOTIFICATION_DETAIL_BASE_URL",
+    );
     expect(parsedWranglerConfig.observability).toMatchObject({
       enabled: true,
       head_sampling_rate: 1,

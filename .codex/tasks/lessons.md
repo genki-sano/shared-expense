@@ -13,3 +13,4 @@
 - 2026-08-01: When an auth failure log names a specific API method such as `GET /api/expenses`, fix the token lifecycle at the token acquisition boundary, not only mutation callers. Expired LIFF ID tokens must be prevented before any API request.
 - 2026-08-01: Do not label post-token user lookup or Spreadsheet failures as if LINE login itself failed. User-facing auth errors must distinguish invalid LINE credentials from unavailable household user data.
 - 2026-08-01: When LINE Messaging API returns a generic `Failed to send messages` error, validate the message object before assuming Provider or user-id mismatch. Log validation details without exposing tokens or recipient ids.
+- 2026-08-01: Notification detail deep links must use the LIFF ID, not the LINE Login channel ID. Server-side API/Jobs env should be `LINE_LIFF_ID`; keep it separate from web's public `NEXT_PUBLIC_LIFF_ID`.

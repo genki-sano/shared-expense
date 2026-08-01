@@ -77,7 +77,8 @@ describe("runMonthlySettlementReminder", () => {
         GOOGLE_SERVICE_ACCOUNT_EMAIL: "jobs@example.iam.gserviceaccount.com",
         GOOGLE_PRIVATE_KEY:
           "-----BEGIN PRIVATE KEY-----\\nkey\\n-----END PRIVATE KEY-----\\n",
-        LINE_NOTIFICATION_DETAIL_BASE_URL: "https://liff.example.com/",
+        LINE_LIFF_ID: "1234567890-shared-expense",
+        LINE_NOTIFICATION_DETAIL_BASE_URL: "https://shared-expense.pages.dev",
       },
       dependencies: {
         signServiceAccountJwt: async () => "signed-jwt",
@@ -164,7 +165,10 @@ describe("runMonthlySettlementReminder", () => {
     ).toBe("flex");
     expect(JSON.stringify(pushedMessages[0])).toContain("￥2,501");
     expect(JSON.stringify(pushedMessages[0])).toContain(
-      "https://liff.example.com/?month=2026-06",
+      "https://liff.line.me/1234567890-shared-expense?month=2026-06",
+    );
+    expect(JSON.stringify(pushedMessages[0])).not.toContain(
+      "https://shared-expense.pages.dev",
     );
   });
 });

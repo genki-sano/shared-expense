@@ -4,8 +4,7 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-08-01",
   "vars": {
-    "API_ALLOWED_ORIGINS": "https://liff.line.me,https://shared-expense.pages.dev",
-    "LINE_NOTIFICATION_DETAIL_BASE_URL": "https://shared-expense.pages.dev"
+    "API_ALLOWED_ORIGINS": "https://liff.line.me,https://shared-expense.pages.dev"
   },
   "observability": {
     "enabled": true,

@@ -15,11 +15,11 @@ Set these values on the `shared-expense-jobs` Worker before deploying:
 pnpm --filter @shared-expense/jobs exec wrangler secret put GOOGLE_SPREADSHEET_ID
 pnpm --filter @shared-expense/jobs exec wrangler secret put GOOGLE_SERVICE_ACCOUNT_EMAIL
 pnpm --filter @shared-expense/jobs exec wrangler secret put GOOGLE_PRIVATE_KEY
+pnpm --filter @shared-expense/jobs exec wrangler secret put LINE_LIFF_ID
 pnpm --filter @shared-expense/jobs exec wrangler secret put LINE_MESSAGING_CHANNEL_ACCESS_TOKEN
-pnpm --filter @shared-expense/jobs exec wrangler secret put LINE_NOTIFICATION_DETAIL_BASE_URL
 ```
 
-`LINE_NOTIFICATION_DETAIL_BASE_URL` is not highly sensitive, but keeping it as a secret keeps deployment configuration consistent and avoids committing environment-specific URLs.
+Notification detail links are generated as `https://liff.line.me/${LINE_LIFF_ID}`.
 
 ## Deploy
 

@@ -311,9 +311,10 @@ describe("createAppFromEnv", () => {
         GOOGLE_SPREADSHEET_ID: "spreadsheet_1",
         GOOGLE_SERVICE_ACCOUNT_EMAIL: "sheets-reader@example.iam.gserviceaccount.com",
         GOOGLE_PRIVATE_KEY: "-----BEGIN PRIVATE KEY-----\\nkey\\n-----END PRIVATE KEY-----\\n",
+        LINE_LIFF_ID: "1234567890-shared-expense",
         LINE_MESSAGING_CHANNEL_ACCESS_TOKEN: "line-message-token",
         LINE_NOTIFICATION_DETAIL_BASE_URL:
-          "https://liff.line.me/1234567890-shared-expense",
+          "https://shared-expense.pages.dev",
       },
       {
         authenticateToken: async () => user,
@@ -394,6 +395,9 @@ describe("createAppFromEnv", () => {
     expect(String(calls.at(-1)?.init?.body)).toContain("詳細を確認");
     expect(String(calls.at(-1)?.init?.body)).toContain(
       "https://liff.line.me/1234567890-shared-expense?month=2026-07",
+    );
+    expect(String(calls.at(-1)?.init?.body)).not.toContain(
+      "https://shared-expense.pages.dev",
     );
     expect(String(calls.at(-1)?.init?.body)).toContain("expenseId=");
     expect(String(calls.at(-1)?.init?.body)).not.toContain("通知ID");

@@ -40,6 +40,7 @@ export type AppEnv = {
   GOOGLE_SERVICE_ACCOUNT_EMAIL?: string | undefined;
   GOOGLE_PRIVATE_KEY?: string | undefined;
   LINE_LOGIN_CHANNEL_ID?: string | undefined;
+  LINE_LIFF_ID?: string | undefined;
   LINE_MESSAGING_CHANNEL_ACCESS_TOKEN?: string | undefined;
   LINE_NOTIFICATION_DETAIL_BASE_URL?: string | undefined;
 };
@@ -157,11 +158,24 @@ function expenseMutationNotifierFromEnv(
       channelAccessToken: env.LINE_MESSAGING_CHANNEL_ACCESS_TOKEN,
       ...(dependencies.fetcher === undefined ? {} : { fetcher: dependencies.fetcher }),
     }),
-    ...(env.LINE_NOTIFICATION_DETAIL_BASE_URL === undefined ||
-    env.LINE_NOTIFICATION_DETAIL_BASE_URL.trim() === ""
-      ? {}
-      : { detailBaseUrl: env.LINE_NOTIFICATION_DETAIL_BASE_URL }),
+    ...optionalDetailBaseUrlFromEnv(env),
   });
+}
+
+function optionalDetailBaseUrlFromEnv(
+  env: Pick<AppEnv, "LINE_LIFF_ID" | "LINE_NOTIFICATION_DETAIL_BASE_URL">,
+): { detailBaseUrl: string } | Record<string, never> {
+  const liffId = env.LINE_LIFF_ID?.trim();
+  if (liffId !== undefined && liffId !== "") {
+    return { detailBaseUrl: `https://liff.line.me/${liffId}` };
+  }
+
+  const legacyDetailBaseUrl = env.LINE_NOTIFICATION_DETAIL_BASE_URL?.trim();
+  if (legacyDetailBaseUrl !== undefined && legacyDetailBaseUrl !== "") {
+    return { detailBaseUrl: legacyDetailBaseUrl };
+  }
+
+  return {};
 }
 
 function authenticateTokenFromEnv(

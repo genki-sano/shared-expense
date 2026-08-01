@@ -21,6 +21,8 @@ export type JobsEnv = {
   GOOGLE_SPREADSHEET_ID?: string | undefined;
   GOOGLE_SERVICE_ACCOUNT_EMAIL?: string | undefined;
   GOOGLE_PRIVATE_KEY?: string | undefined;
+  LINE_LOGIN_CHANNEL_ID?: string | undefined;
+  LINE_LIFF_ID?: string | undefined;
   LINE_MESSAGING_CHANNEL_ACCESS_TOKEN?: string | undefined;
   LINE_NOTIFICATION_DETAIL_BASE_URL?: string | undefined;
 };
@@ -70,7 +72,7 @@ export async function runMonthlySettlementReminder(input: {
         monthlySettlementReminderFlexMessage({
           settlement,
           users,
-          detailBaseUrl: input.env.LINE_NOTIFICATION_DETAIL_BASE_URL,
+          detailBaseUrl: detailBaseUrlFromEnv(input.env),
         }),
       ],
     });
@@ -78,6 +80,18 @@ export async function runMonthlySettlementReminder(input: {
   }
 
   return { targetMonth, notifiedUserIds };
+}
+
+function detailBaseUrlFromEnv(
+  env: Pick<JobsEnv, "LINE_LIFF_ID" | "LINE_NOTIFICATION_DETAIL_BASE_URL">,
+): string | undefined {
+  const liffId = env.LINE_LIFF_ID?.trim();
+  if (liffId !== undefined && liffId !== "") {
+    return `https://liff.line.me/${liffId}`;
+  }
+
+  const legacyDetailBaseUrl = env.LINE_NOTIFICATION_DETAIL_BASE_URL?.trim();
+  return legacyDetailBaseUrl === "" ? undefined : legacyDetailBaseUrl;
 }
 
 export function previousMonthInJst(now: Date): string {
