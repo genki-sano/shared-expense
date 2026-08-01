@@ -31,6 +31,12 @@ https://shared-expense.pages.dev,http://localhost:3000,http://localhost:3001
 
 ## Deploy
 
+For Cloudflare's build command, use:
+
+```sh
+pnpm build:api
+```
+
 ```sh
 pnpm --filter @shared-expense/api dry-run
 pnpm deploy:api

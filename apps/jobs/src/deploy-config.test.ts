@@ -41,6 +41,9 @@ describe("jobs Cloudflare deployment configuration", () => {
     );
 
     expect(rootPackageJson).toContain(
+      '"build:jobs": "pnpm --filter @shared-expense/jobs build"',
+    );
+    expect(rootPackageJson).toContain(
       '"deploy:jobs": "pnpm --filter @shared-expense/jobs run deploy"',
     );
   });

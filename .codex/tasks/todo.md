@@ -1,5 +1,31 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Add Root Build Scripts for Cloudflare
+
+### Checklist
+
+- [x] Inspect root and app package scripts
+- [x] Add root build scripts for API, Web, and Jobs
+- [x] Update Cloudflare deployment docs
+- [x] Update config tests
+- [x] Verify targeted config tests pass
+- [x] Verify root build scripts pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-01 19:55 JST: User asked to add root build commands so Cloudflare project settings can use simple commands.
+- 2026-08-01 19:55 JST: Added root `build:api`, `build:web`, and `build:jobs` scripts as thin wrappers around package builds.
+
+### Verification Log
+
+- 2026-08-01 19:55 JST: `pnpm test apps/api/src/deploy-config.test.ts apps/jobs/src/deploy-config.test.ts apps/web-dev-config.test.ts` passed with 19 tests.
+- 2026-08-01 19:55 JST: `pnpm build:api`, `pnpm build:web`, and `pnpm build:jobs` all passed.
+- 2026-08-01 19:56 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-08-01 19:56 JST: `pnpm build` passed for 6 workspace projects; Next.js generated `/` and `/_not-found` as static pages.
+
 ## Task: Align App Package Script Order
 
 ### Checklist

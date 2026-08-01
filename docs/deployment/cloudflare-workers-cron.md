@@ -23,6 +23,12 @@ pnpm --filter @shared-expense/jobs exec wrangler secret put LINE_NOTIFICATION_DE
 
 ## Deploy
 
+For Cloudflare's build command, use:
+
+```sh
+pnpm build:jobs
+```
+
 ```sh
 pnpm --filter @shared-expense/jobs dry-run
 pnpm deploy:jobs

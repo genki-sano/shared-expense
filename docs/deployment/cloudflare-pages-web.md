@@ -25,7 +25,7 @@ Do not set `NEXT_PUBLIC_DEV_ID_TOKEN` in production.
 If the Pages project root directory is the repository root:
 
 ```text
-Build command: pnpm --filter @shared-expense/web build
+Build command: pnpm build:web
 Build output directory: apps/web/out
 ```
 
