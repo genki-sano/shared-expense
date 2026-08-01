@@ -24,6 +24,10 @@ import {
   InMemoryHouseholdUserRepository,
   type HouseholdUserRepository,
 } from "./core/users/repository";
+import {
+  createLineWebhookRoutes,
+  type LineWebhookRoutesDependencies,
+} from "./line-webhook/routes";
 
 export type AppDependencies = {
   authenticateToken: (token: string) => Promise<User>;
@@ -32,6 +36,7 @@ export type AppDependencies = {
   expenseMutationNotifier?: ExpenseMutationNotifier;
   monthlyExpenseReader: MonthlySettlementExpenseReader;
   userRepository: HouseholdUserRepository;
+  lineWebhook?: LineWebhookRoutesDependencies;
 };
 
 export type AppEnv = {
@@ -42,6 +47,7 @@ export type AppEnv = {
   LINE_LOGIN_CHANNEL_ID?: string | undefined;
   LINE_LIFF_ID?: string | undefined;
   LINE_MESSAGING_CHANNEL_ACCESS_TOKEN?: string | undefined;
+  LINE_MESSAGING_CHANNEL_SECRET?: string | undefined;
   LINE_NOTIFICATION_DETAIL_BASE_URL?: string | undefined;
 };
 
@@ -104,6 +110,9 @@ export function createApp(dependencies: AppDependencies = defaultDependencies): 
       userRepository: dependencies.userRepository,
     }),
   );
+  if (dependencies.lineWebhook !== undefined) {
+    app.route("/api/line/webhook", createLineWebhookRoutes(dependencies.lineWebhook));
+  }
 
   return app;
 }
@@ -127,6 +136,7 @@ export function createAppFromEnv(
     ),
     monthlyExpenseReader: repositories.monthlyExpenseReader,
     userRepository: repositories.userRepository,
+    ...optionalLineWebhookFromEnv(env, dependencies, repositories),
   });
 }
 
@@ -160,6 +170,36 @@ function expenseMutationNotifierFromEnv(
     }),
     ...optionalDetailBaseUrlFromEnv(env),
   });
+}
+
+function optionalLineWebhookFromEnv(
+  env: AppEnv,
+  dependencies: AppEnvDependencies,
+  repositories: {
+    expenseRepository: ExpenseRepository;
+    userRepository: HouseholdUserRepository;
+  },
+): { lineWebhook: LineWebhookRoutesDependencies } | Record<string, never> {
+  if (
+    env.LINE_MESSAGING_CHANNEL_ACCESS_TOKEN === undefined ||
+    env.LINE_MESSAGING_CHANNEL_ACCESS_TOKEN.trim() === "" ||
+    env.LINE_MESSAGING_CHANNEL_SECRET === undefined ||
+    env.LINE_MESSAGING_CHANNEL_SECRET.trim() === ""
+  ) {
+    return {};
+  }
+
+  return {
+    lineWebhook: {
+      channelSecret: env.LINE_MESSAGING_CHANNEL_SECRET,
+      expenseRepository: repositories.expenseRepository,
+      lineMessagingClient: new FetchLineMessagingClient({
+        channelAccessToken: env.LINE_MESSAGING_CHANNEL_ACCESS_TOKEN,
+        ...(dependencies.fetcher === undefined ? {} : { fetcher: dependencies.fetcher }),
+      }),
+      userRepository: repositories.userRepository,
+    },
+  };
 }
 
 function optionalDetailBaseUrlFromEnv(

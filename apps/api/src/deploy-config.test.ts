@@ -26,6 +26,9 @@ describe("api Cloudflare deployment configuration", () => {
     expect(parsedWranglerConfig.vars).not.toHaveProperty("GOOGLE_SPREADSHEET_ID");
     expect(parsedWranglerConfig.vars).not.toHaveProperty("LINE_LOGIN_CHANNEL_ID");
     expect(parsedWranglerConfig.vars).not.toHaveProperty(
+      "LINE_MESSAGING_CHANNEL_SECRET",
+    );
+    expect(parsedWranglerConfig.vars).not.toHaveProperty(
       "LINE_NOTIFICATION_DETAIL_BASE_URL",
     );
     expect(parsedWranglerConfig.observability).toMatchObject({

@@ -3,6 +3,7 @@ import {
   FetchLineMessagingClient,
   LINE_PROFILE_URL_BASE,
   LINE_PUSH_MESSAGE_URL,
+  LINE_REPLY_MESSAGE_URL,
   LINE_VALIDATE_PUSH_MESSAGE_URL,
   LineMessagingApiError,
 } from "./messaging-client";
@@ -91,6 +92,40 @@ describe("FetchLineMessagingClient", () => {
       }),
     ).rejects.toBeInstanceOf(LineMessagingApiError);
   });
+
+  it("replies to a LINE webhook event", async () => {
+    const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
+    const client = new FetchLineMessagingClient({
+      channelAccessToken: "channel-access-token",
+      fetcher: async (url, init) => {
+        calls.push({ url: String(url), init });
+        return Response.json({});
+      },
+    });
+
+    await client.replyMessage({
+      replyToken: "reply-token",
+      messages: [{ type: "text", text: "登録しました" }],
+    });
+
+    expect(calls).toEqual([
+      {
+        url: LINE_REPLY_MESSAGE_URL,
+        init: {
+          method: "POST",
+          headers: {
+            Authorization: "Bearer channel-access-token",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            replyToken: "reply-token",
+            messages: [{ type: "text", text: "登録しました" }],
+          }),
+        },
+      },
+    ]);
+  });
+
 
   it("validates message objects when LINE rejects a push request as malformed", async () => {
     const calls: Array<{ url: string; init: RequestInit | undefined }> = [];

@@ -1,6 +1,7 @@
 import { defaultFetcher } from "../fetcher";
 
 export const LINE_PUSH_MESSAGE_URL = "https://api.line.me/v2/bot/message/push";
+export const LINE_REPLY_MESSAGE_URL = "https://api.line.me/v2/bot/message/reply";
 export const LINE_VALIDATE_PUSH_MESSAGE_URL =
   "https://api.line.me/v2/bot/message/validate/push";
 export const LINE_PROFILE_URL_BASE = "https://api.line.me/v2/bot/profile";
@@ -86,8 +87,14 @@ export type PushLineMessageInput = {
   messages: LineMessage[];
 };
 
+export type ReplyLineMessageInput = {
+  replyToken: string;
+  messages: LineMessage[];
+};
+
 export type LineMessagingClient = {
   pushMessage(input: PushLineMessageInput): Promise<void>;
+  replyMessage(input: ReplyLineMessageInput): Promise<void>;
 };
 
 export type FetchLineMessagingClientInput = {
@@ -167,6 +174,27 @@ export class FetchLineMessagingClient implements LineMessagingClient {
         validationResponseBody: validation?.responseBody,
         recipientProfileStatus: recipientProfile?.status,
         recipientProfileResponseBody: recipientProfile?.responseBody,
+      });
+    }
+  }
+
+  async replyMessage(input: ReplyLineMessageInput): Promise<void> {
+    const response = await this.#fetcher(LINE_REPLY_MESSAGE_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${this.#channelAccessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        replyToken: input.replyToken,
+        messages: input.messages,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new LineMessagingApiError({
+        status: response.status,
+        responseBody: await safeResponseText(response),
       });
     }
   }

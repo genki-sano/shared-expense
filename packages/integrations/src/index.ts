@@ -27,6 +27,7 @@ export type {
   LineTextMessage,
   LineUriAction,
   PushLineMessageInput,
+  ReplyLineMessageInput,
 } from "./line/messaging-client";
 export type {
   GoogleSheetsValuesClient,
@@ -48,6 +49,7 @@ export {
 export {
   FetchLineMessagingClient,
   LINE_PUSH_MESSAGE_URL,
+  LINE_REPLY_MESSAGE_URL,
 } from "./line/messaging-client";
 export {
   expenseFromLegacyPaymentRow,

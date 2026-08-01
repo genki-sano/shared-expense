@@ -139,6 +139,7 @@ describe("runMonthlySettlementReminder", () => {
           pushMessage: async (input) => {
             pushedMessages.push(input);
           },
+          replyMessage: async () => {},
         },
       },
     });

@@ -43,6 +43,7 @@ describe("web dev configuration", () => {
     expect(envExample).toContain("NEXT_PUBLIC_LIFF_ID=");
     expect(envExample).toContain("LINE_LOGIN_CHANNEL_ID=");
     expect(envExample).toContain("LINE_MESSAGING_CHANNEL_ACCESS_TOKEN=");
+    expect(envExample).toContain("LINE_MESSAGING_CHANNEL_SECRET=");
     expect(envExample).toContain("LINE_LIFF_ID=");
     expect(envExample).not.toContain("LINE_NOTIFICATION_DETAIL_BASE_URL=");
   });

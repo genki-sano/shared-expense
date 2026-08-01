@@ -350,12 +350,34 @@ describe("createAppFromEnv", () => {
 
           if (
             String(url) ===
+            "https://sheets.googleapis.com/v4/spreadsheets/spreadsheet_1/values/payments!A2%3AL"
+          ) {
+            return Response.json({ values: [] });
+          }
+
+          if (
+            String(url) ===
             "https://sheets.googleapis.com/v4/spreadsheets/spreadsheet_1/values/payments!A2%3AK:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS"
           ) {
             return Response.json({});
           }
 
+          if (
+            String(url) ===
+            "https://sheets.googleapis.com/v4/spreadsheets/spreadsheet_1/values/payments!A2%3AL"
+          ) {
+            return Response.json({ values: [] });
+          }
+
           if (String(url) === "https://api.line.me/v2/bot/message/push") {
+            return Response.json({});
+          }
+
+          if (String(url) === "https://api.line.me/v2/bot/message/reply") {
+            return Response.json({});
+          }
+
+          if (String(url) === "https://api.line.me/v2/bot/message/reply") {
             return Response.json({});
           }
 
@@ -402,4 +424,116 @@ describe("createAppFromEnv", () => {
     expect(String(calls.at(-1)?.init?.body)).toContain("expenseId=");
     expect(String(calls.at(-1)?.init?.body)).not.toContain("通知ID");
   });
+
+  it("wires LINE webhook expense creation when Messaging API secrets are configured", async () => {
+    const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
+    const app = createAppFromEnv(
+      {
+        GOOGLE_SPREADSHEET_ID: "spreadsheet_1",
+        GOOGLE_SERVICE_ACCOUNT_EMAIL: "sheets-reader@example.iam.gserviceaccount.com",
+        GOOGLE_PRIVATE_KEY: "-----BEGIN PRIVATE KEY-----\\nkey\\n-----END PRIVATE KEY-----\\n",
+        LINE_MESSAGING_CHANNEL_ACCESS_TOKEN: "line-message-token",
+        LINE_MESSAGING_CHANNEL_SECRET: "line-channel-secret",
+      },
+      {
+        signServiceAccountJwt: async () => "signed-jwt",
+        fetcher: async (url, init) => {
+          calls.push({ url: String(url), init });
+          if (String(url) === "https://oauth2.googleapis.com/token") {
+            return Response.json({
+              access_token: "access-token",
+              token_type: "Bearer",
+              expires_in: 3600,
+            });
+          }
+
+          if (
+            String(url) ===
+            "https://sheets.googleapis.com/v4/spreadsheets/spreadsheet_1/values/users!A2%3AF"
+          ) {
+            return Response.json({
+              values: [
+                ["1", "ひとみ", "line_woman", "line_woman", "2021/03/03", "2021/03/03"],
+                ["2", "げんき", "line_man", "line_man", "2021/03/03", "2021/03/03"],
+              ],
+            });
+          }
+
+          if (
+            String(url) ===
+            "https://sheets.googleapis.com/v4/spreadsheets/spreadsheet_1/values/payments!A2%3AL"
+          ) {
+            return Response.json({ values: [] });
+          }
+
+          if (
+            String(url) ===
+            "https://sheets.googleapis.com/v4/spreadsheets/spreadsheet_1/values/payments!A2%3AK:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS"
+          ) {
+            return Response.json({});
+          }
+
+          if (String(url) === "https://api.line.me/v2/bot/message/push") {
+            return Response.json({});
+          }
+
+          if (String(url) === "https://api.line.me/v2/bot/message/reply") {
+            return Response.json({});
+          }
+
+          throw new Error(`Unexpected fetch: ${String(url)}`);
+        },
+      },
+    );
+    const bodyText = JSON.stringify({
+      events: [
+        {
+          type: "message",
+          webhookEventId: "line-webhook-create-1",
+          replyToken: "reply-token-1",
+          source: { type: "user", userId: "line_woman" },
+          message: { type: "text", text: "コンビニ 1200" },
+        },
+      ],
+    });
+
+    const response = await app.request("/api/line/webhook", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-line-signature": await signLineWebhook(bodyText, "line-channel-secret"),
+      },
+      body: bodyText,
+    });
+
+    expect(response.status).toBe(200);
+    const pushBodies = calls
+      .filter((call) => call.url === "https://api.line.me/v2/bot/message/push")
+      .map((call) => String(call.init?.body));
+    expect(pushBodies).toHaveLength(2);
+    expect(pushBodies[0]).toContain('"to":"line_woman"');
+    expect(pushBodies[1]).toContain('"to":"line_man"');
+    expect(pushBodies.join("\n")).toContain("コンビニ ￥1,200");
+  });
 });
+
+async function signLineWebhook(bodyText: string, channelSecret: string): Promise<string> {
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(channelSecret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const digest = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    new TextEncoder().encode(bodyText),
+  );
+  let binary = "";
+  for (const byte of new Uint8Array(digest)) {
+    binary += String.fromCharCode(byte);
+  }
+
+  return btoa(binary);
+}

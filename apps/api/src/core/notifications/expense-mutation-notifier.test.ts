@@ -38,6 +38,7 @@ describe("createExpenseMutationNotifier", () => {
         pushMessage: async (input) => {
           pushed.push(input);
         },
+        replyMessage: async () => {},
       },
     });
 
@@ -144,6 +145,7 @@ describe("createExpenseMutationNotifier", () => {
         pushMessage: async (input) => {
           pushed.push(input);
         },
+        replyMessage: async () => {},
       },
     });
 

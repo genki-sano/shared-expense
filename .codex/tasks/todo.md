@@ -1,5 +1,36 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: LINE Webhook Expense Creation
+
+### Checklist
+
+- [x] Review LINE webhook message event and signature verification docs
+- [x] Add LINE reply API support to the messaging client
+- [x] Add signed LINE webhook route for text expense creation
+- [x] Register successful webhook expenses with category `その他`
+- [x] Push successful webhook registration messages to both users
+- [x] Reply with failure messages when webhook registration cannot proceed
+- [x] Verify targeted LINE webhook and messaging tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-01 23:00 JST: User wants LINE text messages in `支払内容 金額` format, split by half-width or full-width spaces, to create today's expense through Messaging API webhooks.
+- 2026-08-01 23:01 JST: LINE docs require verifying the `x-line-signature` header against the unmodified raw request body before processing webhook events.
+- 2026-08-01 23:03 JST: Added reply API support, a signed webhook route, message parsing, user lookup by LINE user id, and successful creation notifications to both users.
+- 2026-08-01 23:04 JST: User specified webhook-created expenses should use category `その他`.
+- 2026-08-01 23:07 JST: Created the LINE webhook expense creation commit.
+
+### Verification Log
+
+- 2026-08-01 23:03 JST: Targeted webhook/messaging test run failed because the env integration test did not mock the Spreadsheet pre-read or LINE reply URL used on the failure path.
+- 2026-08-01 23:04 JST: `pnpm test apps/api/src/line-webhook/routes.test.ts packages/integrations/src/line/messaging-client.test.ts apps/api/src/app-env.test.ts apps/api/src/core/notifications/expense-mutation-notifier.test.ts apps/jobs/src/monthly-settlement-reminder.test.ts apps/web-dev-config.test.ts apps/api/src/deploy-config.test.ts` passed. `app-env.test.ts` intentionally logs auth failures for invalid-token cases.
+- 2026-08-01 23:05 JST: `pnpm typecheck` failed because webhook route tests typed household users as a general `User[]` instead of the required two-user tuple.
+- 2026-08-01 23:05 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-08-01 23:06 JST: `pnpm build` passed. Redocly still reports the same existing OpenAPI warnings.
+
 ## Task: Derive Notification Detail LIFF URL
 
 ### Checklist
