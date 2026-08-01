@@ -109,7 +109,7 @@ export function createApp(dependencies: AppDependencies = defaultDependencies): 
 
 export function createAppFromEnv(
   env: AppEnv,
-  dependencies: AppEnvDependencies = defaultDependencies,
+  dependencies: AppEnvDependencies = {},
 ): Hono {
   const repositories = repositoriesFromEnv(env, dependencies);
   const allowedOrigins = allowedOriginsFromEnv(env);

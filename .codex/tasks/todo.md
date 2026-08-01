@@ -1,5 +1,32 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Fix Env Authentication Wiring
+
+### Checklist
+
+- [x] Reproduce production `AUTH_UNAVAILABLE` after `LINE_LOGIN_CHANNEL_ID` secret is present
+- [x] Identify why env-based LINE auth is bypassed
+- [x] Fix `createAppFromEnv` dependency defaults
+- [x] Add regression test for env-based authenticator wiring
+- [x] Verify targeted auth/env tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Run API Wrangler dry-run
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-01 21:20 JST: Production API still returned `AUTH_UNAVAILABLE` after `LINE_LOGIN_CHANNEL_ID` was re-added as a Worker secret.
+- 2026-08-01 21:20 JST: Found `createAppFromEnv(env)` defaulted its optional dependencies to `defaultDependencies`, so the fallback `authenticateToken` was always injected and env-based LINE auth was bypassed.
+- 2026-08-01 21:20 JST: Changed `createAppFromEnv` optional dependencies default to an empty object and added a regression test for env-based LINE Login authentication.
+
+### Verification Log
+
+- 2026-08-01 21:20 JST: `pnpm test apps/api/src/app-env.test.ts apps/api/src/app.test.ts apps/api/src/core/auth/line-id-token.test.ts` passed with 32 tests.
+- 2026-08-01 21:20 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-08-01 21:20 JST: `pnpm --filter @shared-expense/api dry-run` passed with Wrangler 4.115.0.
+- 2026-08-01 21:20 JST: `pnpm build` passed for 6 workspace projects; Next.js generated `/` and `/_not-found` as static pages.
+
 ## Task: Update Worker Compatibility Date
 
 ### Checklist

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createAppFromEnv } from "./app";
 
 const user = {
@@ -9,6 +9,10 @@ const user = {
 };
 
 describe("createAppFromEnv", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it("uses the Spreadsheet repository when service account env is configured", async () => {
     const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
     const app = createAppFromEnv(
@@ -173,6 +177,38 @@ describe("createAppFromEnv", () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({ expenses: [] });
+  });
+
+  it("uses LINE Login env authentication when no authenticateToken dependency is injected", async () => {
+    const fetchMock = vi.fn(async () =>
+      Response.json({
+        sub: "line_woman",
+        aud: "unexpected-channel",
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const app = createAppFromEnv({
+      LINE_LOGIN_CHANNEL_ID: "line-channel-1",
+    });
+
+    const response = await app.request("/api/expenses?date=2026-07", {
+      headers: { Authorization: "Bearer line-id-token" },
+    });
+
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toMatchObject({
+      details: { code: "AUTH_INVALID" },
+    });
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://api.line.me/oauth2/v2.1/verify",
+      expect.objectContaining({
+        method: "POST",
+        body: new URLSearchParams({
+          id_token: "line-id-token",
+          client_id: "line-channel-1",
+        }),
+      }),
+    );
   });
 
   it("verifies LINE ID tokens and resolves the LINE user from Spreadsheet users", async () => {
