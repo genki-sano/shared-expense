@@ -1,5 +1,5 @@
 import type { Expense, User } from "@shared-expense/shared";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createApp } from "./app";
 import { AuthenticationError } from "./core/auth/authentication-error";
 import { InMemoryExpenseRepository, type ExpenseRepository } from "./expenses/repository";
@@ -419,6 +419,7 @@ describe("Expense mutations", () => {
   });
 
   it("keeps mutation responses successful when partner notification fails", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const expenseRepository = new InMemoryExpenseRepository(expenses);
     const notificationApp = createApp({
       authenticateToken: async () => user,
@@ -435,22 +436,31 @@ describe("Expense mutations", () => {
       },
     });
 
-    const response = await notificationApp.request("/api/expenses", {
-      method: "POST",
-      headers: {
-        Authorization: "Bearer valid",
-        "Content-Type": "application/json",
-        "Idempotency-Key": "notify-failure-1",
-      },
-      body: JSON.stringify({
-        date: "2026-07-26",
-        price: 1200,
-        category: "食費",
-        memo: "昼食",
-      }),
-    });
+    try {
+      const response = await notificationApp.request("/api/expenses", {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer valid",
+          "Content-Type": "application/json",
+          "Idempotency-Key": "notify-failure-1",
+        },
+        body: JSON.stringify({
+          date: "2026-07-26",
+          price: 1200,
+          category: "食費",
+          memo: "昼食",
+        }),
+      });
 
-    expect(response.status).toBe(201);
+      expect(response.status).toBe(201);
+      expect(consoleError).toHaveBeenCalledWith("Expense notification failed", {
+        name: "Error",
+        reason: "LINE failed",
+        cause: undefined,
+      });
+    } finally {
+      consoleError.mockRestore();
+    }
   });
 
   it("returns 409 when update version does not match", async () => {

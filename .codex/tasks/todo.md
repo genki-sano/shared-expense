@@ -1,5 +1,30 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Surface LINE Push Failure Details
+
+### Checklist
+
+- [x] Inspect current LINE notification failure handling
+- [x] Include LINE Messaging API error body in thrown error
+- [x] Log notification failure details as structured fields
+- [x] Verify targeted notification/messaging tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-01 22:10 JST: Expense create succeeds with HTTP 201, but partner LINE notification fails and logs only a stack trace.
+- 2026-08-01 22:10 JST: Found `FetchLineMessagingClient` throws only `LINE push message failed: <status>` and `notifyExpenseMutation` logs the raw error object.
+- 2026-08-01 22:10 JST: Added `LineMessagingApiError` with status/body and structured notification failure logs.
+
+### Verification Log
+
+- 2026-08-01 22:02 JST: Initial targeted notification test run failed because a new `errorMessage` helper duplicated an existing helper name in `apps/api/src/expenses/routes.ts`; fixed by renaming notification-specific helpers.
+- 2026-08-01 22:02 JST: `pnpm test packages/integrations/src/line/messaging-client.test.ts apps/api/src/app.test.ts apps/api/src/core/notifications/expense-mutation-notifier.test.ts` passed with 26 tests.
+- 2026-08-01 22:02 JST: `pnpm typecheck` passed for 6 workspace projects; Redocly reported existing OpenAPI warnings for missing license and localhost server URL.
+- 2026-08-01 22:02 JST: `pnpm build` passed for 6 workspace projects; Next.js generated `/` and `/_not-found` as static pages.
+
 ## Task: Clarify Auth Unavailable Message
 
 ### Checklist

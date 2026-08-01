@@ -225,8 +225,28 @@ async function notifyExpenseMutation(
   try {
     await (dependencies.expenseMutationNotifier ?? noopExpenseMutationNotifier).notify(input);
   } catch (error) {
-    console.error("Expense notification failed", error);
+    console.error("Expense notification failed", {
+      name: notificationErrorName(error),
+      reason: errorMessage(error),
+      cause: notificationErrorCauseMessage(error),
+    });
   }
+}
+
+function notificationErrorName(error: unknown): string {
+  if (error instanceof Error && error.name.trim() !== "") {
+    return error.name;
+  }
+
+  return typeof error;
+}
+
+function notificationErrorCauseMessage(error: unknown): string | undefined {
+  if (typeof error !== "object" || error === null || !("cause" in error)) {
+    return undefined;
+  }
+
+  return errorMessage(error.cause);
 }
 
 function validateIdempotencyKey(value: string | undefined):

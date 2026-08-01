@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { FetchLineMessagingClient, LINE_PUSH_MESSAGE_URL } from "./messaging-client";
+import {
+  FetchLineMessagingClient,
+  LINE_PUSH_MESSAGE_URL,
+  LineMessagingApiError,
+} from "./messaging-client";
 
 describe("FetchLineMessagingClient", () => {
   it("pushes messages through the LINE Messaging API", async () => {
@@ -72,6 +76,17 @@ describe("FetchLineMessagingClient", () => {
         to: "line_man",
         messages: [{ type: "text", text: "支出が追加されました" }],
       }),
-    ).rejects.toThrow("LINE push message failed: 403");
+    ).rejects.toMatchObject({
+      name: "LineMessagingApiError",
+      status: 403,
+      responseBody: '{"message":"Forbidden"}',
+      message: 'LINE push message failed: 403 {"message":"Forbidden"}',
+    });
+    await expect(
+      client.pushMessage({
+        to: "line_man",
+        messages: [{ type: "text", text: "支出が追加されました" }],
+      }),
+    ).rejects.toBeInstanceOf(LineMessagingApiError);
   });
 });

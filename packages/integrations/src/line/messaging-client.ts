@@ -93,6 +93,20 @@ export type FetchLineMessagingClientInput = {
   fetcher?: typeof fetch;
 };
 
+export class LineMessagingApiError extends Error {
+  readonly status: number;
+  readonly responseBody: string;
+
+  constructor(input: { status: number; responseBody: string }) {
+    const detail =
+      input.responseBody.trim() === "" ? "" : ` ${input.responseBody.trim()}`;
+    super(`LINE push message failed: ${input.status}${detail}`);
+    this.name = "LineMessagingApiError";
+    this.status = input.status;
+    this.responseBody = input.responseBody;
+  }
+}
+
 export class FetchLineMessagingClient implements LineMessagingClient {
   readonly #channelAccessToken: string;
   readonly #fetcher: typeof fetch;
@@ -116,7 +130,18 @@ export class FetchLineMessagingClient implements LineMessagingClient {
     });
 
     if (!response.ok) {
-      throw new Error(`LINE push message failed: ${response.status}`);
+      throw new LineMessagingApiError({
+        status: response.status,
+        responseBody: await safeResponseText(response),
+      });
     }
+  }
+}
+
+async function safeResponseText(response: Response): Promise<string> {
+  try {
+    return await response.text();
+  } catch {
+    return "";
   }
 }
