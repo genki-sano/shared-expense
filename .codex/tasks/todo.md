@@ -1,5 +1,29 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Remove Expense ID From List Query Parameters
+
+### Checklist
+
+- [x] Remove `expenseId` parsing from the list page
+- [x] Remove selected-expense props and scroll/edit deep-link logic from the dashboard
+- [x] Update regression checks so list page only accepts `month`
+- [x] Verify targeted Web config test passes
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-02 15:56 JST: User confirmed the list page no longer needs `expenseId`; started removing the legacy list deep-link behavior while keeping detail page `expenseId` query support.
+- 2026-08-02 20:31 JST: Removed list-page `expenseId` parsing and the dashboard selected-expense auto-open/scroll behavior.
+- 2026-08-02 20:31 JST: Created commit `8f322a6` for removing the list expense id query behavior.
+
+### Verification Log
+
+- 2026-08-02 20:28 JST: `pnpm test apps/web-dev-config.test.ts` passed with 16 tests.
+- 2026-08-02 20:29 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-08-02 20:29 JST: `pnpm build` passed. Redocly still reports the same existing warnings.
+
 ## Task: Use Query-Based Expense Detail Links
 
 ### Checklist

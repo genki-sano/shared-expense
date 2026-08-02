@@ -174,9 +174,9 @@ describe("web dev configuration", () => {
     );
 
     expect(appSource).toContain("<HomeClient />");
-    expect(homeClientSource).toContain("normalizeStringParam(");
-    expect(homeClientSource).toContain("searchParams.get(\"expenseId\")");
-    expect(homeClientSource).toContain("selectedExpenseId={selectedExpenseId}");
+    expect(homeClientSource).toContain("searchParams.get(\"month\")");
+    expect(homeClientSource).not.toContain("searchParams.get(\"expenseId\")");
+    expect(homeClientSource).not.toContain("selectedExpenseId=");
     expect(detailPageSource).toContain("<ExpenseDetailClient />");
     expect(detailClientSource).toContain('searchParams.get("expenseId")');
     expect(detailClientSource).not.toContain("usePathname()");
@@ -187,14 +187,9 @@ describe("web dev configuration", () => {
     expect(detailClientSource).toContain("deleteExpense(");
     expect(detailClientSource).toContain("restoreExpense(");
     expect(detailClientSource).toContain("一覧へ");
-    expect(dashboardSource).toContain("props.selectedExpenseId");
-    expect(dashboardSource).toContain("selectedExpenseExists");
-    expect(dashboardSource).toContain(
-      "setEditingExpenseId(selectedExpenseExists ? props.selectedExpenseId ?? null : null)",
-    );
-    expect(dashboardSource).toContain("expenseElementsRef");
-    expect(dashboardSource).toContain("selectedElement.scrollIntoView");
-    expect(dashboardSource).toContain('block: "start"');
+    expect(dashboardSource).not.toContain("selectedExpenseId");
+    expect(dashboardSource).not.toContain("expenseElementsRef");
+    expect(dashboardSource).not.toContain("scrollIntoView");
     expect(dashboardSource).not.toContain("通知対象");
     expect(notificationSource).toContain('/expense');
     expect(notificationSource).toContain('url.searchParams.set("expenseId", expense.id)');

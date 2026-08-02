@@ -10,9 +10,6 @@ export function HomeClient() {
   const searchParams = useSearchParams();
   const currentMonth = currentMonthInJst();
   const month = normalizeMonthParam(searchParams.get("month") ?? undefined, currentMonth);
-  const selectedExpenseId = normalizeStringParam(
-    searchParams.get("expenseId") ?? undefined,
-  );
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   const devIdToken =
     process.env.NODE_ENV === "development"
@@ -31,17 +28,8 @@ export function HomeClient() {
       liffId={liffId}
       month={month}
       currentMonth={currentMonth}
-      selectedExpenseId={selectedExpenseId}
       settlement={calculateMonthlySettlement(month, sampleUsers, expenses)}
       source={shouldUseSampleData ? "sample" : "api"}
     />
   );
-}
-
-function normalizeStringParam(value: string | undefined): string | undefined {
-  if (value === undefined || value.trim() === "") {
-    return undefined;
-  }
-
-  return value;
 }

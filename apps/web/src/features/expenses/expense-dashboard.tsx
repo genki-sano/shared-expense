@@ -3,7 +3,7 @@
 import { calculateMonthlySettlement, type Expense } from "@shared-expense/shared";
 import type { HouseholdUsers, MonthlySettlementSummary } from "@shared-expense/shared";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import {
   createExpense,
   deleteExpense,
@@ -27,7 +27,6 @@ type ExpenseDashboardProps = {
   liffId: string | undefined;
   settlement: MonthlySettlementSummary;
   currentMonth: string;
-  selectedExpenseId: string | undefined;
   errorMessage: string | undefined;
 };
 
@@ -58,7 +57,6 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [isMonthPending, startMonthTransition] = useTransition();
-  const expenseElementsRef = useRef(new Map<string, HTMLElement>());
 
   const total = useMemo(
     () => expenses.reduce((sum, expense) => sum + expense.price, 0),
@@ -81,17 +79,13 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
   const canMutate = isMutationEnabled && !isMonthLoading;
 
   useEffect(() => {
-    const selectedExpenseExists = props.expenses.some(
-      (expense) => expense.id === props.selectedExpenseId,
-    );
-
     setDisplayMonth(props.month);
     setExpenses(sortExpenses(props.expenses));
     setSettlementSummary(props.settlement);
     setIsCreateOpen(false);
-    setEditingExpenseId(selectedExpenseExists ? props.selectedExpenseId ?? null : null);
+    setEditingExpenseId(null);
     setRestorableExpense(null);
-  }, [props.expenses, props.month, props.selectedExpenseId, props.settlement]);
+  }, [props.expenses, props.month, props.settlement]);
 
   useEffect(() => {
     const apiBaseUrl = props.apiBaseUrl;
@@ -199,11 +193,7 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
         setExpenses(sortExpenses(expensesResult.expenses));
         setSettlementSummary(settlementResult.settlement);
         setStatusMessage(null);
-        setEditingExpenseId(
-          expensesResult.expenses.some((expense) => expense.id === props.selectedExpenseId)
-            ? props.selectedExpenseId ?? null
-            : null,
-        );
+        setEditingExpenseId(null);
       } catch (error) {
         logExpenseMutationError("load", error);
         if (!isCancelled) {
@@ -217,27 +207,7 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
     return () => {
       isCancelled = true;
     };
-  }, [props.apiBaseUrl, props.idToken, props.month, props.selectedExpenseId]);
-
-  useEffect(() => {
-    if (
-      props.selectedExpenseId === undefined ||
-      editingExpenseId !== props.selectedExpenseId
-    ) {
-      return;
-    }
-
-    const selectedElement = expenseElementsRef.current.get(props.selectedExpenseId);
-    if (selectedElement === undefined) {
-      return;
-    }
-
-    const frameId = window.requestAnimationFrame(() => {
-      selectedElement.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-
-    return () => window.cancelAnimationFrame(frameId);
-  }, [editingExpenseId, expenses, props.selectedExpenseId]);
+  }, [props.apiBaseUrl, props.idToken, props.month]);
 
   function navigateToMonth(nextMonth: string): void {
     if (nextMonth === displayMonth) {
@@ -517,14 +487,6 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
             <article
               className={`expense ${payerClassName(expense.userId)}`}
               key={expense.id}
-              ref={(element) => {
-                if (element === null) {
-                  expenseElementsRef.current.delete(expense.id);
-                  return;
-                }
-
-                expenseElementsRef.current.set(expense.id, element);
-              }}
             >
               <button
                 className="expenseTapTarget"
