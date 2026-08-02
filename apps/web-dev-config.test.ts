@@ -75,6 +75,18 @@ describe("web dev configuration", () => {
     expect(existsSync(join(rootDir, "apps/web/src/app/home-client.tsx"))).toBe(true);
   });
 
+  test("web app asks search engines not to index it", () => {
+    const layoutSource = readText("apps/web/src/app/layout.tsx");
+    const robotsSource = readText("apps/web/src/app/robots.ts");
+
+    expect(layoutSource).toContain("robots:");
+    expect(layoutSource).toContain("index: false");
+    expect(layoutSource).toContain("follow: false");
+    expect(robotsSource).toContain('userAgent: "*"');
+    expect(robotsSource).toContain('disallow: "/"');
+    expect(robotsSource).toContain('dynamic = "force-static"');
+  });
+
   test("web app can initialize LIFF ID tokens for production auth", () => {
     const webPackage = readPackageJson("apps/web/package.json");
     const homeClientSource = readText("apps/web/src/app/home-client.tsx");

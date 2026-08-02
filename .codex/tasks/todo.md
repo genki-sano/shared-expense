@@ -1,5 +1,32 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Prevent Web Search Indexing
+
+### Checklist
+
+- [x] Inspect current Next.js web metadata setup
+- [x] Add page-level robots noindex metadata
+- [x] Add `robots.txt` metadata route that disallows all crawling
+- [x] Add a regression test for the noindex setup
+- [x] Verify targeted web config test passes
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-02 11:00 JST: User asked whether the web page can be kept out of Google and other search results.
+- 2026-08-02 11:01 JST: Added both HTML robots metadata and a static-export-compatible `robots.txt` route to discourage indexing/crawling.
+
+### Verification Log
+
+- 2026-08-02 14:28 JST: `pnpm test apps/web-dev-config.test.ts` passed with 15 tests.
+- 2026-08-02 14:29 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-08-02 14:29 JST: `pnpm build` failed because Next static export requires `dynamic = "force-static"` or `revalidate` on `/robots.txt`.
+- 2026-08-02 14:30 JST: `pnpm test apps/web-dev-config.test.ts` passed again after adding static export metadata route configuration.
+- 2026-08-02 14:30 JST: `pnpm build` passed. Next generated static `/robots.txt`; Redocly still reports the same existing OpenAPI warnings.
+- 2026-08-02 14:31 JST: Created the web noindex commit.
+
 ## Task: Reply on LINE Webhook Success
 
 ### Checklist
