@@ -14,7 +14,7 @@ import {
   type UpdateExpensePayload,
 } from "./api";
 import { getLiffIdToken } from "./liff-client";
-import { currentMonthInJst, formatMonthLabel, normalizeMonthParam } from "./month";
+import { formatMonthLabel } from "./month";
 
 type DetailState =
   | { status: "loading" }
@@ -37,8 +37,6 @@ const numberFormatter = new Intl.NumberFormat("ja-JP", {
 export function ExpenseDetailClient() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const currentMonth = currentMonthInJst();
-  const month = normalizeMonthParam(searchParams.get("month") ?? undefined, currentMonth);
   const expenseId =
     expenseIdFromPathname(pathname) ??
     normalizeStringParam(searchParams.get("expenseId") ?? undefined);
@@ -52,7 +50,12 @@ export function ExpenseDetailClient() {
   const [state, setState] = useState<DetailState>({ status: "loading" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const listHref = useMemo(() => `/?month=${month}`, [month]);
+  const detailMonth =
+    state.status === "ready" ? monthFromExpenseDate(state.expense.date) : undefined;
+  const listHref = useMemo(
+    () => (detailMonth === undefined ? "/" : `/?month=${detailMonth}`),
+    [detailMonth],
+  );
 
   useEffect(() => {
     if (expenseId === undefined) {
@@ -173,7 +176,9 @@ export function ExpenseDetailClient() {
       <div className="app">
         <header className="detailTopbar">
           <div>
-            <p className="month">{formatMonthLabel(month)}</p>
+            {detailMonth === undefined ? null : (
+              <p className="month">{formatMonthLabel(detailMonth)}</p>
+            )}
             <h1 className="title">支出詳細</h1>
           </div>
           <Link className="backLink" href={listHref}>
@@ -363,6 +368,10 @@ function normalizeStringParam(value: string | undefined): string | undefined {
   }
 
   return value;
+}
+
+function monthFromExpenseDate(date: string): string {
+  return date.slice(0, 7);
 }
 
 function expenseIdFromPathname(pathname: string): string | undefined {

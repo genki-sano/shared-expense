@@ -181,6 +181,7 @@ describe("web dev configuration", () => {
     expect(detailPageSource).toContain("<ExpenseDetailClient />");
     expect(detailClientSource).toContain("usePathname()");
     expect(detailClientSource).toContain("expenseIdFromPathname(pathname)");
+    expect(detailClientSource).toContain("monthFromExpenseDate(state.expense.date)");
     expect(detailClientSource).toContain("fetchExpenseDetail(");
     expect(detailClientSource).toContain("updateExpense(");
     expect(detailClientSource).toContain("deleteExpense(");
@@ -196,6 +197,7 @@ describe("web dev configuration", () => {
     expect(dashboardSource).toContain('block: "start"');
     expect(dashboardSource).not.toContain("通知対象");
     expect(notificationSource).toContain('/expense/${encodeURIComponent(expense.id)}');
+    expect(notificationSource).not.toContain('searchParams.set("month"');
     expect(redirectsSource).toContain("/expense/* /expense/index.html 200");
     expect(cssSource).not.toContain('.expense[data-selected="true"]');
     expect(cssSource).not.toContain(".selectedPill");

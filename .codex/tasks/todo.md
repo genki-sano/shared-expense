@@ -1,5 +1,29 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Remove Month Query From Expense Detail Links
+
+### Checklist
+
+- [x] Remove `month` from LINE notification expense detail links
+- [x] Derive the detail page month from fetched expense data
+- [x] Update regression checks for month-free detail links
+- [x] Verify targeted API/Web tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-02 15:08 JST: User confirmed detail URLs should not need `month=YYYY-MM`; started changing detail page state to derive month from fetched expense data.
+- 2026-08-02 15:11 JST: Removed the notification link month query and changed the detail page return link/month label to use the fetched expense date.
+- 2026-08-02 15:12 JST: Created commit `918a89e` for month-free expense detail links.
+
+### Verification Log
+
+- 2026-08-02 14:59 JST: `pnpm test apps/api/src/core/notifications/expense-mutation-notifier.test.ts apps/web-dev-config.test.ts` passed with 18 tests.
+- 2026-08-02 14:59 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-08-02 14:59 JST: `pnpm build` passed. Redocly still reports the same existing warnings.
+
 ## Task: Use Path-Based Expense Detail URLs
 
 ### Checklist
