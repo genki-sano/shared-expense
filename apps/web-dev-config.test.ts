@@ -177,6 +177,9 @@ describe("web dev configuration", () => {
     expect(homeClientSource).toContain("searchParams.get(\"month\")");
     expect(homeClientSource).not.toContain("searchParams.get(\"expenseId\")");
     expect(homeClientSource).not.toContain("selectedExpenseId=");
+    expect(homeClientSource).toContain("LIFF_LAUNCH_GUARD_MS");
+    expect(homeClientSource).toContain("isLiffLaunchGuardActive");
+    expect(homeClientSource).toContain("LINE認証を確認しています");
     expect(detailPageSource).toContain("<ExpenseDetailClient />");
     expect(detailClientSource).toContain('searchParams.get("expenseId")');
     expect(detailClientSource).not.toContain("usePathname()");

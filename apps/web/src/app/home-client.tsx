@@ -2,9 +2,12 @@
 
 import { calculateMonthlySettlement } from "@shared-expense/shared";
 import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { ExpenseDashboard } from "../features/expenses/expense-dashboard";
 import { currentMonthInJst, normalizeMonthParam } from "../features/expenses/month";
 import { sampleExpenses, sampleUsers } from "../features/expenses/api";
+
+const LIFF_LAUNCH_GUARD_MS = 450;
 
 export function HomeClient() {
   const searchParams = useSearchParams();
@@ -18,6 +21,38 @@ export function HomeClient() {
   const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
   const shouldUseSampleData = apiBaseUrl === undefined || apiBaseUrl.trim() === "";
   const expenses = shouldUseSampleData ? sampleExpenses : [];
+  const shouldDelayInitialList =
+    process.env.NODE_ENV === "production" &&
+    liffId !== undefined &&
+    liffId.trim() !== "";
+  const [isLiffLaunchGuardActive, setIsLiffLaunchGuardActive] = useState(
+    shouldDelayInitialList,
+  );
+
+  useEffect(() => {
+    if (!shouldDelayInitialList) {
+      setIsLiffLaunchGuardActive(false);
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setIsLiffLaunchGuardActive(false);
+    }, LIFF_LAUNCH_GUARD_MS);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [shouldDelayInitialList]);
+
+  if (isLiffLaunchGuardActive) {
+    return (
+      <main className="shell">
+        <div className="app">
+          <p className="statusMessage" role="status">
+            LINE認証を確認しています
+          </p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <ExpenseDashboard

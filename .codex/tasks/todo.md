@@ -1,5 +1,29 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Delay Home List During LIFF Launch
+
+### Checklist
+
+- [x] Add a short LIFF launch guard before rendering the root expense list
+- [x] Keep direct web/local rendering unaffected when LIFF is not configured
+- [x] Update Web regression checks
+- [x] Verify targeted Web tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-02 21:34 JST: User wants to suppress the brief expense list flash before the detail page opens from LIFF.
+- 2026-08-02 21:56 JST: Added a production-only LIFF launch guard on the root page that shows a short auth status before rendering the expense list.
+- 2026-08-02 21:57 JST: Created commit `3ba0de8` for delaying the home list during LIFF launch.
+
+### Verification Log
+
+- 2026-08-02 21:53 JST: `pnpm test apps/web-dev-config.test.ts` passed with 16 tests.
+- 2026-08-02 21:54 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-08-02 21:54 JST: `pnpm build` passed. Redocly still reports the same existing warnings.
+
 ## Task: Differentiate Notification Colors By Type
 
 ### Checklist
