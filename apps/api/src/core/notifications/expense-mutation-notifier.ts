@@ -141,7 +141,8 @@ function detailUrlForExpense(baseUrl: string | undefined, expense: Expense): str
   }
 
   const url = new URL(baseUrl);
-  url.pathname = `${url.pathname.replace(/\/$/, "")}/expense/${encodeURIComponent(expense.id)}`;
+  url.pathname = `${url.pathname.replace(/\/$/, "")}/expense`;
+  url.searchParams.set("expenseId", expense.id);
   return url.toString();
 }
 

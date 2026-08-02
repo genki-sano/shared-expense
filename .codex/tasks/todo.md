@@ -1,5 +1,29 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Use Query-Based Expense Detail Links
+
+### Checklist
+
+- [x] Change LINE notification links to `/expense?expenseId=:id`
+- [x] Remove the Cloudflare Pages path rewrite used only for `/expense/:id`
+- [x] Update regression checks for query-based detail links
+- [x] Verify targeted API/Web tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-02 15:48 JST: User chose the query-based detail link option to avoid static export rewrites for `/expense/:id`.
+- 2026-08-02 15:51 JST: Changed notification detail links to `/expense?expenseId=:id`, removed the `_redirects` file, and simplified the detail page to read `expenseId` from query parameters.
+- 2026-08-02 15:52 JST: Created commit `2c7ddfb` for query-based expense detail links.
+
+### Verification Log
+
+- 2026-08-02 15:27 JST: `pnpm test apps/api/src/core/notifications/expense-mutation-notifier.test.ts apps/web-dev-config.test.ts` passed with 18 tests.
+- 2026-08-02 15:28 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-08-02 15:28 JST: `pnpm build` passed. Confirmed `apps/web/out/_redirects` is absent.
+
 ## Task: Fix Expense Detail Static Redirect Target
 
 ### Checklist

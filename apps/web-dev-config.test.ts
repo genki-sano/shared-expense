@@ -167,7 +167,6 @@ describe("web dev configuration", () => {
     const detailClientSource = readText(
       "apps/web/src/features/expenses/expense-detail-client.tsx",
     );
-    const redirectsSource = readText("apps/web/public/_redirects");
     const dashboardSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
     const cssSource = readText("apps/web/src/app/globals.css");
     const notificationSource = readText(
@@ -179,8 +178,8 @@ describe("web dev configuration", () => {
     expect(homeClientSource).toContain("searchParams.get(\"expenseId\")");
     expect(homeClientSource).toContain("selectedExpenseId={selectedExpenseId}");
     expect(detailPageSource).toContain("<ExpenseDetailClient />");
-    expect(detailClientSource).toContain("usePathname()");
-    expect(detailClientSource).toContain("expenseIdFromPathname(pathname)");
+    expect(detailClientSource).toContain('searchParams.get("expenseId")');
+    expect(detailClientSource).not.toContain("usePathname()");
     expect(detailClientSource).toContain("monthFromExpenseDate(state.expense.date)");
     expect(detailClientSource).not.toContain("formatMonthLabel(detailMonth)");
     expect(detailClientSource).toContain("fetchExpenseDetail(");
@@ -197,9 +196,9 @@ describe("web dev configuration", () => {
     expect(dashboardSource).toContain("selectedElement.scrollIntoView");
     expect(dashboardSource).toContain('block: "start"');
     expect(dashboardSource).not.toContain("通知対象");
-    expect(notificationSource).toContain('/expense/${encodeURIComponent(expense.id)}');
+    expect(notificationSource).toContain('/expense');
+    expect(notificationSource).toContain('url.searchParams.set("expenseId", expense.id)');
     expect(notificationSource).not.toContain('searchParams.set("month"');
-    expect(redirectsSource).toContain("/expense/* /expense.html 200");
     expect(cssSource).not.toContain('.expense[data-selected="true"]');
     expect(cssSource).not.toContain(".selectedPill");
     expect(cssSource).toContain(".detailPanel");
