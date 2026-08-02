@@ -230,6 +230,12 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
         actor: auth.actor,
       });
 
+      await notifyExpenseMutation(dependencies, {
+        eventType: "expense.updated",
+        actor: auth.actor,
+        expense,
+      });
+
       return c.json(expense);
     } catch (error) {
       return repositoryErrorResponse(error);

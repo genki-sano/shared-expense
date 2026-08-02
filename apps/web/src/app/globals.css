@@ -353,6 +353,10 @@ button:disabled {
   color: #9d2f2f;
 }
 
+.detailForm .deleteButton {
+  grid-column: auto;
+}
+
 .detailPanel {
   border: 1px solid rgba(23, 33, 31, 0.1);
   border-radius: 8px;

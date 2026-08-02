@@ -402,7 +402,7 @@ describe("Expense mutations", () => {
     });
   });
 
-  it("notifies the partner after creating, updating, and deleting expenses", async () => {
+  it("notifies the partner after creating, updating, deleting, and restoring expenses", async () => {
     const notified: unknown[] = [];
     const expenseRepository = new InMemoryExpenseRepository(expenses);
     const notificationApp = createApp({
@@ -457,14 +457,27 @@ describe("Expense mutations", () => {
         "Idempotency-Key": "notify-delete-1",
       },
     });
+    const restoreResponse = await notificationApp.request(
+      `/api/expenses/${created.id}/restore`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer valid",
+          "Idempotency-Key": "notify-restore-1",
+        },
+      },
+    );
+    const restored = (await restoreResponse.json()) as Expense;
 
     expect(createResponse.status).toBe(201);
     expect(updateResponse.status).toBe(200);
     expect(deleteResponse.status).toBe(204);
+    expect(restoreResponse.status).toBe(200);
     expect(notified).toMatchObject([
       { eventType: "expense.created", actor: user, expense: created },
       { eventType: "expense.updated", actor: user, expense: updated },
       { eventType: "expense.deleted", actor: user, expense: updated },
+      { eventType: "expense.updated", actor: user, expense: restored },
     ]);
   });
 

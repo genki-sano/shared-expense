@@ -1,5 +1,31 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Polish Expense Detail Actions And Restore Notification
+
+### Checklist
+
+- [x] Remove the month label from the expense detail header
+- [x] Make save/delete action button sizing consistent on the detail form
+- [x] Send a LINE notification after successful expense restore
+- [x] Add/update regression checks for detail UI and restore notification
+- [x] Verify targeted API/Web tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-02 15:18 JST: User pointed out detail action button sizing mismatch, unnecessary month label, and asked whether detail update/delete/restore sends LINE notifications.
+- 2026-08-02 15:19 JST: Confirmed update/delete notify after repository success, but restore currently returns without notification; started fixing restore notification and detail UI.
+- 2026-08-02 15:23 JST: Removed the detail month label, made detail delete action keep the two-column button width, and added restore notification as `expense.updated` after repository success.
+- 2026-08-02 15:25 JST: Created commit `9ad5ea8` for detail action polish and restore notification.
+
+### Verification Log
+
+- 2026-08-02 15:14 JST: `pnpm test apps/api/src/app.test.ts apps/web-dev-config.test.ts` passed with 40 tests. Existing stderr logs are from tests that assert auth/repository error paths.
+- 2026-08-02 15:14 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-08-02 15:15 JST: `pnpm build` passed. Redocly still reports the same existing warnings.
+
 ## Task: Remove Month Query From Expense Detail Links
 
 ### Checklist

@@ -182,6 +182,7 @@ describe("web dev configuration", () => {
     expect(detailClientSource).toContain("usePathname()");
     expect(detailClientSource).toContain("expenseIdFromPathname(pathname)");
     expect(detailClientSource).toContain("monthFromExpenseDate(state.expense.date)");
+    expect(detailClientSource).not.toContain("formatMonthLabel(detailMonth)");
     expect(detailClientSource).toContain("fetchExpenseDetail(");
     expect(detailClientSource).toContain("updateExpense(");
     expect(detailClientSource).toContain("deleteExpense(");
@@ -202,6 +203,8 @@ describe("web dev configuration", () => {
     expect(cssSource).not.toContain('.expense[data-selected="true"]');
     expect(cssSource).not.toContain(".selectedPill");
     expect(cssSource).toContain(".detailPanel");
+    expect(cssSource).toContain(".detailForm .deleteButton");
+    expect(cssSource).toContain("grid-column: auto");
   });
 
   test("web app pins light rendering colors to avoid dark mode text inversion", () => {

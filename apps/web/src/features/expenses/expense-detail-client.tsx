@@ -14,7 +14,6 @@ import {
   type UpdateExpensePayload,
 } from "./api";
 import { getLiffIdToken } from "./liff-client";
-import { formatMonthLabel } from "./month";
 
 type DetailState =
   | { status: "loading" }
@@ -176,9 +175,6 @@ export function ExpenseDetailClient() {
       <div className="app">
         <header className="detailTopbar">
           <div>
-            {detailMonth === undefined ? null : (
-              <p className="month">{formatMonthLabel(detailMonth)}</p>
-            )}
             <h1 className="title">支出詳細</h1>
           </div>
           <Link className="backLink" href={listHref}>
