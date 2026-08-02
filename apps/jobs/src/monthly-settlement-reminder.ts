@@ -42,6 +42,8 @@ type MonthlySettlementReminderRepository = {
 };
 
 const JAPAN_TIME_ZONE = "Asia/Tokyo";
+const SETTLEMENT_ACCENT_COLOR = "#D14F3F";
+const SETTLEMENT_BACKGROUND_COLOR = "#FFF1EB";
 
 export async function runMonthlySettlementReminder(input: {
   env: JobsEnv;
@@ -131,7 +133,7 @@ export function monthlySettlementReminderFlexMessage(input: {
             type: "text",
             text: "先月分の精算",
             size: "sm",
-            color: "#176B87",
+            color: SETTLEMENT_ACCENT_COLOR,
             weight: "bold",
           },
           {
@@ -145,7 +147,7 @@ export function monthlySettlementReminderFlexMessage(input: {
             type: "text",
             text: amount === 0 ? "精算はありません" : `${formatYen(amount)} を精算`,
             size: "xxl",
-            color: "#176B87",
+            color: SETTLEMENT_ACCENT_COLOR,
             weight: "bold",
             wrap: true,
           },
@@ -171,7 +173,7 @@ export function monthlySettlementReminderFlexMessage(input: {
                   type: "button",
                   style: "primary",
                   height: "sm",
-                  color: "#176B87",
+                  color: SETTLEMENT_ACCENT_COLOR,
                   action: {
                     type: "uri",
                     label: "詳細を確認",
@@ -183,10 +185,10 @@ export function monthlySettlementReminderFlexMessage(input: {
           }),
       styles: {
         body: {
-          backgroundColor: "#F6F7F4",
+          backgroundColor: SETTLEMENT_BACKGROUND_COLOR,
         },
         footer: {
-          backgroundColor: "#F6F7F4",
+          backgroundColor: SETTLEMENT_BACKGROUND_COLOR,
         },
       },
     },

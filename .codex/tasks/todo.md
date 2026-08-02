@@ -1,5 +1,29 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Distinguish Monthly Settlement Notification Colors
+
+### Checklist
+
+- [x] Review current expense and monthly settlement Flex Message colors
+- [x] Change monthly settlement base/accent colors while leaving expense notifications unchanged
+- [x] Update monthly settlement notification tests
+- [x] Verify targeted Jobs notification tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-02 21:18 JST: User requested monthly settlement notifications use a different, more noticeable base color than regular expense notifications.
+- 2026-08-02 21:20 JST: Changed monthly settlement notification accent/button color to coral and body/footer background to light coral, while leaving regular expense notifications unchanged.
+- 2026-08-02 21:21 JST: Created commit `b9ca168` for monthly settlement notification color changes.
+
+### Verification Log
+
+- 2026-08-02 21:14 JST: `pnpm test apps/jobs/src/monthly-settlement-reminder.test.ts apps/api/src/core/notifications/expense-mutation-notifier.test.ts` passed with 5 tests.
+- 2026-08-02 21:15 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-08-02 21:15 JST: `pnpm build` passed. Redocly still reports the same existing warnings.
+
 ## Task: Load Root Env For Jobs Cron Local Dev
 
 ### Checklist

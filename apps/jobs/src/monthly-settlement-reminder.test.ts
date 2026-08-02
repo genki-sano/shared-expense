@@ -58,9 +58,11 @@ describe("monthlySettlementReminderFlexMessage", () => {
     expect(JSON.stringify(message)).toContain("ひとみ");
     expect(JSON.stringify(message)).toContain("￥10,001");
     expect(JSON.stringify(message)).toContain("https://liff.example.com/?month=2026-06");
+    expect(JSON.stringify(message)).toContain("#D14F3F");
+    expect(JSON.stringify(message)).not.toContain("#176B87");
     expect(message.contents.styles).toEqual({
-      body: { backgroundColor: "#F6F7F4" },
-      footer: { backgroundColor: "#F6F7F4" },
+      body: { backgroundColor: "#FFF1EB" },
+      footer: { backgroundColor: "#FFF1EB" },
     });
   });
 });
