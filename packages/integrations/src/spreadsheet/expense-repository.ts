@@ -69,6 +69,11 @@ export type RestoreSpreadsheetExpenseInput = {
   actor?: { id: string };
 };
 
+export type SpreadsheetExpenseDetail = {
+  expense: Expense;
+  deleted: boolean;
+};
+
 export class SpreadsheetExpenseRepository {
   readonly #spreadsheetId: string;
   readonly #valuesClient: GoogleSheetsValuesClient;
@@ -129,6 +134,21 @@ export class SpreadsheetExpenseRepository {
 
         return right.id.localeCompare(left.id);
       });
+  }
+
+  async getById(input: { id: string }): Promise<SpreadsheetExpenseDetail> {
+    const userNamesByType = await this.#userNamesByType();
+    const payments = await this.#paymentRows();
+    const match = payments.rows.find((row) => row.row[0] === input.id);
+
+    if (match === undefined) {
+      throw new Error(`Expense not found: ${input.id}`);
+    }
+
+    return {
+      expense: this.#expenseFromRow(match.row, match.rowNumber, userNamesByType),
+      deleted: match.deletedAt !== "",
+    };
   }
 
   async create(input: CreateSpreadsheetExpenseInput): Promise<Expense> {

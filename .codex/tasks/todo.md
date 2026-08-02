@@ -1,5 +1,36 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Expense Detail Page
+
+### Checklist
+
+- [x] Inspect current notification detail link and expense mutation UI
+- [x] Add API support to fetch active or deleted expense detail by id
+- [x] Add Web API client support for expense detail
+- [x] Add static detail page at `/expense?expenseId=...&month=...`
+- [x] Add edit/delete/restore actions on the detail page
+- [x] Update LINE notification links to the detail page
+- [x] Update OpenAPI contract
+- [x] Verify targeted API/Web tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-02 14:45 JST: User requested an expense detail page for LINE notification links with list navigation, edit, delete, and restore for deleted expenses.
+- 2026-08-02 14:47 JST: Added `GET /api/expenses/:id` returning `{ expense, deleted }` so deleted expenses can be opened from detail links.
+- 2026-08-02 14:50 JST: Added static-export-friendly `/expense` detail page using `expenseId` and `month` query params, with edit/delete/restore actions.
+- 2026-08-02 14:51 JST: Updated LINE expense notification links to `/expense?month=...&expenseId=...`.
+
+### Verification Log
+
+- 2026-08-02 14:46 JST: `pnpm test apps/api/src/app.test.ts apps/api/src/core/notifications/expense-mutation-notifier.test.ts apps/web/src/features/expenses/api.test.ts apps/web-dev-config.test.ts` passed with 55 tests. Existing error-path tests intentionally log failures to stderr.
+- 2026-08-02 14:47 JST: `pnpm typecheck` failed because `expenseId` needed to be narrowed before use inside the async detail loader.
+- 2026-08-02 14:48 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-08-02 14:49 JST: `pnpm build` passed. Next generated static `/expense`; Redocly still reports the same existing OpenAPI warnings.
+- 2026-08-02 14:50 JST: Created the expense detail page commit.
+
 ## Task: Stabilize Mobile Date Input Sizes
 
 ### Checklist

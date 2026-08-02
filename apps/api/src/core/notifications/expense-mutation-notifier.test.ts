@@ -111,7 +111,7 @@ describe("createExpenseMutationNotifier", () => {
                     action: {
                       type: "uri",
                       label: "詳細を確認",
-                      uri: "https://liff.line.me/1234567890-shared-expense?month=2026-07&expenseId=2148",
+                      uri: "https://liff.line.me/1234567890-shared-expense/expense?month=2026-07&expenseId=2148",
                     },
                   },
                 ],

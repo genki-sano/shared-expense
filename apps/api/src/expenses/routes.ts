@@ -59,6 +59,27 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
     return c.json({ expenses });
   });
 
+  app.get("/:id", async (c) => {
+    const auth = await authenticateRequest(
+      c.req.header("Authorization"),
+      dependencies.authenticateToken,
+    );
+    if (!auth.ok) {
+      return c.json(auth.body, auth.status);
+    }
+
+    try {
+      const detail = await dependencies.expenseRepository.getById({
+        id: c.req.param("id"),
+        actor: auth.actor,
+      });
+
+      return c.json(detail);
+    } catch (error) {
+      return repositoryErrorResponse(error);
+    }
+  });
+
   app.post("/", async (c) => {
     const auth = await authenticateRequest(
       c.req.header("Authorization"),

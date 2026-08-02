@@ -61,6 +61,25 @@ button:disabled {
   padding: 8px 0 12px;
 }
 
+.detailTopbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0 12px;
+}
+
+.backLink {
+  border: 1px solid #d7ded9;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #17211f;
+  padding: 10px 12px;
+  font-size: 0.84rem;
+  font-weight: 850;
+  text-decoration: none;
+}
+
 .title {
   margin: 0;
   font-size: 1.65rem;
@@ -332,6 +351,54 @@ button:disabled {
   border: 1px solid #f0c6c6;
   background: #fff7f7;
   color: #9d2f2f;
+}
+
+.detailPanel {
+  border: 1px solid rgba(23, 33, 31, 0.1);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 12px;
+}
+
+.detailPanel[data-deleted="true"] {
+  background: #fff9f2;
+}
+
+.detailHeader {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.detailName {
+  margin: 0;
+  color: #17211f;
+  font-size: 1rem;
+  font-weight: 850;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.detailMeta {
+  margin: 3px 0 0;
+  color: #63716b;
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.detailForm {
+  margin-bottom: 0;
+  border: 0;
+  border-top: 1px solid #e5ece8;
+  border-radius: 0;
+  padding: 12px 0 0;
+}
+
+.detailActions {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
 }
 
 .list {

@@ -141,6 +141,7 @@ function detailUrlForExpense(baseUrl: string | undefined, expense: Expense): str
   }
 
   const url = new URL(baseUrl);
+  url.pathname = `${url.pathname.replace(/\/$/, "")}/expense`;
   url.searchParams.set("month", expense.date.slice(0, 7));
   url.searchParams.set("expenseId", expense.id);
   return url.toString();

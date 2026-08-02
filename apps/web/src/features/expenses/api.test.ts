@@ -5,6 +5,7 @@ import {
   ExpenseApiError,
   fetchMonthlyExpenses,
   fetchMonthlySettlement,
+  fetchExpenseDetail,
   restoreExpense,
   updateExpense,
 } from "./api";
@@ -97,6 +98,46 @@ describe("fetchMonthlyExpenses", () => {
       responseBody:
         '{"message":"認証情報の有効期限が切れているか、正しくありません","details":{"code":"AUTH_INVALID","action":"LINEから開き直して、もう一度お試しください"}}',
     });
+  });
+});
+
+describe("fetchExpenseDetail", () => {
+  it("fetches expense detail from the configured API with the LINE ID token", async () => {
+    const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
+    const result = await fetchExpenseDetail({
+      apiBaseUrl: "https://api.example.test",
+      id: "exp_1",
+      idToken: "id-token",
+      fetcher: async (url, init) => {
+        calls.push({ url: String(url), init });
+        return Response.json({
+          expense: {
+            id: "exp_1",
+            userId: "woman",
+            userName: "ひとみ",
+            date: "2026-07-18",
+            price: 6420,
+            category: "食費",
+            memo: "スーパー",
+            version: 1,
+          },
+          deleted: true,
+        });
+      },
+    });
+
+    expect(calls).toEqual([
+      {
+        url: "https://api.example.test/api/expenses/exp_1",
+        init: {
+          headers: {
+            Authorization: "Bearer id-token",
+          },
+        },
+      },
+    ]);
+    expect(result.deleted).toBe(true);
+    expect(result.expense.id).toBe("exp_1");
   });
 });
 

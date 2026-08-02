@@ -163,12 +163,26 @@ describe("web dev configuration", () => {
   test("notification detail links open the matching expense details", () => {
     const appSource = readText("apps/web/src/app/page.tsx");
     const homeClientSource = readText("apps/web/src/app/home-client.tsx");
+    const detailPageSource = readText("apps/web/src/app/expense/page.tsx");
+    const detailClientSource = readText(
+      "apps/web/src/features/expenses/expense-detail-client.tsx",
+    );
     const dashboardSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
     const cssSource = readText("apps/web/src/app/globals.css");
+    const notificationSource = readText(
+      "apps/api/src/core/notifications/expense-mutation-notifier.ts",
+    );
 
+    expect(appSource).toContain("<HomeClient />");
     expect(homeClientSource).toContain("normalizeStringParam(");
     expect(homeClientSource).toContain("searchParams.get(\"expenseId\")");
     expect(homeClientSource).toContain("selectedExpenseId={selectedExpenseId}");
+    expect(detailPageSource).toContain("<ExpenseDetailClient />");
+    expect(detailClientSource).toContain("fetchExpenseDetail(");
+    expect(detailClientSource).toContain("updateExpense(");
+    expect(detailClientSource).toContain("deleteExpense(");
+    expect(detailClientSource).toContain("restoreExpense(");
+    expect(detailClientSource).toContain("一覧へ");
     expect(dashboardSource).toContain("props.selectedExpenseId");
     expect(dashboardSource).toContain("selectedExpenseExists");
     expect(dashboardSource).toContain(
@@ -178,8 +192,10 @@ describe("web dev configuration", () => {
     expect(dashboardSource).toContain("selectedElement.scrollIntoView");
     expect(dashboardSource).toContain('block: "start"');
     expect(dashboardSource).not.toContain("通知対象");
+    expect(notificationSource).toContain('/expense');
     expect(cssSource).not.toContain('.expense[data-selected="true"]');
     expect(cssSource).not.toContain(".selectedPill");
+    expect(cssSource).toContain(".detailPanel");
   });
 
   test("web app pins light rendering colors to avoid dark mode text inversion", () => {

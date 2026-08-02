@@ -79,6 +79,30 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
   /api/expenses/{id}:
+    get:
+      tags:
+        - Expenses
+      summary: 支払い詳細を取得
+      operationId: getExpense
+      parameters:
+        - $ref: '#/components/parameters/ExpenseId'
+      responses:
+        '200':
+          description: 取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseDetailResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     put:
       tags:
         - Expenses
@@ -403,6 +427,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Expense'
+    ExpenseDetailResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - expense
+        - deleted
+      properties:
+        expense:
+          $ref: '#/components/schemas/Expense'
+        deleted:
+          type: boolean
+          example: false
     SettlementSummaryResponse:
       type: object
       additionalProperties: false

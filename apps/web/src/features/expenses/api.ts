@@ -13,6 +13,11 @@ export type MonthlySettlementResult = {
   settlement: MonthlySettlementSummary;
 };
 
+export type ExpenseDetailResult = {
+  expense: Expense;
+  deleted: boolean;
+};
+
 export type FetchMonthlyExpensesInput = {
   month: string;
   apiBaseUrl: string | undefined;
@@ -55,6 +60,13 @@ export type DeleteExpenseInput = ExpenseMutationInput & {
 
 export type RestoreExpenseInput = ExpenseMutationInput & {
   id: string;
+};
+
+export type FetchExpenseDetailInput = {
+  apiBaseUrl: string | undefined;
+  id: string;
+  idToken?: string | undefined;
+  fetcher?: typeof fetch;
 };
 
 export class ExpenseApiError extends Error {
@@ -160,6 +172,33 @@ export async function fetchMonthlySettlement(
 
   const settlement = (await response.json()) as MonthlySettlementSummary;
   return { source: "api", settlement };
+}
+
+export async function fetchExpenseDetail(
+  input: FetchExpenseDetailInput,
+): Promise<ExpenseDetailResult> {
+  if (input.apiBaseUrl === undefined || input.apiBaseUrl.trim() === "") {
+    const expense = sampleExpenses.find((item) => item.id === input.id);
+    if (expense === undefined) {
+      throw new Error("Expense not found");
+    }
+
+    return { expense, deleted: false };
+  }
+
+  const fetcher = input.fetcher ?? fetch;
+  const response = await fetcher(
+    new URL(`/api/expenses/${encodeURIComponent(input.id)}`, input.apiBaseUrl).toString(),
+    {
+      headers: authorizationHeaders(input.idToken),
+    },
+  );
+
+  if (!response.ok) {
+    throw await expenseApiError("fetch expense detail", response);
+  }
+
+  return (await response.json()) as ExpenseDetailResult;
 }
 
 export async function createExpense(input: CreateExpenseInput): Promise<Expense> {

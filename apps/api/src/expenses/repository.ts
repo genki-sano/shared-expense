@@ -35,8 +35,14 @@ export type RestoreExpenseInput = {
   actor: User;
 };
 
+export type ExpenseDetail = {
+  expense: Expense;
+  deleted: boolean;
+};
+
 export type ExpenseRepository = {
   listByMonth(input: ListExpensesInput): Promise<Expense[]>;
+  getById(input: { id: string; actor: User }): Promise<ExpenseDetail>;
   create(input: CreateExpenseInput): Promise<Expense>;
   update(input: UpdateExpenseInput): Promise<Expense>;
   delete(input: DeleteExpenseInput): Promise<Expense>;
@@ -62,6 +68,22 @@ export class InMemoryExpenseRepository implements ExpenseRepository {
 
         return right.id.localeCompare(left.id);
       });
+  }
+
+  async getById(input: { id: string; actor: User }): Promise<ExpenseDetail> {
+    const activeExpense = this.#expenses.find((expense) => expense.id === input.id);
+    if (activeExpense !== undefined) {
+      return { expense: activeExpense, deleted: false };
+    }
+
+    const deletedExpense = this.#deletedExpenses.find(
+      (expense) => expense.id === input.id,
+    );
+    if (deletedExpense !== undefined) {
+      return { expense: deletedExpense, deleted: true };
+    }
+
+    throw new ExpenseRepositoryError("not_found", input.id);
   }
 
   async create(input: CreateExpenseInput): Promise<Expense> {

@@ -228,6 +228,53 @@ describe("GET /api/expenses", () => {
 });
 
 describe("Expense mutations", () => {
+  it("returns an active expense detail by id", async () => {
+    const response = await app().request("/api/expenses/exp_earlier", {
+      headers: { Authorization: "Bearer valid" },
+    });
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      expense: {
+        id: "exp_earlier",
+        userId: "user_a",
+        date: "2026-07-06",
+        price: 3280,
+        category: "生活用品",
+        memo: "",
+        version: 2,
+      },
+      deleted: false,
+    });
+  });
+
+  it("returns a deleted expense detail by id", async () => {
+    const detailApp = app();
+    const deleteResponse = await detailApp.request("/api/expenses/exp_earlier", {
+      method: "DELETE",
+      headers: {
+        Authorization: "Bearer valid",
+        "Idempotency-Key": "delete-before-detail-1",
+      },
+    });
+    expect(deleteResponse.status).toBe(204);
+
+    const response = await detailApp.request("/api/expenses/exp_earlier", {
+      headers: { Authorization: "Bearer valid" },
+    });
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      expense: {
+        id: "exp_earlier",
+        userId: "user_a",
+        date: "2026-07-06",
+        price: 3280,
+      },
+      deleted: true,
+    });
+  });
+
   it("creates an expense for the authenticated actor", async () => {
     const response = await app().request("/api/expenses", {
       method: "POST",
@@ -261,6 +308,9 @@ describe("Expense mutations", () => {
       listByMonth: async () => [],
       create: async () => {
         throw new Error("Failed to append Google Sheets values: 403");
+      },
+      getById: async () => {
+        throw new Error("unused");
       },
       update: async () => {
         throw new Error("unused");
