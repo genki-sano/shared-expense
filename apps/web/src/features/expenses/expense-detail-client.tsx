@@ -2,7 +2,7 @@
 
 import type { Expense } from "@shared-expense/shared";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
   deleteExpense,
@@ -35,10 +35,13 @@ const numberFormatter = new Intl.NumberFormat("ja-JP", {
 });
 
 export function ExpenseDetailClient() {
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentMonth = currentMonthInJst();
   const month = normalizeMonthParam(searchParams.get("month") ?? undefined, currentMonth);
-  const expenseId = normalizeStringParam(searchParams.get("expenseId") ?? undefined);
+  const expenseId =
+    expenseIdFromPathname(pathname) ??
+    normalizeStringParam(searchParams.get("expenseId") ?? undefined);
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   const devIdToken =
     process.env.NODE_ENV === "development"
@@ -360,6 +363,21 @@ function normalizeStringParam(value: string | undefined): string | undefined {
   }
 
   return value;
+}
+
+function expenseIdFromPathname(pathname: string): string | undefined {
+  const segments = pathname.split("/").filter((segment) => segment !== "");
+  const expenseSegmentIndex = segments.lastIndexOf("expense");
+  if (expenseSegmentIndex === -1) {
+    return undefined;
+  }
+
+  const rawExpenseId = segments[expenseSegmentIndex + 1];
+  if (rawExpenseId === undefined) {
+    return undefined;
+  }
+
+  return normalizeStringParam(decodeURIComponent(rawExpenseId));
 }
 
 function draftFromExpense(expense: Expense): ExpenseDetailDraft {

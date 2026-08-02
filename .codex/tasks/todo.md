@@ -1,5 +1,30 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Use Path-Based Expense Detail URLs
+
+### Checklist
+
+- [x] Update LINE notification links from query-based detail IDs to `/expense/:id`
+- [x] Parse expense id from the detail page pathname
+- [x] Add Cloudflare Pages redirect fallback for static exported detail URLs
+- [x] Add regression checks for path-based detail URLs
+- [x] Verify targeted API/Web tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-02 15:00 JST: User pointed out the detail path should be `/expense/:id` instead of query-only `/expense?expenseId=...`.
+- 2026-08-02 15:01 JST: Updated notification links to `/expense/:id?month=...`, added pathname parsing on the detail client, and added a Cloudflare Pages `_redirects` fallback for static export.
+- 2026-08-02 15:03 JST: Created commit `1cf107e` for path-based expense detail links.
+
+### Verification Log
+
+- 2026-08-02 14:52 JST: `pnpm test apps/api/src/core/notifications/expense-mutation-notifier.test.ts apps/web-dev-config.test.ts` passed with 18 tests.
+- 2026-08-02 14:53 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-08-02 14:54 JST: `pnpm build` passed and `apps/web/out/_redirects` contains `/expense/* /expense/index.html 200`.
+
 ## Task: Expense Detail Page
 
 ### Checklist
