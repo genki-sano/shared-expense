@@ -124,6 +124,18 @@ describe("web dev configuration", () => {
     expect(pageSource).not.toContain('className="metric"');
   });
 
+  test("mobile date inputs keep stable dimensions", () => {
+    const cssSource = readText("apps/web/src/app/globals.css");
+
+    expect(cssSource).toContain("appearance: none");
+    expect(cssSource).toContain("-webkit-appearance: none");
+    expect(cssSource).toContain(".monthInput");
+    expect(cssSource).toContain("height: 42px");
+    expect(cssSource).toContain(".field input");
+    expect(cssSource).toContain("height: 40px");
+    expect(cssSource).toContain("::-webkit-calendar-picker-indicator");
+  });
+
   test("expense dashboard exposes mobile month navigation", () => {
     const appSource = readText("apps/web/src/app/page.tsx");
     const homeClientSource = readText("apps/web/src/app/home-client.tsx");

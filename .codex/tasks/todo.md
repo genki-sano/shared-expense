@@ -1,5 +1,29 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Stabilize Mobile Date Input Sizes
+
+### Checklist
+
+- [x] Inspect mobile month/date input styles
+- [x] Normalize native input appearance and fixed dimensions
+- [x] Add regression test for stable date input styling
+- [x] Verify targeted web config test passes
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-02 14:40 JST: User reported the date form size differs on the smartphone list view and breaks the design.
+- 2026-08-02 14:41 JST: Added native input appearance reset, fixed heights, line heights, and calendar picker indicator sizing for month/date inputs.
+
+### Verification Log
+
+- 2026-08-02 14:33 JST: `pnpm test apps/web-dev-config.test.ts` passed with 16 tests.
+- 2026-08-02 14:34 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-08-02 14:34 JST: `pnpm build` passed. Redocly still reports the same existing OpenAPI warnings.
+- 2026-08-02 14:35 JST: Created the mobile date input sizing commit.
+
 ## Task: Prevent Web Search Indexing
 
 ### Checklist
