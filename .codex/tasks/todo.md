@@ -1,5 +1,29 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Simplify LINE Environment Variables
+
+### Checklist
+
+- [x] Remove legacy `LINE_NOTIFICATION_DETAIL_BASE_URL` support from API and Jobs
+- [x] Remove unused `LINE_LOGIN_CHANNEL_ID` from Jobs env
+- [x] Update deployment docs and tests to use `LINE_LIFF_ID` as the notification link source
+- [x] Verify targeted API/Jobs/Web config tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-02 21:00 JST: User asked to整理 Jobs/API environment variables because `LINE_LOGIN_CHANNEL_ID` and `LINE_NOTIFICATION_DETAIL_BASE_URL` are confusing in Cron setup.
+- 2026-08-02 21:03 JST: Removed `LINE_NOTIFICATION_DETAIL_BASE_URL` fallback from API and Jobs, removed unused `LINE_LOGIN_CHANNEL_ID` from Jobs env, and documented that Jobs does not need login/webhook secrets.
+- 2026-08-02 21:04 JST: Created commit `41892c8` for LINE env simplification.
+
+### Verification Log
+
+- 2026-08-02 20:54 JST: `pnpm test apps/api/src/app-env.test.ts apps/api/src/deploy-config.test.ts apps/jobs/src/deploy-config.test.ts apps/jobs/src/monthly-settlement-reminder.test.ts apps/web-dev-config.test.ts` passed with 30 tests. Existing stderr logs are from auth error-path assertions.
+- 2026-08-02 20:55 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-08-02 20:55 JST: `pnpm build` passed. Redocly still reports the same existing warnings.
+
 ## Task: Update Wrangler For Jobs Cron Local Dev
 
 ### Checklist

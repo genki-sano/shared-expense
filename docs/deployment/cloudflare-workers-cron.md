@@ -21,6 +21,10 @@ pnpm --filter @shared-expense/jobs exec wrangler secret put LINE_MESSAGING_CHANN
 
 Notification detail links are generated as `https://liff.line.me/${LINE_LIFF_ID}`.
 
+`LINE_LOGIN_CHANNEL_ID` and `LINE_MESSAGING_CHANNEL_SECRET` are not required for
+this Jobs Worker. They are used by the API Worker for LIFF ID token verification
+and LINE webhook signature verification.
+
 ## Deploy
 
 For Cloudflare's build command, use:

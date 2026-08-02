@@ -48,7 +48,6 @@ export type AppEnv = {
   LINE_LIFF_ID?: string | undefined;
   LINE_MESSAGING_CHANNEL_ACCESS_TOKEN?: string | undefined;
   LINE_MESSAGING_CHANNEL_SECRET?: string | undefined;
-  LINE_NOTIFICATION_DETAIL_BASE_URL?: string | undefined;
 };
 
 export type AppEnvDependencies = {
@@ -204,16 +203,11 @@ function optionalLineWebhookFromEnv(
 }
 
 function optionalDetailBaseUrlFromEnv(
-  env: Pick<AppEnv, "LINE_LIFF_ID" | "LINE_NOTIFICATION_DETAIL_BASE_URL">,
+  env: Pick<AppEnv, "LINE_LIFF_ID">,
 ): { detailBaseUrl: string } | Record<string, never> {
   const liffId = env.LINE_LIFF_ID?.trim();
   if (liffId !== undefined && liffId !== "") {
     return { detailBaseUrl: `https://liff.line.me/${liffId}` };
-  }
-
-  const legacyDetailBaseUrl = env.LINE_NOTIFICATION_DETAIL_BASE_URL?.trim();
-  if (legacyDetailBaseUrl !== undefined && legacyDetailBaseUrl !== "") {
-    return { detailBaseUrl: legacyDetailBaseUrl };
   }
 
   return {};

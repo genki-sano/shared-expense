@@ -14,6 +14,7 @@ describe("jobs Cloudflare deployment configuration", () => {
       triggers?: { crons?: unknown };
       observability?: Record<string, unknown>;
     };
+    const jobSource = readText("src/monthly-settlement-reminder.ts");
 
     expect(wranglerConfig.name).toBe("shared-expense-jobs");
     expect(wranglerConfig.main).toBe("src/index.ts");
@@ -23,6 +24,9 @@ describe("jobs Cloudflare deployment configuration", () => {
       enabled: true,
       head_sampling_rate: 1,
     });
+    expect(jobSource).not.toContain("LINE_LOGIN_CHANNEL_ID");
+    expect(jobSource).not.toContain("LINE_NOTIFICATION_DETAIL_BASE_URL");
+    expect(jobSource).toContain("LINE_LIFF_ID");
   });
 
   it("exposes only necessary Jobs Worker scripts", () => {

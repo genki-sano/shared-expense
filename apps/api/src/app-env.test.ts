@@ -313,8 +313,6 @@ describe("createAppFromEnv", () => {
         GOOGLE_PRIVATE_KEY: "-----BEGIN PRIVATE KEY-----\\nkey\\n-----END PRIVATE KEY-----\\n",
         LINE_LIFF_ID: "1234567890-shared-expense",
         LINE_MESSAGING_CHANNEL_ACCESS_TOKEN: "line-message-token",
-        LINE_NOTIFICATION_DETAIL_BASE_URL:
-          "https://shared-expense.pages.dev",
       },
       {
         authenticateToken: async () => user,
@@ -416,11 +414,9 @@ describe("createAppFromEnv", () => {
     expect(String(calls.at(-1)?.init?.body)).toContain("Womanさんが支出を追加しました");
     expect(String(calls.at(-1)?.init?.body)).toContain("詳細を確認");
     expect(String(calls.at(-1)?.init?.body)).toContain(
-      "https://liff.line.me/1234567890-shared-expense?month=2026-07",
+      "https://liff.line.me/1234567890-shared-expense",
     );
-    expect(String(calls.at(-1)?.init?.body)).not.toContain(
-      "https://shared-expense.pages.dev",
-    );
+    expect(String(calls.at(-1)?.init?.body)).toContain("/expense?");
     expect(String(calls.at(-1)?.init?.body)).toContain("expenseId=");
     expect(String(calls.at(-1)?.init?.body)).not.toContain("通知ID");
   });
@@ -518,8 +514,9 @@ describe("createAppFromEnv", () => {
     expect(replyBodies[0]).toContain("コンビニ");
     expect(replyBodies[0]).toContain("￥1,200");
     expect(replyBodies[0]).toContain(
-      "https://liff.line.me/1234567890-shared-expense?month=",
+      "https://liff.line.me/1234567890-shared-expense/expense?",
     );
+    expect(replyBodies[0]).toContain("expenseId=");
 
     const pushBodies = calls
       .filter((call) => call.url === "https://api.line.me/v2/bot/message/push")

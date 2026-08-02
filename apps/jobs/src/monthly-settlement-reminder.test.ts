@@ -78,7 +78,6 @@ describe("runMonthlySettlementReminder", () => {
         GOOGLE_PRIVATE_KEY:
           "-----BEGIN PRIVATE KEY-----\\nkey\\n-----END PRIVATE KEY-----\\n",
         LINE_LIFF_ID: "1234567890-shared-expense",
-        LINE_NOTIFICATION_DETAIL_BASE_URL: "https://shared-expense.pages.dev",
       },
       dependencies: {
         signServiceAccountJwt: async () => "signed-jwt",

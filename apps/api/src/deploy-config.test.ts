@@ -28,9 +28,7 @@ describe("api Cloudflare deployment configuration", () => {
     expect(parsedWranglerConfig.vars).not.toHaveProperty(
       "LINE_MESSAGING_CHANNEL_SECRET",
     );
-    expect(parsedWranglerConfig.vars).not.toHaveProperty(
-      "LINE_NOTIFICATION_DETAIL_BASE_URL",
-    );
+    expect(wranglerConfig).not.toContain("LINE_NOTIFICATION_DETAIL_BASE_URL");
     expect(parsedWranglerConfig.observability).toMatchObject({
       enabled: true,
       head_sampling_rate: 1,
