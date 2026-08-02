@@ -1,5 +1,30 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Load Root Env For Jobs Cron Local Dev
+
+### Checklist
+
+- [x] Confirm why Jobs local Cron cannot read env values
+- [x] Update Jobs dev script to load root `.env.local`
+- [x] Update Jobs deployment docs for local scheduled test env loading
+- [x] Verify Jobs deploy config test passes
+- [x] Verify Jobs dev starts with the env file
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-02 21:10 JST: User reported scheduled local execution reaches the handler but fails with `GOOGLE_SPREADSHEET_ID is not configured`.
+- 2026-08-02 21:11 JST: Confirmed root `.env.local` has Jobs keys, but `wrangler dev` runs from `apps/jobs` and does not automatically load the root env file.
+- 2026-08-02 21:13 JST: Updated the Jobs dev script to pass `--env-file ../../.env.local` and documented that local Jobs values live in the root `.env.local`.
+- 2026-08-02 21:14 JST: Created commit `3f7479c` for loading root env in Jobs dev.
+
+### Verification Log
+
+- 2026-08-02 20:57 JST: `pnpm test apps/jobs/src/deploy-config.test.ts` passed with 3 tests.
+- 2026-08-02 20:57 JST: `pnpm --filter @shared-expense/jobs typecheck` passed.
+- 2026-08-02 20:58 JST: `pnpm --filter @shared-expense/jobs run dev` started and Wrangler reported `Using secrets defined in ../../.env.local`.
+- 2026-08-02 20:58 JST: `curl -sS "http://127.0.0.1:8787/__scheduled?format=json"` returned `Ran scheduled event`. The previous `GOOGLE_SPREADSHEET_ID is not configured` error is gone; execution now reaches LINE push and fails with recipient profile 404 from the current local data/token combination.
+
 ## Task: Simplify LINE Environment Variables
 
 ### Checklist

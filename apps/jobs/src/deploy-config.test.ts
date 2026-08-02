@@ -35,7 +35,7 @@ describe("jobs Cloudflare deployment configuration", () => {
     };
 
     expect(packageJson.scripts).toEqual({
-      dev: "wrangler dev --test-scheduled",
+      dev: "wrangler dev --test-scheduled --env-file ../../.env.local",
       build: "tsc -p tsconfig.json",
       typecheck: "tsc -p tsconfig.json --noEmit",
       deploy: "wrangler deploy",

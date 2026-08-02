@@ -50,6 +50,10 @@ pnpm --filter @shared-expense/jobs run deploy
 pnpm --filter @shared-expense/jobs dev
 ```
 
+The Jobs dev script loads the repository root `.env.local` via
+`--env-file ../../.env.local`. Keep the local Jobs values there; do not commit
+that file.
+
 Then trigger the scheduled handler from the local Wrangler server:
 
 ```sh
