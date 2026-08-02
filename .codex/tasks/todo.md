@@ -1,5 +1,33 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Update Wrangler For Jobs Cron Local Dev
+
+### Checklist
+
+- [x] Confirm the local Cron dev failure cause
+- [x] Update Worker packages to a Wrangler version that supports `2026-08-01`
+- [x] Refresh the lockfile
+- [x] Verify Jobs typecheck/build/tests pass
+- [x] Verify `wrangler dev --test-scheduled` starts
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-02 20:47 JST: User reported `wrangler dev --test-scheduled` fails because Wrangler 4.115.0's local runtime supports only compatibility date `2026-07-29` while Jobs requires `2026-08-01`.
+- 2026-08-02 20:49 JST: Updated API and Jobs Wrangler devDependencies to `^4.118.0` and refreshed `pnpm-lock.yaml`.
+- 2026-08-02 20:50 JST: Confirmed `wrangler dev --test-scheduled` starts on `http://localhost:8787`; invoking `/__scheduled` reaches the handler and then fails because local Jobs secrets are not configured.
+- 2026-08-02 20:51 JST: Created commit `afd3980` for updating Wrangler.
+
+### Verification Log
+
+- 2026-08-02 20:46 JST: `pnpm --filter @shared-expense/jobs exec wrangler --version` returned `4.118.0`.
+- 2026-08-02 20:46 JST: `pnpm --filter @shared-expense/jobs typecheck` passed.
+- 2026-08-02 20:46 JST: `pnpm --filter @shared-expense/jobs build` passed.
+- 2026-08-02 20:46 JST: `pnpm test apps/jobs/src/deploy-config.test.ts apps/jobs/src/monthly-settlement-reminder.test.ts` passed with 6 tests.
+- 2026-08-02 20:49 JST: `curl -sS "http://127.0.0.1:8787/__scheduled?format=json"` returned `Ran scheduled event`; Wrangler logs then showed expected local env failure: `GOOGLE_SPREADSHEET_ID is not configured`.
+- 2026-08-02 20:50 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-08-02 20:50 JST: `pnpm build` passed. Redocly still reports the same existing warnings.
+
 ## Task: Remove Expense ID From List Query Parameters
 
 ### Checklist
