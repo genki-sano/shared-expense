@@ -1,5 +1,30 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Fix Expense Detail Static Redirect Target
+
+### Checklist
+
+- [x] Confirm current LINE notification detail URL format
+- [x] Fix Cloudflare Pages redirect target for exported `/expense` page
+- [x] Update regression checks for the exported detail page file
+- [x] Verify targeted Web config test passes
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-02 15:34 JST: User reported LINE notification detail links return 404. Confirmed links are `https://liff.line.me/{LINE_LIFF_ID}/expense/{expenseId}`.
+- 2026-08-02 15:35 JST: Found Next static export emits `apps/web/out/expense.html`, not `apps/web/out/expense/index.html`; the existing `_redirects` target can cause Cloudflare Pages 404.
+- 2026-08-02 15:39 JST: Updated the Cloudflare Pages redirect target from `/expense/index.html` to `/expense.html`.
+- 2026-08-02 15:40 JST: Created commit `065a281` for the static detail path redirect fix.
+
+### Verification Log
+
+- 2026-08-02 15:23 JST: `pnpm test apps/web-dev-config.test.ts` passed with 16 tests.
+- 2026-08-02 15:24 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-08-02 15:24 JST: `pnpm build` passed. Confirmed `apps/web/out/_redirects` contains `/expense/* /expense.html 200` and `apps/web/out/expense.html` exists.
+
 ## Task: Polish Expense Detail Actions And Restore Notification
 
 ### Checklist

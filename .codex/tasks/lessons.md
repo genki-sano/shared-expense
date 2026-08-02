@@ -16,3 +16,4 @@
 - 2026-08-01: Notification detail deep links must use the LIFF ID, not the LINE Login channel ID. Server-side API/Jobs env should be `LINE_LIFF_ID`; keep it separate from web's public `NEXT_PUBLIC_LIFF_ID`.
 - 2026-08-02: Detail-page deep links exposed to users should prefer path-based URLs such as `/expense/:id`; confirm the public URL shape before settling for query-only routing.
 - 2026-08-02: When adding restore/undo flows, verify notification behavior explicitly alongside create/update/delete. Restore is a mutation and must not silently skip partner notifications.
+- 2026-08-02: For static-exported Next.js pages, verify the actual `out/` file path before writing Cloudflare Pages `_redirects`; `/route` may emit `route.html`, not `route/index.html`.
