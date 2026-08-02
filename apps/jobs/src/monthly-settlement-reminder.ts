@@ -42,8 +42,8 @@ type MonthlySettlementReminderRepository = {
 };
 
 const JAPAN_TIME_ZONE = "Asia/Tokyo";
-const SETTLEMENT_ACCENT_COLOR = "#D14F3F";
-const SETTLEMENT_BACKGROUND_COLOR = "#FFF1EB";
+const SETTLEMENT_ACCENT_COLOR = "#6D3FD1";
+const SETTLEMENT_BACKGROUND_COLOR = "#F3EEFF";
 
 export async function runMonthlySettlementReminder(input: {
   env: JobsEnv;

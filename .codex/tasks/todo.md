@@ -1,5 +1,29 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Differentiate Notification Colors By Type
+
+### Checklist
+
+- [x] Define distinct themes for expense create/update/delete notifications
+- [x] Change monthly settlement notification to a fourth distinct theme
+- [x] Update notification tests for all message types
+- [x] Verify targeted notification tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-02 21:24 JST: User requested colors that make expense create, update, delete, and monthly settlement notifications easier to distinguish.
+- 2026-08-02 21:27 JST: Added notification themes: create blue-green, update amber, delete red, and monthly settlement purple.
+- 2026-08-02 21:28 JST: Created commit `69d30b3` for event-specific notification colors.
+
+### Verification Log
+
+- 2026-08-02 21:20 JST: `pnpm test apps/api/src/core/notifications/expense-mutation-notifier.test.ts apps/jobs/src/monthly-settlement-reminder.test.ts` passed with 6 tests.
+- 2026-08-02 21:21 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-08-02 21:21 JST: `pnpm build` passed. Redocly still reports the same existing warnings.
+
 ## Task: Distinguish Monthly Settlement Notification Colors
 
 ### Checklist

@@ -27,6 +27,11 @@ export type ExpenseMutationNotifierInput = {
   detailBaseUrl?: string;
 };
 
+type NotificationTheme = {
+  accentColor: string;
+  backgroundColor: string;
+};
+
 export function createExpenseMutationNotifier(
   input: ExpenseMutationNotifierInput,
 ): ExpenseMutationNotifier {
@@ -60,6 +65,7 @@ export function expenseMutationFlexMessage(
   const title = expenseTitle(input.expense);
   const amount = formatYen(input.expense.price);
   const detailUrl = detailUrlForExpense(detailBaseUrl, input.expense);
+  const theme = eventTheme(input.eventType);
 
   return {
     type: "flex",
@@ -76,7 +82,7 @@ export function expenseMutationFlexMessage(
             type: "text",
             text: `支出を${verb}しました`,
             size: "sm",
-            color: eventColor(input.eventType),
+            color: theme.accentColor,
             weight: "bold",
           },
           {
@@ -91,7 +97,7 @@ export function expenseMutationFlexMessage(
             type: "text",
             text: amount,
             size: "xxl",
-            color: "#176B87",
+            color: theme.accentColor,
             weight: "bold",
           },
           {
@@ -113,7 +119,7 @@ export function expenseMutationFlexMessage(
                   type: "button",
                   style: "primary",
                   height: "sm",
-                  color: "#176B87",
+                  color: theme.accentColor,
                   action: {
                     type: "uri",
                     label: "詳細を確認",
@@ -125,10 +131,10 @@ export function expenseMutationFlexMessage(
           }),
       styles: {
         body: {
-          backgroundColor: "#F6F7F4",
+          backgroundColor: theme.backgroundColor,
         },
         footer: {
-          backgroundColor: "#F6F7F4",
+          backgroundColor: theme.backgroundColor,
         },
       },
     },
@@ -172,16 +178,25 @@ function labelValueBox(label: string, value: string): LineFlexBox {
   };
 }
 
-function eventColor(eventType: ExpenseEventType): string {
+function eventTheme(eventType: ExpenseEventType): NotificationTheme {
   if (eventType === "expense.created") {
-    return "#176B87";
+    return {
+      accentColor: "#176B87",
+      backgroundColor: "#F6F7F4",
+    };
   }
 
   if (eventType === "expense.updated") {
-    return "#8A5A00";
+    return {
+      accentColor: "#A05A00",
+      backgroundColor: "#FFF7E6",
+    };
   }
 
-  return "#9A3412";
+  return {
+    accentColor: "#B42318",
+    backgroundColor: "#FFF1F0",
+  };
 }
 
 function eventVerb(eventType: ExpenseEventType): string {

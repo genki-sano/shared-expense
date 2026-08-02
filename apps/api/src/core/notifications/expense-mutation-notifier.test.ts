@@ -111,7 +111,7 @@ describe("createExpenseMutationNotifier", () => {
                     action: {
                       type: "uri",
                       label: "詳細を確認",
-                    uri: "https://liff.line.me/1234567890-shared-expense/expense?expenseId=2148",
+                      uri: "https://liff.line.me/1234567890-shared-expense/expense?expenseId=2148",
                     },
                   },
                 ],
@@ -132,6 +132,32 @@ describe("createExpenseMutationNotifier", () => {
     expect(JSON.stringify(pushed[0]?.messages[0])).not.toContain("通知ID");
     expect(JSON.stringify(pushed[0]?.messages[0])).not.toContain("expense.created");
     expect(JSON.stringify(pushed[0]?.messages[0])).not.toContain("#D7DED9");
+  });
+
+  it("uses distinct colors for create, update, and delete notifications", async () => {
+    const pushed: Parameters<LineMessagingClient["pushMessage"]>[0][] = [];
+    const notifier = createExpenseMutationNotifier({
+      userRepository: new InMemoryHouseholdUserRepository([actor, partner]),
+      detailBaseUrl: "https://liff.line.me/1234567890-shared-expense",
+      lineMessagingClient: {
+        pushMessage: async (input) => {
+          pushed.push(input);
+        },
+        replyMessage: async () => {},
+      },
+    });
+
+    await notifier.notify({ eventType: "expense.created", actor, expense });
+    await notifier.notify({ eventType: "expense.updated", actor, expense });
+    await notifier.notify({ eventType: "expense.deleted", actor, expense });
+
+    const messages = pushed.map((input) => JSON.stringify(input.messages[0]));
+    expect(messages[0]).toContain("#176B87");
+    expect(messages[0]).toContain("#F6F7F4");
+    expect(messages[1]).toContain("#A05A00");
+    expect(messages[1]).toContain("#FFF7E6");
+    expect(messages[2]).toContain("#B42318");
+    expect(messages[2]).toContain("#FFF1F0");
   });
 
   it("skips when the partner disabled notifications", async () => {
