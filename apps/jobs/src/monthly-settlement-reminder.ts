@@ -58,7 +58,10 @@ export async function runMonthlySettlementReminder(input: {
   const actor = users[0];
   const expenses = await repository.listByMonth({ month: targetMonth, actor });
   const settlement = calculateMonthlySettlement(targetMonth, users, expenses);
-  const lineMessagingClient = lineMessagingClientFromEnv(input.env, dependencies);
+  const lineMessagingClient = lineMessagingClientFromEnv(
+    input.env,
+    dependencies,
+  );
   const notifiedUserIds: string[] = [];
 
   for (const user of users) {
@@ -82,7 +85,9 @@ export async function runMonthlySettlementReminder(input: {
   return { targetMonth, notifiedUserIds };
 }
 
-function detailBaseUrlFromEnv(env: Pick<JobsEnv, "LINE_LIFF_ID">): string | undefined {
+function detailBaseUrlFromEnv(
+  env: Pick<JobsEnv, "LINE_LIFF_ID">,
+): string | undefined {
   const liffId = env.LINE_LIFF_ID?.trim();
   if (liffId !== undefined && liffId !== "") {
     return `https://liff.line.me/${liffId}`;
@@ -116,11 +121,14 @@ export function monthlySettlementReminderFlexMessage(input: {
   const payer = userById(input.users, input.settlement.settlement.fromUserId);
   const receiver = userById(input.users, input.settlement.settlement.toUserId);
   const amount = input.settlement.settlement.amount;
-  const detailUrl = detailUrlForMonth(input.detailBaseUrl, input.settlement.month);
+  const detailUrl = detailUrlForMonth(
+    input.detailBaseUrl,
+    input.settlement.month,
+  );
 
   return {
     type: "flex",
-    altText: `先月の精算をしてね！ ${input.settlement.month} ${formatYen(amount)}`,
+    altText: `先月(${input.settlement.month})の精算をしてください: ${formatYen(amount)}`,
     contents: {
       type: "bubble",
       size: "mega",
@@ -131,35 +139,51 @@ export function monthlySettlementReminderFlexMessage(input: {
         contents: [
           {
             type: "text",
-            text: "先月分の精算",
+            text: `先月(${input.settlement.month})の精算`,
             size: "sm",
             color: SETTLEMENT_ACCENT_COLOR,
             weight: "bold",
           },
           {
-            type: "text",
-            text: input.settlement.month,
-            size: "xl",
-            color: "#17211F",
-            weight: "bold",
-          },
-          {
-            type: "text",
-            text: amount === 0 ? "精算はありません" : `${formatYen(amount)} を精算`,
-            size: "xxl",
-            color: SETTLEMENT_ACCENT_COLOR,
-            weight: "bold",
-            wrap: true,
+            type: "box",
+            layout: "vertical",
+            contents: [
+              {
+                type: "text",
+                text: `${payer?.displayName ?? "-"} → ${receiver?.displayName ?? "-"}`,
+                size: "lg",
+                color: "#63716B",
+                weight: "bold",
+                wrap: true,
+              },
+              {
+                type: "text",
+                text: amount === 0 ? "精算はありません" : formatYen(amount),
+                size: "xxl",
+                color: SETTLEMENT_ACCENT_COLOR,
+                weight: "bold",
+                wrap: true,
+              },
+            ],
           },
           {
             type: "separator",
             margin: "md",
           },
-          labelValueBox("FROM", payer?.displayName ?? "-"),
-          labelValueBox("TO", receiver?.displayName ?? "-"),
-          ...input.settlement.userTotals.map((userTotal) =>
-            labelValueBox(userTotal.displayName, formatYen(userTotal.total)),
-          ),
+          {
+            type: "box",
+            layout: "vertical",
+            spacing: "xs",
+            margin: "xl",
+            contents: [
+              ...input.settlement.userTotals.map((userTotal) =>
+                labelValueBox(
+                  userTotal.displayName,
+                  formatYen(userTotal.total),
+                ),
+              ),
+            ],
+          },
         ],
       },
       ...(detailUrl === null
@@ -200,7 +224,10 @@ function repositoryFromEnv(
   dependencies: MonthlySettlementReminderDependencies,
 ): MonthlySettlementReminderRepository {
   assertConfigured(env.GOOGLE_SPREADSHEET_ID, "GOOGLE_SPREADSHEET_ID");
-  assertConfigured(env.GOOGLE_SERVICE_ACCOUNT_EMAIL, "GOOGLE_SERVICE_ACCOUNT_EMAIL");
+  assertConfigured(
+    env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+    "GOOGLE_SERVICE_ACCOUNT_EMAIL",
+  );
   assertConfigured(env.GOOGLE_PRIVATE_KEY, "GOOGLE_PRIVATE_KEY");
 
   const tokenProviderInput: GoogleServiceAccountAccessTokenProviderInput = {
@@ -217,8 +244,12 @@ function repositoryFromEnv(
   return new SpreadsheetExpenseRepository({
     spreadsheetId: env.GOOGLE_SPREADSHEET_ID,
     valuesClient: new FetchGoogleSheetsValuesClient({
-      accessTokenProvider: new GoogleServiceAccountAccessTokenProvider(tokenProviderInput),
-      ...(dependencies.fetcher === undefined ? {} : { fetcher: dependencies.fetcher }),
+      accessTokenProvider: new GoogleServiceAccountAccessTokenProvider(
+        tokenProviderInput,
+      ),
+      ...(dependencies.fetcher === undefined
+        ? {}
+        : { fetcher: dependencies.fetcher }),
     }),
     userTypeToUserId,
     userIdToUserType,
@@ -239,11 +270,16 @@ function lineMessagingClientFromEnv(
   );
   return new FetchLineMessagingClient({
     channelAccessToken: env.LINE_MESSAGING_CHANNEL_ACCESS_TOKEN,
-    ...(dependencies.fetcher === undefined ? {} : { fetcher: dependencies.fetcher }),
+    ...(dependencies.fetcher === undefined
+      ? {}
+      : { fetcher: dependencies.fetcher }),
   });
 }
 
-function assertConfigured(value: string | undefined, name: string): asserts value is string {
+function assertConfigured(
+  value: string | undefined,
+  name: string,
+): asserts value is string {
   if (value === undefined || value.trim() === "") {
     throw new Error(`${name} is not configured`);
   }
@@ -281,7 +317,10 @@ function userById(users: HouseholdUsers, userId: string | null): User | null {
   return users.find((user) => user.id === userId) ?? null;
 }
 
-function detailUrlForMonth(baseUrl: string | undefined, month: string): string | null {
+function detailUrlForMonth(
+  baseUrl: string | undefined,
+  month: string,
+): string | null {
   if (baseUrl === undefined || baseUrl.trim() === "") {
     return null;
   }
@@ -300,16 +339,15 @@ function labelValueBox(label: string, value: string): LineFlexBox {
       {
         type: "text",
         text: label,
-        size: "xs",
-        color: "#63716B",
+        size: "sm",
+        color: "#aaaaaa",
         flex: 2,
       },
       {
         type: "text",
         text: value,
-        size: "xs",
+        size: "sm",
         color: "#17211F",
-        weight: "bold",
         wrap: true,
         flex: 5,
       },

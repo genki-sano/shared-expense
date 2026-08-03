@@ -1,5 +1,28 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Review Flex Message Format Changes
+
+### Checklist
+
+- [x] Inspect user changes to expense and settlement Flex Message formats
+- [x] Update tests for the new Flex Message structure
+- [x] Verify targeted notification tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-08-03 23:17 JST: User asked to review their Flex Message format changes and commit if valid.
+- 2026-08-03 23:18 JST: Confirmed the new structure uses supported Flex components; targeted tests fail only because expected snapshots still reflect the old layout.
+- 2026-08-03 23:19 JST: Updated notification tests to validate key content, colors, and detail links for the adjusted layouts.
+
+### Verification Log
+
+- 2026-08-03 23:19 JST: `pnpm test apps/api/src/core/notifications/expense-mutation-notifier.test.ts apps/jobs/src/monthly-settlement-reminder.test.ts` passed with 6 tests.
+- 2026-08-03 23:20 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-08-03 23:20 JST: `pnpm build` passed. Redocly still reports the same existing warnings.
+
 ## Task: Delay Home List During LIFF Launch
 
 ### Checklist

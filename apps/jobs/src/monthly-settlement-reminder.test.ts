@@ -51,17 +51,19 @@ describe("monthlySettlementReminderFlexMessage", () => {
       },
     });
 
-    expect(message.altText).toBe("先月の精算をしてね！ 2026-06 ￥2,501");
-    expect(JSON.stringify(message)).toContain("FROM");
-    expect(JSON.stringify(message)).toContain("げんき");
-    expect(JSON.stringify(message)).toContain("TO");
-    expect(JSON.stringify(message)).toContain("ひとみ");
-    expect(JSON.stringify(message)).toContain("￥10,001");
-    expect(JSON.stringify(message)).toContain("https://liff.example.com/?month=2026-06");
-    expect(JSON.stringify(message)).toContain("#6D3FD1");
-    expect(JSON.stringify(message)).not.toContain("#176B87");
-    expect(JSON.stringify(message)).not.toContain("#A05A00");
-    expect(JSON.stringify(message)).not.toContain("#B42318");
+    expect(message.altText).toBe(
+      "先月(2026-06)の精算をしてください: ￥2,501",
+    );
+    const messageJson = JSON.stringify(message);
+    expect(messageJson).toContain("先月(2026-06)の精算");
+    expect(messageJson).toContain("げんき → ひとみ");
+    expect(messageJson).toContain("￥2,501");
+    expect(messageJson).toContain("￥10,001");
+    expect(messageJson).toContain("https://liff.example.com/?month=2026-06");
+    expect(messageJson).toContain("#6D3FD1");
+    expect(messageJson).not.toContain("#176B87");
+    expect(messageJson).not.toContain("#A05A00");
+    expect(messageJson).not.toContain("#B42318");
     expect(message.contents.styles).toEqual({
       body: { backgroundColor: "#F3EEFF" },
       footer: { backgroundColor: "#F3EEFF" },

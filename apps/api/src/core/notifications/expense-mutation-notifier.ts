@@ -86,26 +86,40 @@ export function expenseMutationFlexMessage(
             weight: "bold",
           },
           {
-            type: "text",
-            text: title,
-            size: "xl",
-            color: "#17211F",
-            weight: "bold",
-            wrap: true,
-          },
-          {
-            type: "text",
-            text: amount,
-            size: "xxl",
-            color: theme.accentColor,
-            weight: "bold",
+            type: "box",
+            layout: "vertical",
+            contents: [
+              {
+                type: "text",
+                text: title,
+                size: "lg",
+                color: "#17211F",
+                weight: "bold",
+                wrap: true,
+              },
+              {
+                type: "text",
+                text: amount,
+                size: "xxl",
+                color: theme.accentColor,
+                weight: "bold",
+              },
+            ],
           },
           {
             type: "separator",
             margin: "md",
           },
-          labelValueBox("日付", formatDate(input.expense.date)),
-          labelValueBox("支払者", input.actor.displayName),
+          {
+            type: "box",
+            layout: "vertical",
+            spacing: "xs",
+            margin: "xl",
+            contents: [
+              labelValueBox("日付", formatDate(input.expense.date)),
+              labelValueBox("支払者", input.actor.displayName),
+            ],
+          },
         ],
       },
       ...(detailUrl === null
@@ -141,7 +155,10 @@ export function expenseMutationFlexMessage(
   };
 }
 
-function detailUrlForExpense(baseUrl: string | undefined, expense: Expense): string | null {
+function detailUrlForExpense(
+  baseUrl: string | undefined,
+  expense: Expense,
+): string | null {
   if (baseUrl === undefined || baseUrl.trim() === "") {
     return null;
   }
@@ -161,16 +178,15 @@ function labelValueBox(label: string, value: string): LineFlexBox {
       {
         type: "text",
         text: label,
-        size: "xs",
-        color: "#63716B",
+        size: "sm",
+        color: "#aaaaaa",
         flex: 2,
       },
       {
         type: "text",
         text: value,
-        size: "xs",
+        size: "sm",
         color: "#17211F",
-        weight: "bold",
         wrap: true,
         flex: 5,
       },

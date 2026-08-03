@@ -48,90 +48,56 @@ describe("createExpenseMutationNotifier", () => {
       expense,
     });
 
-    expect(pushed).toEqual([
-      {
-        to: "line_man",
-        messages: [
-          {
-            type: "flex",
-            altText: "ひとみさんが支出を追加しました: アイス ￥328",
-            contents: {
-              type: "bubble",
-              size: "mega",
-              body: {
-                type: "box",
-                layout: "vertical",
-                spacing: "md",
-                contents: [
-                  {
-                    type: "text",
-                    text: "支出を追加しました",
-                    size: "sm",
-                    color: "#176B87",
-                    weight: "bold",
-                  },
-                  {
-                    type: "text",
-                    text: "アイス",
-                    size: "xl",
-                    color: "#17211F",
-                    weight: "bold",
-                    wrap: true,
-                  },
-                  {
-                    type: "text",
-                    text: "￥328",
-                    size: "xxl",
-                    color: "#176B87",
-                    weight: "bold",
-                  },
-                  {
-                    type: "separator",
-                    margin: "md",
-                  },
-                  expect.objectContaining({
-                    type: "box",
-                    layout: "horizontal",
-                  }),
-                  expect.objectContaining({
-                    type: "box",
-                    layout: "horizontal",
-                  }),
-                ],
-              },
-              footer: {
-                type: "box",
-                layout: "vertical",
-                contents: [
-                  {
-                    type: "button",
-                    style: "primary",
-                    height: "sm",
-                    color: "#176B87",
-                    action: {
-                      type: "uri",
-                      label: "詳細を確認",
-                      uri: "https://liff.line.me/1234567890-shared-expense/expense?expenseId=2148",
-                    },
-                  },
-                ],
-              },
-              styles: {
-                body: {
-                  backgroundColor: "#F6F7F4",
-                },
-                footer: {
-                  backgroundColor: "#F6F7F4",
-                },
+    expect(pushed).toHaveLength(1);
+    expect(pushed[0]?.to).toBe("line_man");
+    const message = pushed[0]?.messages[0];
+    if (message?.type !== "flex") {
+      throw new Error("Expected a Flex Message");
+    }
+
+    expect(message).toMatchObject({
+      type: "flex",
+      altText: "ひとみさんが支出を追加しました: アイス ￥328",
+      contents: {
+        type: "bubble",
+        size: "mega",
+        footer: {
+          type: "box",
+          layout: "vertical",
+          contents: [
+            {
+              type: "button",
+              style: "primary",
+              height: "sm",
+              color: "#176B87",
+              action: {
+                type: "uri",
+                label: "詳細を確認",
+                uri: "https://liff.line.me/1234567890-shared-expense/expense?expenseId=2148",
               },
             },
+          ],
+        },
+        styles: {
+          body: {
+            backgroundColor: "#F6F7F4",
           },
-        ],
+          footer: {
+            backgroundColor: "#F6F7F4",
+          },
+        },
       },
-    ]);
-    expect(JSON.stringify(pushed[0]?.messages[0])).not.toContain("通知ID");
-    expect(JSON.stringify(pushed[0]?.messages[0])).not.toContain("expense.created");
-    expect(JSON.stringify(pushed[0]?.messages[0])).not.toContain("#D7DED9");
+    });
+
+    const messageJson = JSON.stringify(message);
+    expect(messageJson).toContain("支出を追加しました");
+    expect(messageJson).toContain("アイス");
+    expect(messageJson).toContain("￥328");
+    expect(messageJson).toContain("2026/07/22");
+    expect(messageJson).toContain("ひとみ");
+    expect(messageJson).not.toContain("通知ID");
+    expect(messageJson).not.toContain("expense.created");
+    expect(messageJson).not.toContain("#D7DED9");
   });
 
   it("uses distinct colors for create, update, and delete notifications", async () => {
