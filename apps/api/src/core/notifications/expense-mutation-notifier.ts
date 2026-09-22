@@ -33,9 +33,9 @@ type NotificationTheme = {
 };
 
 const MAN_DARK_COLOR = "#648A70";
-const MAN_LIGHT_COLOR = "#DCEBDD";
+const MAN_NOTIFICATION_BACKGROUND_COLOR = "#EEF6F0";
 const WOMAN_DARK_COLOR = "#D9685D";
-const WOMAN_LIGHT_COLOR = "#FBE0DB";
+const WOMAN_NOTIFICATION_BACKGROUND_COLOR = "#FFF0ED";
 const ACCENT_COLOR = "#E9B64E";
 const BACKGROUND_COLOR = "#FFF9F2";
 const TEXT_PRIMARY_COLOR = "#5B4638";
@@ -207,7 +207,7 @@ function eventTheme(eventType: ExpenseEventType): NotificationTheme {
   if (eventType === "expense.created") {
     return {
       accentColor: MAN_DARK_COLOR,
-      backgroundColor: MAN_LIGHT_COLOR,
+      backgroundColor: MAN_NOTIFICATION_BACKGROUND_COLOR,
     };
   }
 
@@ -220,7 +220,7 @@ function eventTheme(eventType: ExpenseEventType): NotificationTheme {
 
   return {
     accentColor: WOMAN_DARK_COLOR,
-    backgroundColor: WOMAN_LIGHT_COLOR,
+    backgroundColor: WOMAN_NOTIFICATION_BACKGROUND_COLOR,
   };
 }
 

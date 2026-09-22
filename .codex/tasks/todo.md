@@ -1,5 +1,23 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Soften Expense Notification Background Colors
+
+### Checklist
+
+- [x] Inspect current expense notification Flex Message background colors
+- [x] Change male/female notification backgrounds to the requested softer colors
+- [x] Update notification color tests
+- [x] Verify targeted notification tests pass
+
+### Progress Log
+
+- 2026-09-22 00:00 JST: User requested softer LINE Flex Message backgrounds: male `#EEF6F0`, female `#FFF0ED`.
+- 2026-09-22 00:00 JST: Updated expense notification Flex Message create/delete background colors and matching tests.
+
+### Verification Log
+
+- 2026-09-22 00:00 JST: `pnpm test apps/api/src/core/notifications/expense-mutation-notifier.test.ts` passed with 3 tests.
+
 ## Task: Adjust Base Color Palette
 
 ### Checklist

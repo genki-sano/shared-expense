@@ -80,10 +80,10 @@ describe("createExpenseMutationNotifier", () => {
         },
         styles: {
           body: {
-            backgroundColor: "#DCEBDD",
+            backgroundColor: "#EEF6F0",
           },
           footer: {
-            backgroundColor: "#DCEBDD",
+            backgroundColor: "#EEF6F0",
           },
         },
       },
@@ -119,11 +119,11 @@ describe("createExpenseMutationNotifier", () => {
 
     const messages = pushed.map((input) => JSON.stringify(input.messages[0]));
     expect(messages[0]).toContain("#648A70");
-    expect(messages[0]).toContain("#DCEBDD");
+    expect(messages[0]).toContain("#EEF6F0");
     expect(messages[1]).toContain("#E9B64E");
     expect(messages[1]).toContain("#FFF9F2");
     expect(messages[2]).toContain("#D9685D");
-    expect(messages[2]).toContain("#FBE0DB");
+    expect(messages[2]).toContain("#FFF0ED");
   });
 
   it("skips when the partner disabled notifications", async () => {
