@@ -38,6 +38,7 @@ export function HomeClient() {
       errorMessage={undefined}
       expenses={expenses}
       idToken={devIdToken}
+      key={month}
       liffId={liffId}
       month={month}
       currentMonth={currentMonth}

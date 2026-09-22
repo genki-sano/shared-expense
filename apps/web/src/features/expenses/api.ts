@@ -23,6 +23,7 @@ export type FetchMonthlyExpensesInput = {
   apiBaseUrl: string | undefined;
   idToken?: string | undefined;
   fetcher?: typeof fetch;
+  signal?: AbortSignal | undefined;
 };
 
 export type FetchMonthlySettlementInput = FetchMonthlyExpensesInput;
@@ -67,6 +68,7 @@ export type FetchExpenseDetailInput = {
   id: string;
   idToken?: string | undefined;
   fetcher?: typeof fetch;
+  signal?: AbortSignal | undefined;
 };
 
 export class ExpenseApiError extends Error {
@@ -138,6 +140,7 @@ export async function fetchMonthlyExpenses(
 
   const response = await fetcher(url.toString(), {
     headers: authorizationHeaders(input.idToken),
+    ...(input.signal === undefined ? {} : { signal: input.signal }),
   });
 
   if (!response.ok) {
@@ -164,6 +167,7 @@ export async function fetchMonthlySettlement(
 
   const response = await fetcher(url.toString(), {
     headers: authorizationHeaders(input.idToken),
+    ...(input.signal === undefined ? {} : { signal: input.signal }),
   });
 
   if (!response.ok) {
@@ -191,6 +195,7 @@ export async function fetchExpenseDetail(
     new URL(`/api/expenses/${encodeURIComponent(input.id)}`, input.apiBaseUrl).toString(),
     {
       headers: authorizationHeaders(input.idToken),
+      ...(input.signal === undefined ? {} : { signal: input.signal }),
     },
   );
 

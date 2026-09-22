@@ -104,8 +104,11 @@ describe("web dev configuration", () => {
     expect(dashboardSource).toContain("async function resolveIdToken()");
     expect(dashboardSource).toContain("idToken: currentIdToken");
     expect(dashboardSource).toContain("getLiffIdToken(");
+    expect(dashboardSource).toContain("new AbortController()");
+    expect(dashboardSource).toContain("abortController.abort()");
     expect(dashboardSource).toContain("fetchMonthlyExpenses({");
     expect(dashboardSource).toContain("fetchMonthlySettlement({");
+    expect(dashboardSource).toContain("signal: abortController.signal");
     expect(liffClientSource).toContain('import("@line/liff")');
     expect(liffClientSource).toContain("export async function initializeLiff");
     expect(liffClientSource).toContain("liff.init({ liffId })");
@@ -147,6 +150,7 @@ describe("web dev configuration", () => {
 
     expect(homeClientSource).toContain("normalizeMonthParam(searchParams.get(\"month\")");
     expect(homeClientSource).toContain("currentMonthInJst()");
+    expect(homeClientSource).toContain("key={month}");
     expect(appSource).not.toContain('const month = "2026-07"');
     expect(dashboardSource).toContain('className="monthControls"');
     expect(dashboardSource).toContain('type="month"');
@@ -156,6 +160,7 @@ describe("web dev configuration", () => {
     expect(dashboardSource).toContain("useTransition()");
     expect(dashboardSource).toContain("router.push(`/?month=${nextMonth}`)");
     expect(dashboardSource).toContain("setDisplayMonth(nextMonth)");
+    expect(dashboardSource).not.toContain("setExpenses(sortExpenses(props.expenses))");
     expect(dashboardSource).toContain('className="monthLoading"');
     expect(cssSource).toContain(".monthControls");
     expect(cssSource).toContain('[data-loading="true"]');
@@ -194,9 +199,14 @@ describe("web dev configuration", () => {
     expect(detailClientSource).toContain("monthFromExpenseDate(state.expense.date)");
     expect(detailClientSource).not.toContain("formatMonthLabel(detailMonth)");
     expect(detailClientSource).toContain("fetchExpenseDetail(");
+    expect(detailClientSource).toContain("new AbortController()");
+    expect(detailClientSource).toContain("abortController.abort()");
+    expect(detailClientSource).toContain("signal: abortController.signal");
     expect(detailClientSource).toContain("updateExpense(");
     expect(detailClientSource).toContain("deleteExpense(");
     expect(detailClientSource).toContain("restoreExpense(");
+    expect(detailClientSource).toContain('key={`${state.expense.id}:${state.expense.version}`}');
+    expect(detailClientSource).not.toContain("setDraft(props.defaultDraft)");
     expect(detailClientSource).toContain("一覧へ");
     expect(dashboardSource).not.toContain("selectedExpenseId");
     expect(dashboardSource).not.toContain("expenseElementsRef");

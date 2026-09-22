@@ -73,6 +73,7 @@ export function ExpenseDetailClient() {
     }
 
     const normalizedExpenseId = expenseId;
+    const abortController = new AbortController();
     let isCancelled = false;
 
     async function loadDetail(): Promise<void> {
@@ -93,6 +94,7 @@ export function ExpenseDetailClient() {
           apiBaseUrl,
           id: normalizedExpenseId,
           idToken: token,
+          signal: abortController.signal,
         });
         if (isCancelled) {
           return;
@@ -112,6 +114,7 @@ export function ExpenseDetailClient() {
 
     return () => {
       isCancelled = true;
+      abortController.abort();
     };
   }, [
     apiBaseUrl,
@@ -255,6 +258,7 @@ export function ExpenseDetailClient() {
               <DetailExpenseForm
                 defaultDraft={draftFromExpense(state.expense)}
                 disabled={isSubmitting}
+                key={`${state.expense.id}:${state.expense.version}`}
                 onDelete={() => handleDelete(state.expense)}
                 onSubmit={(payload) =>
                   handleUpdate(state.expense, {
@@ -278,10 +282,6 @@ function DetailExpenseForm(props: {
   onSubmit: (payload: CreateExpensePayload) => Promise<void>;
 }) {
   const [draft, setDraft] = useState(props.defaultDraft);
-
-  useEffect(() => {
-    setDraft(props.defaultDraft);
-  }, [props.defaultDraft]);
 
   return (
     <form

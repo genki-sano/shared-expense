@@ -79,15 +79,6 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
   const canMutate = isMutationEnabled && !isMonthLoading;
 
   useEffect(() => {
-    setDisplayMonth(props.month);
-    setExpenses(sortExpenses(props.expenses));
-    setSettlementSummary(props.settlement);
-    setIsCreateOpen(false);
-    setEditingExpenseId(null);
-    setRestorableExpense(null);
-  }, [props.expenses, props.month, props.settlement]);
-
-  useEffect(() => {
     const apiBaseUrl = props.apiBaseUrl;
     const liffId = props.liffId;
     if (
@@ -102,6 +93,7 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
 
     const normalizedApiBaseUrl = apiBaseUrl;
     const normalizedLiffId = liffId;
+    const abortController = new AbortController();
     let isCancelled = false;
 
     async function initializeLiff(): Promise<void> {
@@ -121,11 +113,13 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
             month: props.month,
             apiBaseUrl: normalizedApiBaseUrl,
             idToken: token,
+            signal: abortController.signal,
           }),
           fetchMonthlySettlement({
             month: props.month,
             apiBaseUrl: normalizedApiBaseUrl,
             idToken: token,
+            signal: abortController.signal,
           }),
         ]);
 
@@ -138,10 +132,12 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
         setSettlementSummary(settlementResult.settlement);
         setStatusMessage(null);
       } catch (error) {
-        logExpenseMutationError("authenticate", error);
-        if (!isCancelled) {
-          setStatusMessage(`LINE認証に失敗しました。${errorMessageForUser(error)}`);
+        if (isCancelled) {
+          return;
         }
+
+        logExpenseMutationError("authenticate", error);
+        setStatusMessage(`LINE認証に失敗しました。${errorMessageForUser(error)}`);
       } finally {
         if (!isCancelled) {
           setIsAuthenticating(false);
@@ -153,6 +149,7 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
 
     return () => {
       isCancelled = true;
+      abortController.abort();
     };
   }, [props.apiBaseUrl, props.idToken, props.liffId, props.month]);
 
@@ -168,6 +165,7 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
       return;
     }
 
+    const abortController = new AbortController();
     let isCancelled = false;
 
     async function loadInitialApiData(): Promise<void> {
@@ -178,11 +176,13 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
             month: props.month,
             apiBaseUrl,
             idToken: currentIdToken,
+            signal: abortController.signal,
           }),
           fetchMonthlySettlement({
             month: props.month,
             apiBaseUrl,
             idToken: currentIdToken,
+            signal: abortController.signal,
           }),
         ]);
 
@@ -195,10 +195,12 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
         setStatusMessage(null);
         setEditingExpenseId(null);
       } catch (error) {
-        logExpenseMutationError("load", error);
-        if (!isCancelled) {
-          setStatusMessage(`支出明細を取得できませんでした。${errorMessageForUser(error)}`);
+        if (isCancelled) {
+          return;
         }
+
+        logExpenseMutationError("load", error);
+        setStatusMessage(`支出明細を取得できませんでした。${errorMessageForUser(error)}`);
       }
     }
 
@@ -206,6 +208,7 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
 
     return () => {
       isCancelled = true;
+      abortController.abort();
     };
   }, [props.apiBaseUrl, props.idToken, props.month]);
 

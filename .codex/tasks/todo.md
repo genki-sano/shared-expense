@@ -1,5 +1,38 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Improve Web Effect Cleanup
+
+### Checklist
+
+- [x] Add `AbortSignal` support to Web API fetch helpers
+- [x] Pass abort signals from dashboard/detail data-loading effects
+- [x] Verify targeted Web API/effect tests pass
+- [x] Revisit dashboard prop-to-state reset effect after fetch cleanup
+- [x] Revisit detail form draft reset effect after dashboard cleanup
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+
+### Progress Log
+
+- 2026-09-22 00:00 JST: User reported `Expense load failed AbortError: signal is aborted without reason` and duplicate `/api/expenses` and `/api/settlements` requests after adding abortable effects.
+- 2026-09-22 00:00 JST: User wants to address useEffect review findings in order, starting with abortable API fetches.
+- 2026-09-22 00:00 JST: Added optional `AbortSignal` to monthly expenses, monthly settlement, and expense detail fetch helpers; dashboard/detail data-loading effects now abort in cleanup.
+- 2026-09-22 00:00 JST: Replaced dashboard prop-to-state reset effect with `key={month}` remounting from `HomeClient`, and replaced detail form draft reset effect with an expense id/version key.
+- 2026-09-22 00:00 JST: Diagnosed the abort error as React development StrictMode replaying mount effects: the first request pair is aborted during cleanup, then the second request pair runs; the aborted first request was still logged as a load failure.
+- 2026-09-22 00:00 JST: Changed dashboard auth/load effects to skip logging and status updates after cleanup cancellation, so StrictMode aborts are not reported as user-visible load failures.
+
+### Verification Log
+
+- 2026-09-22 00:00 JST: `pnpm test apps/web/src/features/expenses/api.test.ts apps/web-dev-config.test.ts` passed with 29 tests after adding abortable fetch helpers.
+- 2026-09-22 00:00 JST: `pnpm test apps/web/src/features/expenses/api.test.ts apps/web/src/features/expenses/liff-client.test.ts apps/web/src/features/expenses/liff-primary-redirect-gate.test.ts apps/web-dev-config.test.ts` passed with 38 tests after replacing prop-to-state reset effects.
+- 2026-09-22 00:00 JST: Initial `pnpm typecheck` and `pnpm build` failed because read fetch helpers passed `signal: undefined` under `exactOptionalPropertyTypes`.
+- 2026-09-22 00:00 JST: Re-ran `pnpm test apps/web/src/features/expenses/api.test.ts apps/web-dev-config.test.ts`; it passed with 29 tests after omitting undefined `signal`.
+- 2026-09-22 00:00 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-09-22 00:00 JST: `pnpm build` passed. Redocly still reports the same existing warnings; restored the committed `apps/web/next-env.d.ts` dev types import after build.
+- 2026-09-22 00:00 JST: Re-ran `pnpm typecheck` after restoring `apps/web/next-env.d.ts`; it passed with the same existing Redocly warnings.
+- 2026-09-22 00:00 JST: `pnpm test apps/web/src/features/expenses/api.test.ts apps/web-dev-config.test.ts` passed with 29 tests after suppressing cancelled dashboard effect errors.
+- 2026-09-22 00:00 JST: `pnpm typecheck` passed after the cancelled effect error handling change; Redocly still reports the same existing warnings.
+
 ## Task: Gate LIFF Primary Redirect Rendering
 
 ### Checklist

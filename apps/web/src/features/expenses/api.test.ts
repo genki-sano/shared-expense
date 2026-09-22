@@ -23,10 +23,12 @@ describe("fetchMonthlyExpenses", () => {
 
   it("fetches monthly expenses from the configured API with the LINE ID token", async () => {
     const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
+    const controller = new AbortController();
     const result = await fetchMonthlyExpenses({
       month: "2026-07",
       apiBaseUrl: "https://api.example.test",
       idToken: "id-token",
+      signal: controller.signal,
       fetcher: async (url, init) => {
         calls.push({ url: String(url), init });
         return Response.json({
@@ -53,6 +55,7 @@ describe("fetchMonthlyExpenses", () => {
           headers: {
             Authorization: "Bearer id-token",
           },
+          signal: controller.signal,
         },
       },
     ]);
@@ -104,10 +107,12 @@ describe("fetchMonthlyExpenses", () => {
 describe("fetchExpenseDetail", () => {
   it("fetches expense detail from the configured API with the LINE ID token", async () => {
     const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
+    const controller = new AbortController();
     const result = await fetchExpenseDetail({
       apiBaseUrl: "https://api.example.test",
       id: "exp_1",
       idToken: "id-token",
+      signal: controller.signal,
       fetcher: async (url, init) => {
         calls.push({ url: String(url), init });
         return Response.json({
@@ -133,6 +138,7 @@ describe("fetchExpenseDetail", () => {
           headers: {
             Authorization: "Bearer id-token",
           },
+          signal: controller.signal,
         },
       },
     ]);
@@ -155,10 +161,12 @@ describe("fetchMonthlySettlement", () => {
 
   it("fetches monthly settlement from the configured API with the LINE ID token", async () => {
     const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
+    const controller = new AbortController();
     const result = await fetchMonthlySettlement({
       month: "2026-07",
       apiBaseUrl: "https://api.example.test",
       idToken: "id-token",
+      signal: controller.signal,
       fetcher: async (url, init) => {
         calls.push({ url: String(url), init });
         return Response.json({
@@ -185,6 +193,7 @@ describe("fetchMonthlySettlement", () => {
           headers: {
             Authorization: "Bearer id-token",
           },
+          signal: controller.signal,
         },
       },
     ]);
