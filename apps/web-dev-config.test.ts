@@ -193,6 +193,10 @@ describe("web dev configuration", () => {
     expect(homeClientSource).toContain("hasLiffPrimaryRedirectParams(searchParams)");
     expect(detailClientSource).toContain("hasLiffPrimaryRedirectParams(searchParams)");
     expect(liffGateSource).toContain("LINE認証を確認しています");
+    expect(dashboardSource).toContain("支出明細を読み込んでいます");
+    expect(dashboardSource).toContain("支出明細を読み込めませんでした");
+    expect(dashboardSource).not.toContain("LINE認証に失敗しました");
+    expect(dashboardSource).toContain("isMutationEnabled || isAuthenticating");
     expect(detailPageSource).toContain("<ExpenseDetailClient />");
     expect(detailClientSource).toContain('searchParams.get("expenseId")');
     expect(detailClientSource).not.toContain("usePathname()");

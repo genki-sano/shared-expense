@@ -98,7 +98,7 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
 
     async function initializeLiff(): Promise<void> {
       setIsAuthenticating(true);
-      setStatusMessage("LINE認証を確認しています");
+      setStatusMessage("支出明細を読み込んでいます");
       try {
         const token = await getLiffIdToken({
           liffId: normalizedLiffId,
@@ -137,7 +137,7 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
         }
 
         logExpenseMutationError("authenticate", error);
-        setStatusMessage(`LINE認証に失敗しました。${errorMessageForUser(error)}`);
+        setStatusMessage(`支出明細を読み込めませんでした。${errorMessageForUser(error)}`);
       } finally {
         if (!isCancelled) {
           setIsAuthenticating(false);
@@ -477,11 +477,9 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
             ) : null}
           </p>
         )}
-        {isMutationEnabled ? null : (
+        {isMutationEnabled || isAuthenticating ? null : (
           <p className="errorMessage">
-            {isAuthenticating
-              ? "LINE認証を確認しています"
-              : "APIまたは認証が未設定のため、追加・編集・削除はできません"}
+            APIまたは認証が未設定のため、追加・編集・削除はできません
           </p>
         )}
 

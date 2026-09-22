@@ -11,6 +11,7 @@
 - [x] Revisit detail form draft reset effect after dashboard cleanup
 - [x] Run `pnpm typecheck`
 - [x] Run `pnpm build`
+- [x] Align dashboard LIFF token loading copy with expense loading
 
 ### Progress Log
 
@@ -20,6 +21,9 @@
 - 2026-09-22 00:00 JST: Replaced dashboard prop-to-state reset effect with `key={month}` remounting from `HomeClient`, and replaced detail form draft reset effect with an expense id/version key.
 - 2026-09-22 00:00 JST: Diagnosed the abort error as React development StrictMode replaying mount effects: the first request pair is aborted during cleanup, then the second request pair runs; the aborted first request was still logged as a load failure.
 - 2026-09-22 00:00 JST: Changed dashboard auth/load effects to skip logging and status updates after cleanup cancellation, so StrictMode aborts are not reported as user-visible load failures.
+- 2026-09-22 00:00 JST: Changed dashboard LIFF token/API preparation copy from `LINE認証を確認しています` to `支出明細を読み込んでいます`, while keeping the LIFF primary redirect gate auth copy unchanged.
+- 2026-09-22 00:00 JST: Aligned dashboard LIFF token/API preparation failure copy to `支出明細を読み込めませんでした`, while leaving the primary redirect gate auth failure copy unchanged.
+- 2026-09-22 00:00 JST: Prevented duplicate dashboard loading copy by hiding the API/auth-unconfigured message while LIFF token/API preparation is in progress.
 
 ### Verification Log
 
@@ -32,6 +36,9 @@
 - 2026-09-22 00:00 JST: Re-ran `pnpm typecheck` after restoring `apps/web/next-env.d.ts`; it passed with the same existing Redocly warnings.
 - 2026-09-22 00:00 JST: `pnpm test apps/web/src/features/expenses/api.test.ts apps/web-dev-config.test.ts` passed with 29 tests after suppressing cancelled dashboard effect errors.
 - 2026-09-22 00:00 JST: `pnpm typecheck` passed after the cancelled effect error handling change; Redocly still reports the same existing warnings.
+- 2026-09-22 00:00 JST: `pnpm test apps/web-dev-config.test.ts` passed with 16 tests after the dashboard loading copy change.
+- 2026-09-22 00:00 JST: `pnpm test apps/web-dev-config.test.ts` passed with 16 tests after the dashboard loading failure copy change.
+- 2026-09-22 00:00 JST: `pnpm test apps/web-dev-config.test.ts` passed with 16 tests after preventing duplicate dashboard loading copy.
 
 ## Task: Gate LIFF Primary Redirect Rendering
 
