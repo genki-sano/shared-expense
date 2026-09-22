@@ -42,8 +42,10 @@ type MonthlySettlementReminderRepository = {
 };
 
 const JAPAN_TIME_ZONE = "Asia/Tokyo";
-const SETTLEMENT_ACCENT_COLOR = "#6D3FD1";
-const SETTLEMENT_BACKGROUND_COLOR = "#F3EEFF";
+const SETTLEMENT_ACCENT_COLOR = "#E9B64E";
+const SETTLEMENT_BACKGROUND_COLOR = "#FFF9F2";
+const TEXT_PRIMARY_COLOR = "#5B4638";
+const TEXT_SECONDARY_COLOR = "#8A7669";
 
 export async function runMonthlySettlementReminder(input: {
   env: JobsEnv;
@@ -152,7 +154,7 @@ export function monthlySettlementReminderFlexMessage(input: {
                 type: "text",
                 text: `${payer?.displayName ?? "-"} → ${receiver?.displayName ?? "-"}`,
                 size: "lg",
-                color: "#63716B",
+                color: TEXT_SECONDARY_COLOR,
                 weight: "bold",
                 wrap: true,
               },
@@ -340,14 +342,14 @@ function labelValueBox(label: string, value: string): LineFlexBox {
         type: "text",
         text: label,
         size: "sm",
-        color: "#aaaaaa",
+        color: TEXT_SECONDARY_COLOR,
         flex: 2,
       },
       {
         type: "text",
         text: value,
         size: "sm",
-        color: "#17211F",
+        color: TEXT_PRIMARY_COLOR,
         wrap: true,
         flex: 5,
       },

@@ -69,7 +69,7 @@ describe("createExpenseMutationNotifier", () => {
               type: "button",
               style: "primary",
               height: "sm",
-              color: "#176B87",
+              color: "#648A70",
               action: {
                 type: "uri",
                 label: "詳細を確認",
@@ -80,10 +80,10 @@ describe("createExpenseMutationNotifier", () => {
         },
         styles: {
           body: {
-            backgroundColor: "#F6F7F4",
+            backgroundColor: "#DCEBDD",
           },
           footer: {
-            backgroundColor: "#F6F7F4",
+            backgroundColor: "#DCEBDD",
           },
         },
       },
@@ -118,12 +118,12 @@ describe("createExpenseMutationNotifier", () => {
     await notifier.notify({ eventType: "expense.deleted", actor, expense });
 
     const messages = pushed.map((input) => JSON.stringify(input.messages[0]));
-    expect(messages[0]).toContain("#176B87");
-    expect(messages[0]).toContain("#F6F7F4");
-    expect(messages[1]).toContain("#A05A00");
-    expect(messages[1]).toContain("#FFF7E6");
-    expect(messages[2]).toContain("#B42318");
-    expect(messages[2]).toContain("#FFF1F0");
+    expect(messages[0]).toContain("#648A70");
+    expect(messages[0]).toContain("#DCEBDD");
+    expect(messages[1]).toContain("#E9B64E");
+    expect(messages[1]).toContain("#FFF9F2");
+    expect(messages[2]).toContain("#D9685D");
+    expect(messages[2]).toContain("#FBE0DB");
   });
 
   it("skips when the partner disabled notifications", async () => {

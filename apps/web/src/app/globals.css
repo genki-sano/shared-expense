@@ -1,7 +1,20 @@
 :root {
+  --color-man: #8fb99a;
+  --color-man-dark: #648a70;
+  --color-man-light: #dcebdd;
+  --color-woman: #f48778;
+  --color-woman-dark: #d9685d;
+  --color-woman-light: #fbe0db;
+  --color-accent: #e9b64e;
+  --color-background: #fff9f2;
+  --color-surface: #fffdfc;
+  --color-border: #eadbcb;
+  --color-text-primary: #5b4638;
+  --color-text-secondary: #8a7669;
+  --color-disabled: #c9bdb3;
   color-scheme: light;
-  color: #17211f;
-  background: #f6f7f4;
+  color: var(--color-text-primary);
+  background: var(--color-background);
   font-family:
     Inter,
     ui-sans-serif,
@@ -18,8 +31,8 @@
 
 body {
   margin: 0;
-  background: #f6f7f4;
-  color: #17211f;
+  background: var(--color-background);
+  color: var(--color-text-primary);
 }
 
 button,
@@ -70,10 +83,10 @@ button:disabled {
 }
 
 .backLink {
-  border: 1px solid #d7ded9;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: #ffffff;
-  color: #17211f;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
   padding: 10px 12px;
   font-size: 0.84rem;
   font-weight: 850;
@@ -89,7 +102,7 @@ button:disabled {
 
 .month {
   margin: 0 0 3px;
-  color: #4f5b56;
+  color: var(--color-text-secondary);
   font-size: 0.82rem;
   font-weight: 700;
 }
@@ -107,10 +120,10 @@ button:disabled {
   place-items: center;
   min-width: 42px;
   height: 42px;
-  border: 1px solid #d7ded9;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: #ffffff;
-  color: #17211f;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
   font-size: 1.25rem;
   font-weight: 850;
   line-height: 1;
@@ -124,7 +137,7 @@ button:disabled {
 
 .monthControls[data-loading="true"] .monthButton,
 .monthControls[data-loading="true"] .monthInput {
-  background: #f0f4f2;
+  background: var(--color-background);
 }
 
 .monthToday {
@@ -139,10 +152,10 @@ button:disabled {
 .monthInput {
   width: 100%;
   height: 42px;
-  border: 1px solid #d7ded9;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: #ffffff;
-  color: #17211f;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
   padding: 0 10px;
   font-size: 1rem;
   font-weight: 750;
@@ -155,29 +168,29 @@ button:disabled {
 
 .monthLoading {
   margin: 8px 0 0;
-  color: #40514b;
+  color: var(--color-text-secondary);
   font-size: 0.78rem;
   font-weight: 750;
 }
 
 .summaryPanel {
   border-radius: 8px;
-  background: #12211d;
-  color: #ffffff;
+  background: var(--color-text-primary);
+  color: var(--color-surface);
   padding: 16px;
-  box-shadow: 0 10px 24px rgba(18, 33, 29, 0.14);
+  box-shadow: 0 10px 24px rgba(91, 70, 56, 0.14);
 }
 
 .summaryLabel {
   margin: 0 0 4px;
-  color: #c8d5d0;
+  color: var(--color-disabled);
   font-size: 0.78rem;
   font-weight: 700;
 }
 
 .settlementAmount {
   margin: 0;
-  color: #ffffff;
+  color: var(--color-surface);
   font-size: 2rem;
   font-weight: 850;
   line-height: 1.05;
@@ -188,7 +201,7 @@ button:disabled {
   flex-wrap: wrap;
   gap: 8px 14px;
   margin-top: 12px;
-  color: #dce6e2;
+  color: var(--color-background);
   font-size: 0.82rem;
   font-weight: 700;
 }
@@ -208,8 +221,8 @@ button:disabled {
 
 .sourceBadge {
   border-radius: 999px;
-  background: #edf3ef;
-  color: #40514b;
+  background: var(--color-man-light);
+  color: var(--color-man-dark);
   padding: 4px 8px;
   font-size: 0.72rem;
   font-weight: 800;
@@ -218,8 +231,8 @@ button:disabled {
 .errorMessage {
   margin: 0 0 8px;
   border-radius: 8px;
-  background: #fff4d8;
-  color: #5d4212;
+  background: var(--color-background);
+  color: var(--color-text-primary);
   padding: 8px 10px;
   font-size: 0.78rem;
   font-weight: 700;
@@ -232,8 +245,8 @@ button:disabled {
   gap: 10px;
   margin: 0 0 8px;
   border-radius: 8px;
-  background: #e9f7ee;
-  color: #245239;
+  background: var(--color-man-light);
+  color: var(--color-man-dark);
   padding: 8px 16px;
   font-size: 0.78rem;
   font-weight: 750;
@@ -243,7 +256,7 @@ button:disabled {
   flex: 0 0 auto;
   border: 0;
   background: transparent;
-  color: #176b87;
+  color: var(--color-man-dark);
   padding: 0;
   font-size: 0.78rem;
   font-weight: 850;
@@ -258,8 +271,8 @@ button:disabled {
   height: 42px;
   border: 0;
   border-radius: 50%;
-  background: #176b87;
-  color: #ffffff;
+  background: var(--color-accent);
+  color: var(--color-text-primary);
   font-size: 1.55rem;
   font-weight: 800;
   line-height: 1;
@@ -270,24 +283,24 @@ button:disabled {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin: 12px 0;
-  border: 1px solid rgba(23, 33, 31, 0.1);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--color-surface);
   padding: 12px;
 }
 
 .expense .expenseForm {
   grid-column: 1 / -1;
   margin: 2px 0 0;
-  border-color: #dfe7e3;
-  background: #f9fbf8;
+  border-color: var(--color-border);
+  background: var(--color-background);
 }
 
 .field {
   display: grid;
   gap: 5px;
   min-width: 0;
-  color: #4f5b56;
+  color: var(--color-text-secondary);
   font-size: 0.74rem;
   font-weight: 800;
 }
@@ -295,10 +308,10 @@ button:disabled {
 .field input {
   width: 100%;
   height: 40px;
-  border: 1px solid #d6ded9;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: #ffffff;
-  color: #17211f;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
   padding: 8px 10px;
   font-size: 0.92rem;
   font-weight: 650;
@@ -336,21 +349,21 @@ button:disabled {
 
 .primaryButton {
   border: 0;
-  background: #176b87;
-  color: #ffffff;
+  background: var(--color-accent);
+  color: var(--color-text-primary);
 }
 
 .secondaryButton {
-  border: 1px solid #d6ded9;
-  background: #ffffff;
-  color: #40514b;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
 }
 
 .deleteButton {
   grid-column: 1 / -1;
-  border: 1px solid #f0c6c6;
-  background: #fff7f7;
-  color: #9d2f2f;
+  border: 1px solid var(--color-woman);
+  background: var(--color-woman-light);
+  color: var(--color-woman-dark);
 }
 
 .detailForm .deleteButton {
@@ -358,14 +371,14 @@ button:disabled {
 }
 
 .detailPanel {
-  border: 1px solid rgba(23, 33, 31, 0.1);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--color-surface);
   padding: 12px;
 }
 
 .detailPanel[data-deleted="true"] {
-  background: #fff9f2;
+  background: var(--color-background);
 }
 
 .detailHeader {
@@ -377,7 +390,7 @@ button:disabled {
 
 .detailName {
   margin: 0;
-  color: #17211f;
+  color: var(--color-text-primary);
   font-size: 1rem;
   font-weight: 850;
   line-height: 1.25;
@@ -386,7 +399,7 @@ button:disabled {
 
 .detailMeta {
   margin: 3px 0 0;
-  color: #63716b;
+  color: var(--color-text-secondary);
   font-size: 0.78rem;
   font-weight: 750;
 }
@@ -394,7 +407,7 @@ button:disabled {
 .detailForm {
   margin-bottom: 0;
   border: 0;
-  border-top: 1px solid #e5ece8;
+  border-top: 1px solid var(--color-border);
   border-radius: 0;
   padding: 12px 0 0;
 }
@@ -408,19 +421,19 @@ button:disabled {
 .list {
   display: grid;
   overflow: hidden;
-  border: 1px solid rgba(23, 33, 31, 0.1);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--color-surface);
 }
 
 .expense {
   display: block;
   min-height: 64px;
   padding: 0;
-  border-bottom: 1px solid #e8ece9;
-  border-left: 5px solid #c8d5d0;
-  background: #ffffff;
-  color: #17211f;
+  border-bottom: 1px solid var(--color-border);
+  border-left: 5px solid var(--color-disabled);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
 }
 
 .expenseTapTarget {
@@ -432,13 +445,13 @@ button:disabled {
   min-height: 58px;
   border: 0;
   background: transparent;
-  color: #17211f;
+  color: var(--color-text-primary);
   padding: 10px 12px 10px 8px;
   text-align: left;
 }
 
 .expenseTapTarget:active {
-  background: #f3f7f5;
+  background: var(--color-background);
 }
 
 .expenseTapTarget:disabled {
@@ -450,15 +463,15 @@ button:disabled {
 }
 
 .expense.payerWoman {
-  border-left-color: #d84d73;
+  border-left-color: var(--color-woman);
 }
 
 .expense.payerMan {
-  border-left-color: #2878c5;
+  border-left-color: var(--color-man);
 }
 
 .expense.payerUnknown {
-  border-left-color: #8d9994;
+  border-left-color: var(--color-disabled);
 }
 
 .expense:last-child {
@@ -471,8 +484,8 @@ button:disabled {
   min-width: 42px;
   height: 32px;
   border-radius: 8px;
-  background: #edf3ef;
-  color: #40514b;
+  background: var(--color-background);
+  color: var(--color-text-secondary);
   font-size: 0.78rem;
   font-weight: 800;
 }
@@ -491,7 +504,7 @@ button:disabled {
   align-items: center;
   gap: 7px;
   margin: 0;
-  color: #5f6b66;
+  color: var(--color-text-secondary);
   font-size: 0.8rem;
 }
 
@@ -508,23 +521,23 @@ button:disabled {
 }
 
 .payerPill.payerWoman {
-  background: #fde8ee;
-  color: #9b2449;
+  background: var(--color-woman-light);
+  color: var(--color-woman-dark);
 }
 
 .payerPill.payerMan {
-  background: #e3f0ff;
-  color: #145a9c;
+  background: var(--color-man-light);
+  color: var(--color-man-dark);
 }
 
 .payerPill.payerUnknown {
-  background: #edf3ef;
-  color: #40514b;
+  background: var(--color-background);
+  color: var(--color-text-secondary);
 }
 
 .amount {
   align-self: center;
-  color: #22342f;
+  color: var(--color-text-primary);
   font-weight: 800;
   white-space: nowrap;
 }

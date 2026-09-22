@@ -1,5 +1,31 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Adjust Base Color Palette
+
+### Checklist
+
+- [x] Inspect current Web and LINE notification color usage
+- [x] Apply the requested palette to Web base UI and payer colors
+- [x] Apply the requested palette to expense and monthly settlement Flex Messages
+- [x] Update color regression tests
+- [x] Verify targeted tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Commit changes
+
+### Progress Log
+
+- 2026-09-22 00:00 JST: User requested a base palette adjustment with male, female, accent, background, surface, border, text, and disabled colors.
+- 2026-09-22 00:00 JST: Added CSS palette variables, applied payer colors to Web rows/pills, and updated expense/monthly Flex Message themes to the requested palette.
+
+### Verification Log
+
+- 2026-09-22 00:00 JST: `pnpm test apps/web-dev-config.test.ts apps/api/src/core/notifications/expense-mutation-notifier.test.ts apps/jobs/src/monthly-settlement-reminder.test.ts` passed with 22 tests.
+- 2026-09-22 00:00 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-09-22 00:00 JST: `pnpm build` passed. Redocly still reports the same existing warnings; restored the committed `apps/web/next-env.d.ts` dev types import after build.
+- 2026-09-22 00:00 JST: Re-ran `pnpm typecheck` after restoring `apps/web/next-env.d.ts`; it passed with the same existing Redocly warnings.
+- 2026-09-22 00:00 JST: Prepared commit for the base palette adjustment.
+
 ## Task: Review Flex Message Format Changes
 
 ### Checklist

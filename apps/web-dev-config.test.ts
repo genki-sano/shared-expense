@@ -208,9 +208,12 @@ describe("web dev configuration", () => {
     const cssSource = readText("apps/web/src/app/globals.css");
 
     expect(cssSource).toContain("color-scheme: light");
+    expect(cssSource).toContain("--color-background: #fff9f2");
+    expect(cssSource).toContain("--color-surface: #fffdfc");
+    expect(cssSource).toContain("--color-text-primary: #5b4638");
     expect(cssSource).toContain(".summaryPanel");
-    expect(cssSource).toContain("background: #12211d");
-    expect(cssSource).toContain("color: #ffffff");
+    expect(cssSource).toContain("background: var(--color-text-primary)");
+    expect(cssSource).toContain("color: var(--color-surface)");
   });
 
   test("expense rows expose payer bars and payer pills for quick scanning", () => {

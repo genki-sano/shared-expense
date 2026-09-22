@@ -32,6 +32,15 @@ type NotificationTheme = {
   backgroundColor: string;
 };
 
+const MAN_DARK_COLOR = "#648A70";
+const MAN_LIGHT_COLOR = "#DCEBDD";
+const WOMAN_DARK_COLOR = "#D9685D";
+const WOMAN_LIGHT_COLOR = "#FBE0DB";
+const ACCENT_COLOR = "#E9B64E";
+const BACKGROUND_COLOR = "#FFF9F2";
+const TEXT_PRIMARY_COLOR = "#5B4638";
+const TEXT_SECONDARY_COLOR = "#8A7669";
+
 export function createExpenseMutationNotifier(
   input: ExpenseMutationNotifierInput,
 ): ExpenseMutationNotifier {
@@ -93,7 +102,7 @@ export function expenseMutationFlexMessage(
                 type: "text",
                 text: title,
                 size: "lg",
-                color: "#17211F",
+                color: TEXT_PRIMARY_COLOR,
                 weight: "bold",
                 wrap: true,
               },
@@ -179,14 +188,14 @@ function labelValueBox(label: string, value: string): LineFlexBox {
         type: "text",
         text: label,
         size: "sm",
-        color: "#aaaaaa",
+        color: TEXT_SECONDARY_COLOR,
         flex: 2,
       },
       {
         type: "text",
         text: value,
         size: "sm",
-        color: "#17211F",
+        color: TEXT_PRIMARY_COLOR,
         wrap: true,
         flex: 5,
       },
@@ -197,21 +206,21 @@ function labelValueBox(label: string, value: string): LineFlexBox {
 function eventTheme(eventType: ExpenseEventType): NotificationTheme {
   if (eventType === "expense.created") {
     return {
-      accentColor: "#176B87",
-      backgroundColor: "#F6F7F4",
+      accentColor: MAN_DARK_COLOR,
+      backgroundColor: MAN_LIGHT_COLOR,
     };
   }
 
   if (eventType === "expense.updated") {
     return {
-      accentColor: "#A05A00",
-      backgroundColor: "#FFF7E6",
+      accentColor: ACCENT_COLOR,
+      backgroundColor: BACKGROUND_COLOR,
     };
   }
 
   return {
-    accentColor: "#B42318",
-    backgroundColor: "#FFF1F0",
+    accentColor: WOMAN_DARK_COLOR,
+    backgroundColor: WOMAN_LIGHT_COLOR,
   };
 }
 
