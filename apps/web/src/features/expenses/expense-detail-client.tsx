@@ -14,6 +14,10 @@ import {
   type UpdateExpensePayload,
 } from "./api";
 import { getLiffIdToken } from "./liff-client";
+import {
+  hasLiffPrimaryRedirectParams,
+  LiffPrimaryRedirectGate,
+} from "./liff-primary-redirect-gate";
 
 type DetailState =
   | { status: "loading" }
@@ -42,6 +46,11 @@ export function ExpenseDetailClient() {
       ? process.env.NEXT_PUBLIC_DEV_ID_TOKEN
       : undefined;
   const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
+  const normalizedLiffId = liffId?.trim();
+  const shouldGateLiffPrimaryRedirect =
+    normalizedLiffId !== undefined &&
+    normalizedLiffId !== "" &&
+    hasLiffPrimaryRedirectParams(searchParams);
   const [idToken, setIdToken] = useState<string | undefined>(devIdToken);
   const [state, setState] = useState<DetailState>({ status: "loading" });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -54,6 +63,10 @@ export function ExpenseDetailClient() {
   );
 
   useEffect(() => {
+    if (shouldGateLiffPrimaryRedirect) {
+      return;
+    }
+
     if (expenseId === undefined) {
       setState({ status: "error", message: "支出IDが指定されていません" });
       return;
@@ -100,7 +113,18 @@ export function ExpenseDetailClient() {
     return () => {
       isCancelled = true;
     };
-  }, [apiBaseUrl, devIdToken, expenseId, idToken, liffId]);
+  }, [
+    apiBaseUrl,
+    devIdToken,
+    expenseId,
+    idToken,
+    liffId,
+    shouldGateLiffPrimaryRedirect,
+  ]);
+
+  if (shouldGateLiffPrimaryRedirect) {
+    return <LiffPrimaryRedirectGate liffId={normalizedLiffId} />;
+  }
 
   async function handleUpdate(
     expense: Expense,

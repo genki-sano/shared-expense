@@ -2,12 +2,13 @@
 
 import { calculateMonthlySettlement } from "@shared-expense/shared";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
 import { ExpenseDashboard } from "../features/expenses/expense-dashboard";
+import {
+  hasLiffPrimaryRedirectParams,
+  LiffPrimaryRedirectGate,
+} from "../features/expenses/liff-primary-redirect-gate";
 import { currentMonthInJst, normalizeMonthParam } from "../features/expenses/month";
 import { sampleExpenses, sampleUsers } from "../features/expenses/api";
-
-const LIFF_LAUNCH_GUARD_MS = 450;
 
 export function HomeClient() {
   const searchParams = useSearchParams();
@@ -19,39 +20,16 @@ export function HomeClient() {
       ? process.env.NEXT_PUBLIC_DEV_ID_TOKEN
       : undefined;
   const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
+  const normalizedLiffId = liffId?.trim();
   const shouldUseSampleData = apiBaseUrl === undefined || apiBaseUrl.trim() === "";
   const expenses = shouldUseSampleData ? sampleExpenses : [];
-  const shouldDelayInitialList =
-    process.env.NODE_ENV === "production" &&
-    liffId !== undefined &&
-    liffId.trim() !== "";
-  const [isLiffLaunchGuardActive, setIsLiffLaunchGuardActive] = useState(
-    shouldDelayInitialList,
-  );
+  const shouldGateLiffPrimaryRedirect =
+    normalizedLiffId !== undefined &&
+    normalizedLiffId !== "" &&
+    hasLiffPrimaryRedirectParams(searchParams);
 
-  useEffect(() => {
-    if (!shouldDelayInitialList) {
-      setIsLiffLaunchGuardActive(false);
-      return;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      setIsLiffLaunchGuardActive(false);
-    }, LIFF_LAUNCH_GUARD_MS);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [shouldDelayInitialList]);
-
-  if (isLiffLaunchGuardActive) {
-    return (
-      <main className="shell">
-        <div className="app">
-          <p className="statusMessage" role="status">
-            LINE認証を確認しています
-          </p>
-        </div>
-      </main>
-    );
+  if (shouldGateLiffPrimaryRedirect) {
+    return <LiffPrimaryRedirectGate liffId={normalizedLiffId} />;
   }
 
   return (

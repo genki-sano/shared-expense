@@ -99,13 +99,16 @@ describe("web dev configuration", () => {
     expect(homeClientSource).toContain("NEXT_PUBLIC_LIFF_ID");
     expect(homeClientSource).toContain("NEXT_PUBLIC_DEV_ID_TOKEN");
     expect(homeClientSource).toContain('process.env.NODE_ENV === "development"');
+    expect(homeClientSource).toContain("hasLiffPrimaryRedirectParams(searchParams)");
+    expect(homeClientSource).toContain("<LiffPrimaryRedirectGate");
     expect(dashboardSource).toContain("async function resolveIdToken()");
     expect(dashboardSource).toContain("idToken: currentIdToken");
     expect(dashboardSource).toContain("getLiffIdToken(");
     expect(dashboardSource).toContain("fetchMonthlyExpenses({");
     expect(dashboardSource).toContain("fetchMonthlySettlement({");
     expect(liffClientSource).toContain('import("@line/liff")');
-    expect(liffClientSource).toContain("liff.init({ liffId: input.liffId })");
+    expect(liffClientSource).toContain("export async function initializeLiff");
+    expect(liffClientSource).toContain("liff.init({ liffId })");
     expect(liffClientSource).toContain("liff.isLoggedIn()");
     expect(liffClientSource).toContain("liff.login(");
     expect(liffClientSource).toContain("liff.getIDToken()");
@@ -167,6 +170,9 @@ describe("web dev configuration", () => {
     const detailClientSource = readText(
       "apps/web/src/features/expenses/expense-detail-client.tsx",
     );
+    const liffGateSource = readText(
+      "apps/web/src/features/expenses/liff-primary-redirect-gate.tsx",
+    );
     const dashboardSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
     const cssSource = readText("apps/web/src/app/globals.css");
     const notificationSource = readText(
@@ -177,9 +183,11 @@ describe("web dev configuration", () => {
     expect(homeClientSource).toContain("searchParams.get(\"month\")");
     expect(homeClientSource).not.toContain("searchParams.get(\"expenseId\")");
     expect(homeClientSource).not.toContain("selectedExpenseId=");
-    expect(homeClientSource).toContain("LIFF_LAUNCH_GUARD_MS");
-    expect(homeClientSource).toContain("isLiffLaunchGuardActive");
-    expect(homeClientSource).toContain("LINE認証を確認しています");
+    expect(homeClientSource).not.toContain("LIFF_LAUNCH_GUARD_MS");
+    expect(homeClientSource).not.toContain("setTimeout");
+    expect(homeClientSource).toContain("hasLiffPrimaryRedirectParams(searchParams)");
+    expect(detailClientSource).toContain("hasLiffPrimaryRedirectParams(searchParams)");
+    expect(liffGateSource).toContain("LINE認証を確認しています");
     expect(detailPageSource).toContain("<ExpenseDetailClient />");
     expect(detailClientSource).toContain('searchParams.get("expenseId")');
     expect(detailClientSource).not.toContain("usePathname()");

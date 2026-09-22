@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getLiffIdToken } from "./liff-client";
+import {
+  getLiffIdToken,
+  initializeLiff,
+  resetLiffInitializationForTest,
+} from "./liff-client";
 
 const liffMock = vi.hoisted(() => ({
   init: vi.fn(async () => undefined),
@@ -17,6 +21,7 @@ vi.mock("@line/liff", () => ({
 
 describe("getLiffIdToken", () => {
   beforeEach(() => {
+    resetLiffInitializationForTest();
     liffMock.init.mockResolvedValue(undefined);
     liffMock.isLoggedIn.mockReturnValue(true);
     liffMock.isInClient.mockReturnValue(false);
@@ -27,6 +32,7 @@ describe("getLiffIdToken", () => {
   afterEach(() => {
     vi.clearAllMocks();
     vi.unstubAllGlobals();
+    resetLiffInitializationForTest();
   });
 
   it("returns the current LIFF ID token when it is still valid", async () => {
@@ -38,6 +44,14 @@ describe("getLiffIdToken", () => {
     ).resolves.toBe("id-token");
 
     expect(liffMock.init).toHaveBeenCalledWith({ liffId: "liff-id" });
+    expect(liffMock.login).not.toHaveBeenCalled();
+  });
+
+  it("can initialize LIFF without reading an ID token", async () => {
+    await expect(initializeLiff("liff-id")).resolves.toBeUndefined();
+
+    expect(liffMock.init).toHaveBeenCalledWith({ liffId: "liff-id" });
+    expect(liffMock.getIDToken).not.toHaveBeenCalled();
     expect(liffMock.login).not.toHaveBeenCalled();
   });
 

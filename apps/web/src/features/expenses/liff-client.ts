@@ -6,13 +6,31 @@ export type GetLiffIdTokenInput = {
 
 const ID_TOKEN_EXPIRATION_BUFFER_SECONDS = 60;
 const EXPIRED_ID_TOKEN_REFRESH_KEY = "shared-expense:liff-expired-id-token-refresh";
+let liffInitPromise: Promise<void> | null = null;
+let initializedLiffId: string | null = null;
+
+export async function initializeLiff(liffId: string): Promise<void> {
+  if (liffInitPromise !== null && initializedLiffId === liffId) {
+    return await liffInitPromise;
+  }
+
+  const { default: liff } = await import("@line/liff");
+  initializedLiffId = liffId;
+  liffInitPromise = liff.init({ liffId });
+  return await liffInitPromise;
+}
+
+export function resetLiffInitializationForTest(): void {
+  liffInitPromise = null;
+  initializedLiffId = null;
+}
 
 export async function getLiffIdToken(
   input: GetLiffIdTokenInput,
 ): Promise<string | null> {
   const { default: liff } = await import("@line/liff");
 
-  await liff.init({ liffId: input.liffId });
+  await initializeLiff(input.liffId);
 
   if (!liff.isLoggedIn()) {
     if (input.redirectUri === undefined) {

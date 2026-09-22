@@ -1,5 +1,31 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Gate LIFF Primary Redirect Rendering
+
+### Checklist
+
+- [x] Inspect current LIFF startup and redirect rendering behavior
+- [x] Add a LIFF primary redirect detector/gate before app rendering
+- [x] Split LIFF initialization so the gate can run `liff.init()` without reading tokens
+- [x] Update Web regression tests
+- [x] Verify targeted Web/LIFF tests pass
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+
+### Progress Log
+
+- 2026-09-22 00:00 JST: User wants to avoid briefly showing the primary redirect destination before the LIFF secondary redirect destination appears.
+- 2026-09-22 00:00 JST: Plan is to replace the timer-based launch guard with a query-based LIFF primary redirect gate that renders only an auth status while `liff.init()` lets the SDK complete secondary redirect handling.
+- 2026-09-22 00:00 JST: Added `LiffPrimaryRedirectGate`, extracted cached `initializeLiff()`, removed the fixed 450ms home launch guard, and applied the gate to both root and expense detail clients.
+
+### Verification Log
+
+- 2026-09-22 00:00 JST: Initial `pnpm test apps/web/src/features/expenses/liff-client.test.ts apps/web/src/features/expenses/liff-primary-redirect-gate.test.ts apps/web-dev-config.test.ts` failed because the Web regression test still expected the LIFF auth status text in `home-client.tsx` after moving it into the gate component.
+- 2026-09-22 00:00 JST: `pnpm test apps/web/src/features/expenses/liff-client.test.ts apps/web/src/features/expenses/liff-primary-redirect-gate.test.ts apps/web-dev-config.test.ts` passed with 25 tests.
+- 2026-09-22 00:00 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-09-22 00:00 JST: `pnpm build` passed. Redocly still reports the same existing warnings; restored the committed `apps/web/next-env.d.ts` dev types import after build.
+- 2026-09-22 00:00 JST: Re-ran `pnpm typecheck` after restoring `apps/web/next-env.d.ts`; it passed with the same existing Redocly warnings.
+
 ## Task: Soften Expense Notification Background Colors
 
 ### Checklist
