@@ -118,6 +118,10 @@ describe("createLineWebhookRoutes", () => {
     ]);
     expect(JSON.stringify(replied)).toContain("Aliceとして登録");
     expect(JSON.stringify(replied)).toContain("Bobとして登録");
+    expect(JSON.stringify(replied)).toContain("#5B4638");
+    expect(JSON.stringify(replied)).toContain("#8A7669");
+    expect(JSON.stringify(replied)).toContain("#F48778");
+    expect(JSON.stringify(replied)).toContain("#8FB99A");
     expect(JSON.stringify(replied)).toContain("action=claimUser&userId=woman");
     expect(JSON.stringify(replied)).toContain("action=claimUser&userId=man");
   });

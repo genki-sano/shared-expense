@@ -167,6 +167,27 @@
 - 2026-09-26 18:57 JST: `pnpm test` passed with 164 tests across 29 test files.
 - 2026-09-26 18:58 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
 
+## Task: Align LINE Onboarding Colors
+
+### Checklist
+
+- [x] Inspect current LINE onboarding Flex colors
+- [x] Replace onboarding colors with existing app palette colors
+- [x] Update/extend webhook color assertions
+- [x] Run targeted tests
+- [x] Run `pnpm typecheck`
+- [x] Report verification results
+
+### Progress Log
+
+- 2026-09-26 19:00 JST: User requested the initial registration Flex Message colors be aligned with the existing palette.
+- 2026-09-26 19:04 JST: Aligned onboarding Flex colors with the app palette: text primary `#5B4638`, text secondary `#8A7669`, woman `#F48778`, man `#8FB99A`.
+
+### Verification Log
+
+- 2026-09-26 19:04 JST: `pnpm test apps/api/src/line-webhook/routes.test.ts` passed with 9 tests.
+- 2026-09-26 19:05 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+
 ## Task: Improve Web Effect Cleanup
 
 ### Checklist

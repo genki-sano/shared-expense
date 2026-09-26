@@ -1,4 +1,7 @@
-import type { LineFlexMessage, LineMessagingClient } from "@shared-expense/integrations";
+import type {
+  LineFlexMessage,
+  LineMessagingClient,
+} from "@shared-expense/integrations";
 import type { Expense, User } from "@shared-expense/shared";
 import { Hono } from "hono";
 import type { ExpenseRepository } from "../core/expenses/repository";
@@ -39,6 +42,10 @@ type LineWebhookEvent = {
 
 const WEBHOOK_CATEGORY = "その他";
 const ONBOARDING_ACTION = "claimUser";
+const ONBOARDING_TEXT_PRIMARY_COLOR = "#5B4638";
+const ONBOARDING_TEXT_SECONDARY_COLOR = "#8A7669";
+const ONBOARDING_WOMAN_COLOR = "#F48778";
+const ONBOARDING_MAN_COLOR = "#8FB99A";
 
 export function createLineWebhookRoutes(
   dependencies: LineWebhookRoutesDependencies,
@@ -107,7 +114,10 @@ async function handleTextMessage(
     return;
   }
 
-  const actor = await findUserByLineUserId(dependencies.userRepository, event.source?.userId);
+  const actor = await findUserByLineUserId(
+    dependencies.userRepository,
+    event.source?.userId,
+  );
   if (actor === null) {
     await replyOnboardingGuide(dependencies, event);
     return;
@@ -172,7 +182,10 @@ async function replyOnboardingGuide(
     return;
   }
 
-  const actor = await findUserByLineUserId(dependencies.userRepository, event.source?.userId);
+  const actor = await findUserByLineUserId(
+    dependencies.userRepository,
+    event.source?.userId,
+  );
   if (actor !== null) {
     await replyText(
       dependencies.lineMessagingClient,
@@ -253,7 +266,9 @@ async function handleOnboardingPostback(
   );
 }
 
-function parseOnboardingPostback(data: string | undefined): { userId: string } | null {
+function parseOnboardingPostback(
+  data: string | undefined,
+): { userId: string } | null {
   if (data === undefined || data.trim() === "") {
     return null;
   }
@@ -284,17 +299,17 @@ function onboardingFlexMessage(users: readonly User[]): LineFlexMessage {
         contents: [
           {
             type: "text",
-            text: "初回登録",
+            text: "はじめまして！",
             weight: "bold",
             size: "lg",
-            color: "#5B4638",
+            color: ONBOARDING_TEXT_PRIMARY_COLOR,
           },
           {
             type: "text",
             text: "家計簿で使うユーザーを選択してください。",
             wrap: true,
             size: "sm",
-            color: "#6F625A",
+            color: ONBOARDING_TEXT_SECONDARY_COLOR,
           },
         ],
       },
@@ -313,9 +328,9 @@ function onboardingButtons(users: readonly User[]) {
     .filter(isOnboardingUser)
     .map((user) =>
       onboardingButton(
-        `${user.displayName}として登録`,
+        user.displayName,
         user.id,
-        user.id === "woman" ? "#FFB8AA" : "#D8EAD8",
+        user.id === "woman" ? ONBOARDING_WOMAN_COLOR : ONBOARDING_MAN_COLOR,
       ),
     );
 }
@@ -324,7 +339,11 @@ function isOnboardingUser(user: User): user is User & { id: "woman" | "man" } {
   return user.id === "woman" || user.id === "man";
 }
 
-function onboardingButton(label: string, userId: "woman" | "man", color: string) {
+function onboardingButton(
+  label: string,
+  userId: "woman" | "man",
+  color: string,
+) {
   return {
     type: "button" as const,
     style: "primary" as const,
@@ -407,7 +426,9 @@ async function notifyPartnerUsers(
       continue;
     }
 
-    const recipient = users.filter((user) => user.id !== input.actor.id && user.notifyEnabled)[index];
+    const recipient = users.filter(
+      (user) => user.id !== input.actor.id && user.notifyEnabled,
+    )[index];
     console.error("LINE webhook expense partner notification failed", {
       reason: errorMessage(result.reason),
       recipientUserId: recipient?.id,
