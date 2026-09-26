@@ -29,12 +29,12 @@ const users: HouseholdUsers = [
 ];
 
 describe("parseExpenseMessage", () => {
-  it("parses memo and price split by half-width or full-width spaces", () => {
-    expect(parseExpenseMessage("コンビニ 1200")).toEqual({
+  it("parses price and memo split by half-width or full-width spaces", () => {
+    expect(parseExpenseMessage("1200 コンビニ")).toEqual({
       memo: "コンビニ",
       price: 1200,
     });
-    expect(parseExpenseMessage("昼食　１，２００")).toEqual({
+    expect(parseExpenseMessage("１，２００　昼食")).toEqual({
       memo: "昼食",
       price: 1200,
     });
@@ -42,6 +42,7 @@ describe("parseExpenseMessage", () => {
 
   it("rejects unsupported messages", () => {
     expect(parseExpenseMessage("1200")).toBeNull();
+    expect(parseExpenseMessage("コンビニ 1200")).toBeNull();
     expect(parseExpenseMessage("昼食 abc")).toBeNull();
   });
 });
@@ -168,7 +169,7 @@ describe("createLineWebhookRoutes", () => {
         messages: [
           {
             type: "text",
-            text: "ひとみさんとして登録しました。支出は「支払内容 金額」の形式で送信できます。",
+            text: "ひとみさんとして登録しました。支出は「金額 支払内容」の形式で送信できます。",
           },
         ],
       },
@@ -197,7 +198,7 @@ describe("createLineWebhookRoutes", () => {
           type: "message",
           replyToken: "reply-token-1",
           source: { type: "user", userId: "line_new" },
-          message: { type: "text", text: "コンビニ 1200" },
+          message: { type: "text", text: "1200 コンビニ" },
         },
       ],
     });
@@ -244,7 +245,7 @@ describe("createLineWebhookRoutes", () => {
           webhookEventId: "webhook-event-1",
           replyToken: "reply-token-1",
           source: { type: "user", userId: "line_woman" },
-          message: { type: "text", id: "message-1", text: "コンビニ 1200" },
+          message: { type: "text", id: "message-1", text: "1200 コンビニ" },
         },
       ],
     });
@@ -330,7 +331,7 @@ describe("createLineWebhookRoutes", () => {
         messages: [
           {
             type: "text",
-            text: "登録できませんでした。`支払内容 金額` の形式で送信してください。",
+            text: "登録できませんでした。`金額 支払内容` の形式で送信してください。",
           },
         ],
       },

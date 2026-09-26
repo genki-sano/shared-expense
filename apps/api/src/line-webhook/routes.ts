@@ -118,7 +118,7 @@ async function handleTextMessage(
     await replyText(
       dependencies.lineMessagingClient,
       event.replyToken,
-      "登録できませんでした。`支払内容 金額` の形式で送信してください。",
+      "登録できませんでした。`金額 支払内容` の形式で送信してください。",
     );
     return;
   }
@@ -177,7 +177,7 @@ async function replyOnboardingGuide(
     await replyText(
       dependencies.lineMessagingClient,
       event.replyToken,
-      `${actor.displayName}さんとして登録済みです。支出は「支払内容 金額」の形式で送信できます。`,
+      `${actor.displayName}さんとして登録済みです。支出は「金額 支払内容」の形式で送信できます。`,
     );
     return;
   }
@@ -249,7 +249,7 @@ async function handleOnboardingPostback(
   await replyText(
     dependencies.lineMessagingClient,
     event.replyToken,
-    `${claimedUser.displayName}さんとして登録しました。支出は「支払内容 金額」の形式で送信できます。`,
+    `${claimedUser.displayName}さんとして登録しました。支出は「金額 支払内容」の形式で送信できます。`,
   );
 }
 
@@ -341,13 +341,13 @@ function onboardingButton(label: string, userId: "woman" | "man", color: string)
 export function parseExpenseMessage(
   text: string,
 ): { memo: string; price: number } | null {
-  const match = text.trim().match(/^(.+?)[\u0020\u3000]+([0-9０-９,，]+)$/u);
+  const match = text.trim().match(/^([0-9０-９,，]+)[\u0020\u3000]+(.+?)$/u);
   if (match === null) {
     return null;
   }
 
-  const memo = match[1]?.trim();
-  const priceText = normalizeDigits(match[2] ?? "").replaceAll(",", "");
+  const priceText = normalizeDigits(match[1] ?? "").replaceAll(",", "");
+  const memo = match[2]?.trim();
   const price = Number(priceText);
   if (
     memo === undefined ||

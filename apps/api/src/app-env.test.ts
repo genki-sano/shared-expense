@@ -489,7 +489,7 @@ describe("createAppFromEnv", () => {
           webhookEventId: "line-webhook-create-1",
           replyToken: "reply-token-1",
           source: { type: "user", userId: "line_woman" },
-          message: { type: "text", text: "コンビニ 1200" },
+          message: { type: "text", text: "1200 コンビニ" },
         },
       ],
     });

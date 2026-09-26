@@ -126,6 +126,27 @@
 - 2026-09-26 18:50 JST: Initial `pnpm typecheck` failed because `InMemoryExpenseRepository.getById` still referenced `User` after moving types; restored the type import.
 - 2026-09-26 18:51 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
 
+## Task: Change LINE Expense Text Order
+
+### Checklist
+
+- [x] Find LINE webhook parser and user-facing format messages
+- [x] Change parser from `支払内容 金額` to `金額 支払内容`
+- [x] Update webhook tests and sample messages
+- [x] Run targeted tests
+- [x] Run `pnpm typecheck`
+- [x] Report verification results
+
+### Progress Log
+
+- 2026-09-26 18:52 JST: User requested LINE text expense input order be changed from `支払内容 金額` to `金額 支払内容`, including all related messages.
+- 2026-09-26 18:55 JST: Updated LINE webhook parser, registration guidance, invalid-format reply, and webhook test payloads to use `金額 支払内容`.
+
+### Verification Log
+
+- 2026-09-26 18:55 JST: `pnpm test apps/api/src/line-webhook/routes.test.ts apps/api/src/app-env.test.ts` passed with 15 tests.
+- 2026-09-26 18:55 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+
 ## Task: Improve Web Effect Cleanup
 
 ### Checklist
