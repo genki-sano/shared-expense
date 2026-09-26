@@ -1,5 +1,30 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Improve Actionable Error Messages
+
+### Checklist
+
+- [x] Review API, LINE webhook, and Web user-facing error messages
+- [x] Add actionable `details.action` to Expense and Settlement API validation/repository errors
+- [x] Make Expense detail UI extract API `message` and `details.action`
+- [x] Replace console-only fallback copy with user-actionable copy
+- [x] Review and update LINE webhook reply messages
+- [x] Update tests
+- [x] Run targeted tests
+- [x] Run `pnpm typecheck`
+- [x] Report verification results
+
+### Progress Log
+
+- 2026-09-26 19:08 JST: User requested error messages be reviewed and updated so they are not merely factual and include what the user should do next.
+- 2026-09-26 19:08 JST: Found strongest gaps in Expense/Settlement API `Invalid request`, `Expense not found`, `Expense version conflict`, `Expense create failed`, and Web detail API error formatting/fallback copy.
+- 2026-09-26 19:27 JST: Added action guidance to Expense/Settlement API errors, aligned Expense detail Web error formatting with dashboard behavior, replaced console-only fallback copy, and made LINE webhook failure replies more actionable with examples/retry guidance.
+
+### Verification Log
+
+- 2026-09-26 19:27 JST: `pnpm test apps/api/src/app.test.ts apps/api/src/line-webhook/routes.test.ts apps/web/src/features/expenses/api.test.ts apps/web-dev-config.test.ts` passed with 62 tests.
+- 2026-09-26 19:28 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+
 ## Task: Clarify LINE Friend Add User Flow
 
 ### Checklist

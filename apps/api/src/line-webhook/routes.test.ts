@@ -116,8 +116,8 @@ describe("createLineWebhookRoutes", () => {
         ],
       },
     ]);
-    expect(JSON.stringify(replied)).toContain("Aliceとして登録");
-    expect(JSON.stringify(replied)).toContain("Bobとして登録");
+    expect(JSON.stringify(replied)).toContain("Alice");
+    expect(JSON.stringify(replied)).toContain("Bob");
     expect(JSON.stringify(replied)).toContain("#5B4638");
     expect(JSON.stringify(replied)).toContain("#8A7669");
     expect(JSON.stringify(replied)).toContain("#F48778");
@@ -335,7 +335,7 @@ describe("createLineWebhookRoutes", () => {
         messages: [
           {
             type: "text",
-            text: "登録できませんでした。`金額 支払内容` の形式で送信してください。",
+            text: "登録できませんでした。`金額 支払内容` の形式で送信してください。例: `1200 コンビニ`",
           },
         ],
       },

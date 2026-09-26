@@ -128,7 +128,7 @@ async function handleTextMessage(
     await replyText(
       dependencies.lineMessagingClient,
       event.replyToken,
-      "登録できませんでした。`金額 支払内容` の形式で送信してください。",
+      "登録できませんでした。`金額 支払内容` の形式で送信してください。例: `1200 コンビニ`",
     );
     return;
   }
@@ -150,7 +150,7 @@ async function handleTextMessage(
     await replyText(
       dependencies.lineMessagingClient,
       event.replyToken,
-      "登録できませんでした。時間をおいて再度お試しください。",
+      "登録できませんでした。時間をおいて、同じ内容をもう一度送信してください。",
     );
     return;
   }
@@ -231,7 +231,7 @@ async function handleOnboardingPostback(
     await replyText(
       dependencies.lineMessagingClient,
       event.replyToken,
-      `${existingUser.displayName}さんとして登録済みです。`,
+      `${existingUser.displayName}さんとして登録済みです。支出は「金額 支払内容」の形式で送信できます。`,
     );
     return;
   }
@@ -241,7 +241,7 @@ async function handleOnboardingPostback(
     await replyText(
       dependencies.lineMessagingClient,
       event.replyToken,
-      "登録先のユーザーが見つかりませんでした。",
+      "登録先のユーザーが見つかりませんでした。メッセージを送って初回登録メニューを表示し、もう一度選択してください。",
     );
     return;
   }

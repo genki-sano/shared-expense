@@ -254,6 +254,7 @@ components:
             details:
               field: date
               reason: must be YYYY-MM
+              action: 入力内容を確認して、もう一度お試しください
     Unauthorized:
       description: 認証エラー
       content:
@@ -307,6 +308,7 @@ components:
             message: Expense not found
             details:
               id: "exp_123"
+              action: 一覧に戻って最新の支出を確認してください
     Conflict:
       description: 更新競合
       content:
@@ -319,6 +321,7 @@ components:
               id: "exp_123"
               expectedVersion: 3
               actualVersion: 4
+              action: 再読み込みして最新の内容を確認してから、もう一度お試しください
     InternalServerError:
       description: サーバーエラー
       content:
@@ -327,7 +330,8 @@ components:
             $ref: '#/components/schemas/ErrorResponse'
           example:
             message: Internal server error
-            details: {}
+            details:
+              action: 時間をおいて再度お試しください。解消しない場合は管理者に連絡してください
   schemas:
     Expense:
       type: object

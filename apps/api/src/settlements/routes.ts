@@ -28,7 +28,11 @@ export function createSettlementRoutes(dependencies: SettlementRoutesDependencie
       return c.json(
         {
           message: "Invalid request",
-          details: { field: "month", reason: "must be YYYY-MM" },
+          details: {
+            field: "month",
+            reason: "must be YYYY-MM",
+            action: "年月を選び直して、もう一度お試しください",
+          },
         },
         400,
       );

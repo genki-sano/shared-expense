@@ -729,7 +729,7 @@ function errorMessageForUser(error: unknown): string {
     return error.message;
   }
 
-  return "詳細はブラウザ console を確認してください";
+  return "時間をおいて再度お試しください。解消しない場合は管理者に連絡してください";
 }
 
 function apiErrorMessageForUser(responseBody: string): string | null {

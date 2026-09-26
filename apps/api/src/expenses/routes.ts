@@ -45,7 +45,11 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
       return c.json(
         {
           message: "Invalid request",
-          details: { field: "date", reason: "must be YYYY-MM" },
+          details: {
+            field: "date",
+            reason: "must be YYYY-MM",
+            action: "入力内容を確認して、もう一度お試しください",
+          },
         },
         400,
       );
@@ -116,6 +120,8 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
           message: "Expense create failed",
           details: {
             reason: errorMessage(error),
+            action:
+              "時間をおいて再度お試しください。解消しない場合は管理者に連絡してください",
           },
         },
         500,
@@ -279,13 +285,21 @@ function notificationErrorCauseMessage(error: unknown): string | undefined {
 function validateIdempotencyKey(value: string | undefined):
   | {
       message: "Invalid request";
-      details: { field: "Idempotency-Key"; reason: "is required" };
+      details: {
+        field: "Idempotency-Key";
+        reason: "is required";
+        action: string;
+      };
     }
   | null {
   if (value === undefined || value.trim() === "") {
     return {
       message: "Invalid request",
-      details: { field: "Idempotency-Key", reason: "is required" },
+      details: {
+        field: "Idempotency-Key",
+        reason: "is required",
+        action: "もう一度操作してください",
+      },
     };
   }
 
@@ -396,7 +410,14 @@ function invalidField(
   field: string,
   reason: string,
 ): { message: "Invalid request"; details: Record<string, string> } {
-  return { message: "Invalid request", details: { field, reason } };
+  return {
+    message: "Invalid request",
+    details: {
+      field,
+      reason,
+      action: "入力内容を確認して、もう一度お試しください",
+    },
+  };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -421,7 +442,10 @@ function repositoryErrorResponse(error: unknown): Response {
     return Response.json(
       {
         message: "Expense not found",
-        details: { id: repositoryError.id },
+        details: {
+          id: repositoryError.id,
+          action: "一覧に戻って最新の支出を確認してください",
+        },
       },
       { status: 404 },
     );
@@ -438,6 +462,7 @@ function repositoryErrorResponse(error: unknown): Response {
         ...(repositoryError.actualVersion === undefined
           ? {}
           : { actualVersion: repositoryError.actualVersion }),
+        action: "再読み込みして最新の内容を確認してから、もう一度お試しください",
       },
     },
     { status: 409 },

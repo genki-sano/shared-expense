@@ -193,6 +193,7 @@ describe("GET /api/expenses", () => {
       details: {
         field: "date",
         reason: "must be YYYY-MM",
+        action: "入力内容を確認して、もう一度お試しください",
       },
     });
   });
@@ -351,6 +352,8 @@ describe("Expense mutations", () => {
       message: "Expense create failed",
       details: {
         reason: "Failed to append Google Sheets values: 403",
+        action:
+          "時間をおいて再度お試しください。解消しない場合は管理者に連絡してください",
       },
     });
   });
@@ -372,7 +375,11 @@ describe("Expense mutations", () => {
     expect(response.status).toBe(400);
     await expect(response.json()).resolves.toEqual({
       message: "Invalid request",
-      details: { field: "Idempotency-Key", reason: "is required" },
+      details: {
+        field: "Idempotency-Key",
+        reason: "is required",
+        action: "もう一度操作してください",
+      },
     });
   });
 
@@ -548,6 +555,7 @@ describe("Expense mutations", () => {
         id: "exp_earlier",
         expectedVersion: 1,
         actualVersion: 2,
+        action: "再読み込みして最新の内容を確認してから、もう一度お試しください",
       },
     });
   });
@@ -577,7 +585,10 @@ describe("Expense mutations", () => {
     expect(response.status).toBe(404);
     await expect(response.json()).resolves.toEqual({
       message: "Expense not found",
-      details: { id: "missing" },
+      details: {
+        id: "missing",
+        action: "一覧に戻って最新の支出を確認してください",
+      },
     });
   });
 
@@ -624,7 +635,10 @@ describe("Expense mutations", () => {
     expect(response.status).toBe(404);
     await expect(response.json()).resolves.toEqual({
       message: "Expense not found",
-      details: { id: "exp_earlier" },
+      details: {
+        id: "exp_earlier",
+        action: "一覧に戻って最新の支出を確認してください",
+      },
     });
   });
 });
@@ -654,6 +668,7 @@ describe("GET /api/settlements", () => {
       details: {
         field: "month",
         reason: "must be YYYY-MM",
+        action: "年月を選び直して、もう一度お試しください",
       },
     });
   });
