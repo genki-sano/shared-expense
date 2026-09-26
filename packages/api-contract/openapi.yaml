@@ -285,7 +285,7 @@ components:
             message: このLINEユーザーは家計簿に登録されていません
             details:
               code: USER_NOT_REGISTERED
-              action: 管理者にusersシートへの登録を依頼してください
+              action: 初回登録で使うユーザーを選択してください
     ServiceUnavailable:
       description: 認証基盤または外部連携の一時エラー
       content:

@@ -39,6 +39,11 @@ export type ListSpreadsheetExpensesInput = {
   month: string;
 };
 
+export type ClaimSpreadsheetHouseholdUserInput = {
+  userId: string;
+  lineUserId: string;
+};
+
 export type CreateSpreadsheetExpenseInput = {
   actor: { id: string };
   date: string;
@@ -107,6 +112,45 @@ export class SpreadsheetExpenseRepository {
     }
 
     return [first, second];
+  }
+
+  async claimHouseholdUser(input: ClaimSpreadsheetHouseholdUserInput): Promise<User> {
+    const rows = await this.#readUserRows();
+    const existingUser = rows
+      .map((item) => this.#userFromRow(item.row))
+      .find((user): user is User => user !== null && user.lineUserId === input.lineUserId);
+    if (existingUser !== undefined && existingUser.id !== input.userId) {
+      throw new Error("LINE user is already registered to another household user");
+    }
+
+    const targetUserType = this.#userTypeFor(input.userId);
+    const target = rows.find((item) => String(item.row[0] ?? "").trim() === targetUserType);
+    if (target === undefined) {
+      throw new Error(`Unknown household user: ${input.userId}`);
+    }
+
+    const currentLineUserId = String(target.row[2] ?? "").trim();
+    if (currentLineUserId !== "" && currentLineUserId !== input.lineUserId) {
+      throw new Error("Household user is already claimed");
+    }
+
+    await this.#updateValues({
+      spreadsheetId: this.#spreadsheetId,
+      range: `users!C${target.rowNumber}:C${target.rowNumber}`,
+      values: [[input.lineUserId]],
+    });
+
+    const claimedUser = this.#userFromRow([
+      target.row[0],
+      target.row[1],
+      input.lineUserId,
+      ...target.row.slice(3),
+    ]);
+    if (claimedUser === null) {
+      throw new Error(`Invalid household user row: ${target.rowNumber}`);
+    }
+
+    return claimedUser;
   }
 
   async listByMonth(input: ListSpreadsheetExpensesInput): Promise<Expense[]> {
@@ -281,6 +325,18 @@ export class SpreadsheetExpenseRepository {
     return userNamesByType;
   }
 
+  async #readUserRows(): Promise<Array<{ row: unknown[]; rowNumber: number }>> {
+    const response = await this.#valuesClient.getValues({
+      spreadsheetId: this.#spreadsheetId,
+      range: "users!A2:F",
+    });
+
+    return (response.values ?? []).map((row, index) => ({
+      row,
+      rowNumber: index + 2,
+    }));
+  }
+
   #expenseFromRow(
     row: unknown[],
     sheetRowNumber: number,
@@ -368,7 +424,7 @@ export class SpreadsheetExpenseRepository {
 
     return {
       id: userId,
-      lineUserId: row[2] === undefined ? userId : String(row[2]).trim(),
+      lineUserId: row[2] === undefined ? "" : String(row[2]).trim(),
       displayName: String(displayName).trim(),
       notifyEnabled: true,
     };

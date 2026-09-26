@@ -1,11 +1,11 @@
 import type { User } from "@shared-expense/shared";
 import { Hono } from "hono";
 import { authenticateRequest } from "../core/auth/request-auth";
+import { ExpenseRepositoryError, type ExpenseRepository } from "../core/expenses/repository";
 import {
   noopExpenseMutationNotifier,
   type ExpenseMutationNotifier,
 } from "../core/notifications/expense-mutation-notifier";
-import { ExpenseRepositoryError, type ExpenseRepository } from "./repository";
 
 export type ExpenseRoutesDependencies = {
   authenticateToken: (token: string) => Promise<User>;

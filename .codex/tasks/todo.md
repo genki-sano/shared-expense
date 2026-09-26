@@ -1,5 +1,131 @@
 # Task: shared-expense monorepo replacement design
 
+## Task: Clarify LINE Friend Add User Flow
+
+### Checklist
+
+- [x] Inspect architecture and implementation guide for LINE/LIFF entry flow
+- [x] Inspect current LIFF startup and API authentication behavior
+- [x] Inspect LINE webhook behavior for friend-add/onboarding support
+- [x] Report current flow image and gaps
+
+### Progress Log
+
+- 2026-09-26 17:20 JST: User asked what the user flow looks like after adding the LINE account as a friend.
+- 2026-09-26 17:20 JST: Confirmed current docs center on rich-menu to LIFF startup, LIFF ID token verification, and resolving a registered `lineUserId` to an internal user.
+- 2026-09-26 17:20 JST: Confirmed current webhook handles text messages for expense creation, but does not implement follow/friend-add onboarding or user auto-registration.
+
+### Verification Log
+
+- 2026-09-26 17:20 JST: Reviewed `docs/01-architecture.md`, `docs/03-implementation-guide.md`, `apps/web/src/features/expenses/liff-client.ts`, `apps/web/src/features/expenses/expense-dashboard.tsx`, `apps/api/src/core/auth/request-auth.ts`, `apps/api/src/line-webhook/routes.ts`, and `packages/api-contract/openapi.yaml`; no runtime commands were needed because this was a flow clarification.
+
+## Task: Add Self Onboarding Flow
+
+### Checklist
+
+- [x] Plan the minimum self-onboarding design
+- [x] Add API support for claiming an existing household user slot with a LINE ID token
+- [x] Add Spreadsheet repository support for writing the claimed LINE user id
+- [x] Show an onboarding choice in LIFF when the current LINE user is not registered
+- [x] Update targeted tests
+- [x] Run targeted tests
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Report verification results
+
+### Progress Log
+
+- 2026-09-26 17:20 JST: User wants self-onboarding after adding the LINE official account as a friend.
+- 2026-09-26 17:20 JST: Planned the minimum flow as LIFF ID token verification without an existing user, then claiming one of the existing two Spreadsheet `users` slots (`woman` or `man`) if it is unclaimed or already belongs to the same LINE user.
+- 2026-09-26 17:28 JST: Added `POST /api/onboarding`, Spreadsheet `users!C` claim support, Web onboarding choice UI, OpenAPI contract entries, and targeted regression tests.
+
+### Verification Log
+
+- 2026-09-26 17:27 JST: `pnpm test apps/api/src/app.test.ts packages/integrations/src/spreadsheet/expense-repository.test.ts apps/web/src/features/expenses/api.test.ts` passed with 51 tests.
+- 2026-09-26 17:28 JST: Initial `pnpm typecheck` failed because `HouseholdUserRepository` made onboarding write support mandatory for read-only auth test mocks and because the in-memory tuple update needed stricter typing.
+- 2026-09-26 17:28 JST: Split claim support into `ClaimableHouseholdUserRepository` and kept read-only auth on `HouseholdUserRepository`.
+- 2026-09-26 17:28 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-09-26 17:28 JST: Re-ran `pnpm test apps/api/src/app.test.ts packages/integrations/src/spreadsheet/expense-repository.test.ts apps/web/src/features/expenses/api.test.ts`; it passed with 51 tests.
+- 2026-09-26 17:29 JST: `pnpm build` passed. Redocly still reports the same existing warnings.
+- 2026-09-26 17:29 JST: Restored the generated `apps/web/next-env.d.ts` route-types import after build, then re-ran `pnpm typecheck`; it passed with the same existing Redocly warnings.
+
+## Task: Move Self Onboarding To LINE Webhook
+
+### Checklist
+
+- [x] Review LINE Messaging API webhook docs for friend-add/message/postback events
+- [x] Record lesson from the mismatched LIFF-first onboarding assumption
+- [x] Remove LIFF-first onboarding UI/API surface from the previous implementation
+- [x] Add LINE talk onboarding replies for `follow` and unregistered text messages
+- [x] Add LINE postback claiming for existing household user slots
+- [x] Update targeted webhook/repository tests
+- [x] Run targeted tests
+- [x] Run `pnpm typecheck`
+- [x] Run `pnpm build`
+- [x] Report verification results
+
+### Progress Log
+
+- 2026-09-26 17:30 JST: User clarified the intended onboarding should be built as LINE talk interactions via Webhook, referencing LINE's receiving messages documentation.
+- 2026-09-26 17:30 JST: Confirmed from LINE docs that friend add/block解除 sends a `follow` event, button interactions can send `postback` events, and webhook signatures must be verified before processing.
+- 2026-09-26 18:14 JST: Removed the LIFF-first onboarding API/UI surface and moved self-onboarding into LINE webhook handling.
+- 2026-09-26 18:14 JST: Added follow/unregistered-text onboarding Flex replies, postback-based user slot claiming, and postback action typing for LINE Flex buttons.
+
+### Verification Log
+
+- 2026-09-26 18:13 JST: Initial targeted test run failed because an existing webhook notification test expected an older month-list LIFF URL while current implementation emits an expense-detail LIFF URL.
+- 2026-09-26 18:14 JST: Updated the stale webhook test expectation to the current `/expense?expenseId=...` detail link.
+- 2026-09-26 18:14 JST: `pnpm test apps/api/src/line-webhook/routes.test.ts apps/api/src/app.test.ts packages/integrations/src/spreadsheet/expense-repository.test.ts apps/web/src/features/expenses/api.test.ts` passed with 57 tests.
+- 2026-09-26 18:14 JST: Initial `pnpm typecheck` failed because webhook env wiring still typed the user repository as read-only; updated it to `ClaimableHouseholdUserRepository`.
+- 2026-09-26 18:15 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+- 2026-09-26 18:15 JST: `pnpm build` passed. Redocly still reports the same existing warnings.
+- 2026-09-26 18:15 JST: Restored generated `apps/web/next-env.d.ts` build noise and re-ran `pnpm typecheck`; it passed with the same existing Redocly warnings.
+
+## Task: Use Spreadsheet User Names In LINE Onboarding
+
+### Checklist
+
+- [x] Inspect current webhook onboarding button labels
+- [x] Change onboarding labels to use repository user display names
+- [x] Update webhook tests
+- [x] Run targeted tests
+- [x] Run `pnpm typecheck`
+- [x] Report verification results
+
+### Progress Log
+
+- 2026-09-26 18:16 JST: User requested LINE onboarding names not be hard-coded as `ひとみ` / `げんき`, and instead be displayed from Spreadsheet user names.
+- 2026-09-26 18:44 JST: Changed onboarding Flex buttons to build labels from `listHouseholdUsers()` display names while keeping stable `woman` / `man` postback ids.
+
+### Verification Log
+
+- 2026-09-26 18:44 JST: `pnpm test apps/api/src/line-webhook/routes.test.ts packages/integrations/src/spreadsheet/expense-repository.test.ts` passed with 20 tests.
+- 2026-09-26 18:44 JST: Initial `pnpm typecheck` failed because TypeScript did not narrow filtered user ids to `woman | man`.
+- 2026-09-26 18:45 JST: Added a small `isOnboardingUser` type guard, then `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+
+## Task: Decouple LINE Webhook From Expenses Feature Repository
+
+### Checklist
+
+- [x] Confirm `line-webhook/routes.ts` imports the Expenses feature repository contract
+- [x] Move shared expense repository contract to `core`
+- [x] Update imports so LINE webhook depends on `core`, not `expenses`
+- [x] Run targeted tests
+- [x] Run `pnpm typecheck`
+- [x] Report verification results
+
+### Progress Log
+
+- 2026-09-26 18:46 JST: User noticed `apps/api/src/line-webhook/routes.ts` references `apps/api/src/expenses/`.
+- 2026-09-26 18:46 JST: Confirmed `line-webhook/routes.ts` imports `ExpenseRepository` from `../expenses/repository`, which couples webhook handling to the Expenses feature module.
+- 2026-09-26 18:50 JST: Moved the shared expense repository contract and error type to `apps/api/src/core/expenses/repository.ts`; `line-webhook/routes.ts`, `expenses/routes.ts`, and app wiring now import the contract from core.
+
+### Verification Log
+
+- 2026-09-26 18:50 JST: `pnpm test apps/api/src/line-webhook/routes.test.ts apps/api/src/app.test.ts` passed with 33 tests.
+- 2026-09-26 18:50 JST: Initial `pnpm typecheck` failed because `InMemoryExpenseRepository.getById` still referenced `User` after moving types; restored the type import.
+- 2026-09-26 18:51 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+
 ## Task: Improve Web Effect Cleanup
 
 ### Checklist

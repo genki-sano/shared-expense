@@ -69,6 +69,154 @@ describe("verifyLineWebhookSignature", () => {
 });
 
 describe("createLineWebhookRoutes", () => {
+  it("replies with onboarding choices when the user follows the LINE account", async () => {
+    const replied: ReplyLineMessageInput[] = [];
+    const app = createLineWebhookRoutes({
+      channelSecret: "channel-secret",
+      expenseRepository: new InMemoryExpenseRepository([]),
+      lineMessagingClient: {
+        pushMessage: async () => {},
+        replyMessage: async (input) => {
+          replied.push(input);
+        },
+      },
+      userRepository: new InMemoryHouseholdUserRepository([
+        { ...users[0], displayName: "Alice", lineUserId: "" },
+        { ...users[1], displayName: "Bob", lineUserId: "" },
+      ]),
+    });
+    const bodyText = JSON.stringify({
+      events: [
+        {
+          type: "follow",
+          replyToken: "reply-token-1",
+          source: { type: "user", userId: "line_new" },
+        },
+      ],
+    });
+
+    const response = await app.request("/", {
+      method: "POST",
+      headers: {
+        "x-line-signature": await sign(bodyText, "channel-secret"),
+      },
+      body: bodyText,
+    });
+
+    expect(response.status).toBe(200);
+    expect(replied).toEqual([
+      {
+        replyToken: "reply-token-1",
+        messages: [
+          expect.objectContaining({
+            type: "flex",
+            altText: "初回登録: 使うユーザーを選択してください",
+          }),
+        ],
+      },
+    ]);
+    expect(JSON.stringify(replied)).toContain("Aliceとして登録");
+    expect(JSON.stringify(replied)).toContain("Bobとして登録");
+    expect(JSON.stringify(replied)).toContain("action=claimUser&userId=woman");
+    expect(JSON.stringify(replied)).toContain("action=claimUser&userId=man");
+  });
+
+  it("claims a household user slot from a LINE postback", async () => {
+    const replied: ReplyLineMessageInput[] = [];
+    const userRepository = new InMemoryHouseholdUserRepository([
+      { ...users[0], lineUserId: "" },
+      { ...users[1], lineUserId: "" },
+    ]);
+    const app = createLineWebhookRoutes({
+      channelSecret: "channel-secret",
+      expenseRepository: new InMemoryExpenseRepository([]),
+      lineMessagingClient: {
+        pushMessage: async () => {},
+        replyMessage: async (input) => {
+          replied.push(input);
+        },
+      },
+      userRepository,
+    });
+    const bodyText = JSON.stringify({
+      events: [
+        {
+          type: "postback",
+          replyToken: "reply-token-1",
+          source: { type: "user", userId: "line_new" },
+          postback: { data: "action=claimUser&userId=woman" },
+        },
+      ],
+    });
+
+    const response = await app.request("/", {
+      method: "POST",
+      headers: {
+        "x-line-signature": await sign(bodyText, "channel-secret"),
+      },
+      body: bodyText,
+    });
+
+    expect(response.status).toBe(200);
+    await expect(userRepository.listHouseholdUsers()).resolves.toEqual([
+      { ...users[0], lineUserId: "line_new" },
+      { ...users[1], lineUserId: "" },
+    ]);
+    expect(replied).toEqual([
+      {
+        replyToken: "reply-token-1",
+        messages: [
+          {
+            type: "text",
+            text: "ひとみさんとして登録しました。支出は「支払内容 金額」の形式で送信できます。",
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("replies with onboarding choices when an unregistered user sends text", async () => {
+    const replied: ReplyLineMessageInput[] = [];
+    const app = createLineWebhookRoutes({
+      channelSecret: "channel-secret",
+      expenseRepository: new InMemoryExpenseRepository([]),
+      lineMessagingClient: {
+        pushMessage: async () => {},
+        replyMessage: async (input) => {
+          replied.push(input);
+        },
+      },
+      userRepository: new InMemoryHouseholdUserRepository([
+        { ...users[0], lineUserId: "" },
+        { ...users[1], lineUserId: "" },
+      ]),
+    });
+    const bodyText = JSON.stringify({
+      events: [
+        {
+          type: "message",
+          replyToken: "reply-token-1",
+          source: { type: "user", userId: "line_new" },
+          message: { type: "text", text: "コンビニ 1200" },
+        },
+      ],
+    });
+
+    const response = await app.request("/", {
+      method: "POST",
+      headers: {
+        "x-line-signature": await sign(bodyText, "channel-secret"),
+      },
+      body: bodyText,
+    });
+
+    expect(response.status).toBe(200);
+    expect(replied[0]?.messages[0]).toMatchObject({
+      type: "flex",
+      altText: "初回登録: 使うユーザーを選択してください",
+    });
+  });
+
   it("creates today's expense from a LINE text message, replies to the sender, and pushes to the partner", async () => {
     const repository = new InMemoryExpenseRepository([]);
     const pushed: Array<{ to: string; messages: LineMessage[] }> = [];
@@ -128,7 +276,7 @@ describe("createLineWebhookRoutes", () => {
     expect(JSON.stringify(pushed)).toContain("コンビニ");
     expect(JSON.stringify(pushed)).toContain("￥1,200");
     expect(JSON.stringify(pushed)).toContain(
-      "https://liff.line.me/1234567890-shared-expense?month=2026-08",
+      "https://liff.line.me/1234567890-shared-expense/expense?expenseId=exp_1",
     );
     expect(replied).toEqual([
       {

@@ -70,6 +70,110 @@ describe("SpreadsheetExpenseRepository", () => {
     ]);
   });
 
+  it("claims an empty household user slot by writing the LINE user id", async () => {
+    const updates: Array<{ range: string; values: unknown[][] }> = [];
+    const repository = new SpreadsheetExpenseRepository({
+      spreadsheetId: "spreadsheet_1",
+      valuesClient: {
+        getValues: async (input) => {
+          expect(input.range).toBe("users!A2:F");
+          return {
+            values: [
+              ["1", "ひとみ", "", "", "2021/03/03", "2021/03/03"],
+              ["2", "げんき", "", "", "2021/03/03", "2021/03/03"],
+            ],
+          };
+        },
+        updateValues: async (input) => {
+          updates.push({ range: input.range, values: input.values });
+        },
+      },
+      userTypeToUserId: (userType) => {
+        if (userType === "1") {
+          return "woman";
+        }
+
+        if (userType === "2") {
+          return "man";
+        }
+
+        return null;
+      },
+      userIdToUserType: (userId) => {
+        if (userId === "woman") {
+          return "1";
+        }
+
+        if (userId === "man") {
+          return "2";
+        }
+
+        return null;
+      },
+    });
+
+    await expect(
+      repository.claimHouseholdUser({
+        userId: "woman",
+        lineUserId: "line_woman",
+      }),
+    ).resolves.toEqual({
+      id: "woman",
+      lineUserId: "line_woman",
+      displayName: "ひとみ",
+      notifyEnabled: true,
+    });
+    expect(updates).toEqual([
+      { range: "users!C2:C2", values: [["line_woman"]] },
+    ]);
+  });
+
+  it("rejects claiming a household user slot already claimed by another LINE user", async () => {
+    const repository = new SpreadsheetExpenseRepository({
+      spreadsheetId: "spreadsheet_1",
+      valuesClient: {
+        getValues: async () => ({
+          values: [
+            ["1", "ひとみ", "line_existing", "", "2021/03/03", "2021/03/03"],
+            ["2", "げんき", "", "", "2021/03/03", "2021/03/03"],
+          ],
+        }),
+        updateValues: async () => {
+          throw new Error("update should not be called");
+        },
+      },
+      userTypeToUserId: (userType) => {
+        if (userType === "1") {
+          return "woman";
+        }
+
+        if (userType === "2") {
+          return "man";
+        }
+
+        return null;
+      },
+      userIdToUserType: (userId) => {
+        if (userId === "woman") {
+          return "1";
+        }
+
+        if (userId === "man") {
+          return "2";
+        }
+
+        return null;
+      },
+    });
+
+    await expect(
+      repository.claimHouseholdUser({
+        userId: "woman",
+        lineUserId: "line_new",
+      }),
+    ).rejects.toThrow("Household user is already claimed");
+  });
+
   it("reads legacy payments rows from payments!A2:L and returns requested month expenses newest first", async () => {
     const ranges: string[] = [];
     const client: GoogleSheetsValuesClient = {

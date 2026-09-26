@@ -65,13 +65,20 @@ export type LineFlexButton = {
   style?: "link" | "primary" | "secondary";
   height?: "sm" | "md";
   color?: string;
-  action: LineUriAction;
+  action: LineUriAction | LinePostbackAction;
 };
 
 export type LineUriAction = {
   type: "uri";
   label: string;
   uri: string;
+};
+
+export type LinePostbackAction = {
+  type: "postback";
+  label: string;
+  data: string;
+  displayText?: string;
 };
 
 export type LineFlexComponent =

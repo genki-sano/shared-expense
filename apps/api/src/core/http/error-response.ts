@@ -23,7 +23,7 @@ export const userNotRegisteredErrorResponse = {
   message: "このLINEユーザーは家計簿に登録されていません",
   details: {
     code: "USER_NOT_REGISTERED",
-    action: "管理者にusersシートへの登録を依頼してください",
+    action: "初回登録で使うユーザーを選択してください",
   },
 } as const satisfies ApiErrorResponse;
 

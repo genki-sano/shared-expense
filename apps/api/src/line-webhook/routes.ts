@@ -1,16 +1,19 @@
-import type { LineMessagingClient } from "@shared-expense/integrations";
+import type { LineFlexMessage, LineMessagingClient } from "@shared-expense/integrations";
 import type { Expense, User } from "@shared-expense/shared";
 import { Hono } from "hono";
+import type { ExpenseRepository } from "../core/expenses/repository";
 import { expenseMutationFlexMessage } from "../core/notifications/expense-mutation-notifier";
-import type { HouseholdUserRepository } from "../core/users/repository";
-import type { ExpenseRepository } from "../expenses/repository";
+import type {
+  ClaimableHouseholdUserRepository,
+  HouseholdUserRepository,
+} from "../core/users/repository";
 
 export type LineWebhookRoutesDependencies = {
   channelSecret: string;
   expenseRepository: ExpenseRepository;
   detailBaseUrl?: string | undefined;
   lineMessagingClient: LineMessagingClient;
-  userRepository: HouseholdUserRepository;
+  userRepository: ClaimableHouseholdUserRepository;
   now?: () => Date;
 };
 
@@ -29,9 +32,13 @@ type LineWebhookEvent = {
     type?: string;
     text?: string;
   };
+  postback?: {
+    data?: string;
+  };
 };
 
 const WEBHOOK_CATEGORY = "その他";
+const ONBOARDING_ACTION = "claimUser";
 
 export function createLineWebhookRoutes(
   dependencies: LineWebhookRoutesDependencies,
@@ -73,33 +80,45 @@ async function handleLineWebhookEvent(
   dependencies: LineWebhookRoutesDependencies,
   event: LineWebhookEvent,
 ): Promise<void> {
-  if (
-    event.type !== "message" ||
-    event.message?.type !== "text" ||
-    event.replyToken === undefined
-  ) {
+  if (event.replyToken === undefined) {
     return;
   }
 
-  const parsedText = parseExpenseMessage(event.message.text ?? "");
+  if (event.type === "follow") {
+    await replyOnboardingGuide(dependencies, event);
+    return;
+  }
+
+  if (event.type === "postback") {
+    await handleOnboardingPostback(dependencies, event);
+    return;
+  }
+
+  if (event.type === "message" && event.message?.type === "text") {
+    await handleTextMessage(dependencies, event);
+  }
+}
+
+async function handleTextMessage(
+  dependencies: LineWebhookRoutesDependencies,
+  event: LineWebhookEvent,
+): Promise<void> {
+  if (event.replyToken === undefined) {
+    return;
+  }
+
+  const actor = await findUserByLineUserId(dependencies.userRepository, event.source?.userId);
+  if (actor === null) {
+    await replyOnboardingGuide(dependencies, event);
+    return;
+  }
+
+  const parsedText = parseExpenseMessage(event.message?.text ?? "");
   if (parsedText === null) {
     await replyText(
       dependencies.lineMessagingClient,
       event.replyToken,
       "登録できませんでした。`支払内容 金額` の形式で送信してください。",
-    );
-    return;
-  }
-
-  const actor = await findUserByLineUserId(
-    dependencies.userRepository,
-    event.source?.userId,
-  );
-  if (actor === null) {
-    await replyText(
-      dependencies.lineMessagingClient,
-      event.replyToken,
-      "登録できませんでした。このLINEユーザーは家計簿に登録されていません。",
     );
     return;
   }
@@ -143,6 +162,180 @@ async function handleLineWebhookEvent(
     expense,
     webhookEventId: event.webhookEventId,
   });
+}
+
+async function replyOnboardingGuide(
+  dependencies: LineWebhookRoutesDependencies,
+  event: LineWebhookEvent,
+): Promise<void> {
+  if (event.replyToken === undefined) {
+    return;
+  }
+
+  const actor = await findUserByLineUserId(dependencies.userRepository, event.source?.userId);
+  if (actor !== null) {
+    await replyText(
+      dependencies.lineMessagingClient,
+      event.replyToken,
+      `${actor.displayName}さんとして登録済みです。支出は「支払内容 金額」の形式で送信できます。`,
+    );
+    return;
+  }
+
+  const users = await dependencies.userRepository.listHouseholdUsers();
+  await dependencies.lineMessagingClient.replyMessage({
+    replyToken: event.replyToken,
+    messages: [onboardingFlexMessage(users)],
+  });
+}
+
+async function handleOnboardingPostback(
+  dependencies: LineWebhookRoutesDependencies,
+  event: LineWebhookEvent,
+): Promise<void> {
+  if (event.replyToken === undefined) {
+    return;
+  }
+
+  const lineUserId = event.source?.userId;
+  if (lineUserId === undefined || lineUserId.trim() === "") {
+    await replyText(
+      dependencies.lineMessagingClient,
+      event.replyToken,
+      "登録できませんでした。1対1のトークからもう一度お試しください。",
+    );
+    return;
+  }
+
+  const postback = parseOnboardingPostback(event.postback?.data);
+  if (postback === null) {
+    return;
+  }
+
+  const users = await dependencies.userRepository.listHouseholdUsers();
+  const existingUser = users.find((user) => user.lineUserId === lineUserId);
+  if (existingUser !== undefined) {
+    await replyText(
+      dependencies.lineMessagingClient,
+      event.replyToken,
+      `${existingUser.displayName}さんとして登録済みです。`,
+    );
+    return;
+  }
+
+  const targetUser = users.find((user) => user.id === postback.userId);
+  if (targetUser === undefined) {
+    await replyText(
+      dependencies.lineMessagingClient,
+      event.replyToken,
+      "登録先のユーザーが見つかりませんでした。",
+    );
+    return;
+  }
+
+  if (targetUser.lineUserId.trim() !== "") {
+    await replyText(
+      dependencies.lineMessagingClient,
+      event.replyToken,
+      `${targetUser.displayName}さんは登録済みです。別のユーザーを選んでください。`,
+    );
+    return;
+  }
+
+  const claimedUser = await dependencies.userRepository.claimHouseholdUser({
+    userId: postback.userId,
+    lineUserId,
+  });
+  await replyText(
+    dependencies.lineMessagingClient,
+    event.replyToken,
+    `${claimedUser.displayName}さんとして登録しました。支出は「支払内容 金額」の形式で送信できます。`,
+  );
+}
+
+function parseOnboardingPostback(data: string | undefined): { userId: string } | null {
+  if (data === undefined || data.trim() === "") {
+    return null;
+  }
+
+  const params = new URLSearchParams(data);
+  if (params.get("action") !== ONBOARDING_ACTION) {
+    return null;
+  }
+
+  const userId = params.get("userId");
+  if (userId !== "woman" && userId !== "man") {
+    return null;
+  }
+
+  return { userId };
+}
+
+function onboardingFlexMessage(users: readonly User[]): LineFlexMessage {
+  return {
+    type: "flex",
+    altText: "初回登録: 使うユーザーを選択してください",
+    contents: {
+      type: "bubble",
+      body: {
+        type: "box",
+        layout: "vertical",
+        spacing: "md",
+        contents: [
+          {
+            type: "text",
+            text: "初回登録",
+            weight: "bold",
+            size: "lg",
+            color: "#5B4638",
+          },
+          {
+            type: "text",
+            text: "家計簿で使うユーザーを選択してください。",
+            wrap: true,
+            size: "sm",
+            color: "#6F625A",
+          },
+        ],
+      },
+      footer: {
+        type: "box",
+        layout: "vertical",
+        spacing: "sm",
+        contents: onboardingButtons(users),
+      },
+    },
+  };
+}
+
+function onboardingButtons(users: readonly User[]) {
+  return users
+    .filter(isOnboardingUser)
+    .map((user) =>
+      onboardingButton(
+        `${user.displayName}として登録`,
+        user.id,
+        user.id === "woman" ? "#FFB8AA" : "#D8EAD8",
+      ),
+    );
+}
+
+function isOnboardingUser(user: User): user is User & { id: "woman" | "man" } {
+  return user.id === "woman" || user.id === "man";
+}
+
+function onboardingButton(label: string, userId: "woman" | "man", color: string) {
+  return {
+    type: "button" as const,
+    style: "primary" as const,
+    color,
+    action: {
+      type: "postback" as const,
+      label,
+      data: `action=${ONBOARDING_ACTION}&userId=${userId}`,
+      displayText: label,
+    },
+  };
 }
 
 export function parseExpenseMessage(

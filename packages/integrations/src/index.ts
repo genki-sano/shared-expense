@@ -24,6 +24,7 @@ export type {
   LineFlexText,
   LineMessagingClient,
   LineMessage,
+  LinePostbackAction,
   LineTextMessage,
   LineUriAction,
   PushLineMessageInput,

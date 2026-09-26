@@ -2,7 +2,8 @@ import type { Expense, User } from "@shared-expense/shared";
 import { describe, expect, it, vi } from "vitest";
 import { createApp } from "./app";
 import { AuthenticationError } from "./core/auth/authentication-error";
-import { InMemoryExpenseRepository, type ExpenseRepository } from "./expenses/repository";
+import type { ExpenseRepository } from "./core/expenses/repository";
+import { InMemoryExpenseRepository } from "./expenses/repository";
 import { InMemoryHouseholdUserRepository } from "./core/users/repository";
 
 const user: User = {
@@ -149,7 +150,7 @@ describe("GET /api/expenses", () => {
       message: "このLINEユーザーは家計簿に登録されていません",
       details: {
         code: "USER_NOT_REGISTERED",
-        action: "管理者にusersシートへの登録を依頼してください",
+        action: "初回登録で使うユーザーを選択してください",
       },
     });
   });

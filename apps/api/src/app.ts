@@ -11,8 +11,9 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { AuthenticationError } from "./core/auth/authentication-error";
 import { createLineIdTokenAuthenticator } from "./core/auth/line-id-token";
+import type { ExpenseRepository } from "./core/expenses/repository";
 import { createExpenseRoutes } from "./expenses/routes";
-import { InMemoryExpenseRepository, type ExpenseRepository } from "./expenses/repository";
+import { InMemoryExpenseRepository } from "./expenses/repository";
 import {
   createExpenseMutationNotifier,
   noopExpenseMutationNotifier,
@@ -21,6 +22,7 @@ import {
 import type { MonthlySettlementExpenseReader } from "./settlements/repository";
 import { createSettlementRoutes } from "./settlements/routes";
 import {
+  type ClaimableHouseholdUserRepository,
   InMemoryHouseholdUserRepository,
   type HouseholdUserRepository,
 } from "./core/users/repository";
@@ -176,7 +178,7 @@ function optionalLineWebhookFromEnv(
   dependencies: AppEnvDependencies,
   repositories: {
     expenseRepository: ExpenseRepository;
-    userRepository: HouseholdUserRepository;
+    userRepository: ClaimableHouseholdUserRepository;
   },
 ): { lineWebhook: LineWebhookRoutesDependencies } | Record<string, never> {
   if (
@@ -235,7 +237,7 @@ function repositoriesFromEnv(
 ): {
   expenseRepository: ExpenseRepository;
   monthlyExpenseReader: MonthlySettlementExpenseReader;
-  userRepository: HouseholdUserRepository;
+  userRepository: ClaimableHouseholdUserRepository;
 } {
   if (
     env.GOOGLE_SPREADSHEET_ID === undefined ||
