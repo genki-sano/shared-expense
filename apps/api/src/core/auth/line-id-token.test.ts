@@ -11,13 +11,13 @@ describe("createLineIdTokenAuthenticator", () => {
           {
             id: "woman",
             lineUserId: "line_woman",
-            displayName: "ひとみ",
+            displayName: "花子",
             notifyEnabled: true,
           },
           {
             id: "man",
             lineUserId: "line_man",
-            displayName: "げんき",
+            displayName: "太郎",
             notifyEnabled: true,
           },
         ],
@@ -32,7 +32,7 @@ describe("createLineIdTokenAuthenticator", () => {
     await expect(authenticate("id-token")).resolves.toEqual({
       id: "woman",
       lineUserId: "line_woman",
-      displayName: "ひとみ",
+      displayName: "花子",
       notifyEnabled: true,
     });
   });
@@ -45,13 +45,13 @@ describe("createLineIdTokenAuthenticator", () => {
           {
             id: "woman",
             lineUserId: "line_woman",
-            displayName: "ひとみ",
+            displayName: "花子",
             notifyEnabled: true,
           },
           {
             id: "man",
             lineUserId: "line_man",
-            displayName: "げんき",
+            displayName: "太郎",
             notifyEnabled: true,
           },
         ],
@@ -77,13 +77,13 @@ describe("createLineIdTokenAuthenticator", () => {
           {
             id: "woman",
             lineUserId: "line_woman",
-            displayName: "ひとみ",
+            displayName: "花子",
             notifyEnabled: true,
           },
           {
             id: "man",
             lineUserId: "line_man",
-            displayName: "げんき",
+            displayName: "太郎",
             notifyEnabled: true,
           },
         ],
@@ -108,13 +108,13 @@ describe("createLineIdTokenAuthenticator", () => {
           {
             id: "woman",
             lineUserId: "line_woman",
-            displayName: "ひとみ",
+            displayName: "花子",
             notifyEnabled: true,
           },
           {
             id: "man",
             lineUserId: "line_man",
-            displayName: "げんき",
+            displayName: "太郎",
             notifyEnabled: true,
           },
         ],

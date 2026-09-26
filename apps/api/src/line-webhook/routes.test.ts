@@ -17,13 +17,13 @@ const users: HouseholdUsers = [
   {
     id: "woman",
     lineUserId: "line_woman",
-    displayName: "ひとみ",
+    displayName: "花子",
     notifyEnabled: true,
   },
   {
     id: "man",
     lineUserId: "line_man",
-    displayName: "げんき",
+    displayName: "太郎",
     notifyEnabled: true,
   },
 ];
@@ -169,7 +169,7 @@ describe("createLineWebhookRoutes", () => {
         messages: [
           {
             type: "text",
-            text: "ひとみさんとして登録しました。支出は「金額 支払内容」の形式で送信できます。",
+            text: "花子さんとして登録しました。支出は「金額 支払内容」の形式で送信できます。",
           },
         ],
       },
@@ -285,7 +285,7 @@ describe("createLineWebhookRoutes", () => {
         messages: [
           expect.objectContaining({
             type: "flex",
-            altText: "ひとみさんが支出を追加しました: コンビニ ￥1,200",
+            altText: "花子さんが支出を追加しました: コンビニ ￥1,200",
           }),
         ],
       },

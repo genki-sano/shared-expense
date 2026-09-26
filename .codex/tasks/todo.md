@@ -147,6 +147,26 @@
 - 2026-09-26 18:55 JST: `pnpm test apps/api/src/line-webhook/routes.test.ts apps/api/src/app-env.test.ts` passed with 15 tests.
 - 2026-09-26 18:55 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
 
+## Task: Remove Personal Names From Tests
+
+### Checklist
+
+- [x] Search test files for `ひとみ` / `げんき`
+- [x] Replace test fixtures and expectations with `花子` / `太郎`
+- [x] Run affected tests
+- [x] Run `pnpm typecheck`
+- [x] Report verification results
+
+### Progress Log
+
+- 2026-09-26 18:56 JST: User requested not to use `ひとみ` / `げんき` in tests.
+- 2026-09-26 18:57 JST: User clarified the replacement names should be `花子` / `太郎`; updated test fixtures and expectations accordingly.
+
+### Verification Log
+
+- 2026-09-26 18:57 JST: `pnpm test` passed with 164 tests across 29 test files.
+- 2026-09-26 18:58 JST: `pnpm typecheck` passed. Redocly still reports existing warnings for missing OpenAPI license and localhost server URL.
+
 ## Task: Improve Web Effect Cleanup
 
 ### Checklist

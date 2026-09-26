@@ -25,13 +25,13 @@ describe("monthlySettlementReminderFlexMessage", () => {
         {
           id: "woman",
           lineUserId: "line_woman",
-          displayName: "ひとみ",
+          displayName: "花子",
           notifyEnabled: true,
         },
         {
           id: "man",
           lineUserId: "line_man",
-          displayName: "げんき",
+          displayName: "太郎",
           notifyEnabled: true,
         },
       ],
@@ -40,8 +40,8 @@ describe("monthlySettlementReminderFlexMessage", () => {
         householdTotal: 15001,
         difference: 5001,
         userTotals: [
-          { userId: "woman", displayName: "ひとみ", total: 10001 },
-          { userId: "man", displayName: "げんき", total: 5000 },
+          { userId: "woman", displayName: "花子", total: 10001 },
+          { userId: "man", displayName: "太郎", total: 5000 },
         ],
         settlement: {
           fromUserId: "man",
@@ -56,7 +56,7 @@ describe("monthlySettlementReminderFlexMessage", () => {
     );
     const messageJson = JSON.stringify(message);
     expect(messageJson).toContain("先月(2026-06)の精算");
-    expect(messageJson).toContain("げんき → ひとみ");
+    expect(messageJson).toContain("太郎 → 花子");
     expect(messageJson).toContain("￥2,501");
     expect(messageJson).toContain("￥10,001");
     expect(messageJson).toContain("https://liff.example.com/?month=2026-06");
@@ -102,8 +102,8 @@ describe("runMonthlySettlementReminder", () => {
           ) {
             return Response.json({
               values: [
-                ["1", "ひとみ", "line_woman", "line_woman", "2021/03/03", "2021/03/03"],
-                ["2", "げんき", "line_man", "line_man", "2021/03/03", "2021/03/03"],
+                ["1", "花子", "line_woman", "line_woman", "2021/03/03", "2021/03/03"],
+                ["2", "太郎", "line_man", "line_man", "2021/03/03", "2021/03/03"],
               ],
             });
           }

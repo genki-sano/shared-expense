@@ -7,14 +7,14 @@ import { createExpenseMutationNotifier } from "./expense-mutation-notifier";
 const actor: User = {
   id: "woman",
   lineUserId: "line_woman",
-  displayName: "ひとみ",
+  displayName: "花子",
   notifyEnabled: true,
 };
 
 const partner: User = {
   id: "man",
   lineUserId: "line_man",
-  displayName: "げんき",
+  displayName: "太郎",
   notifyEnabled: true,
 };
 
@@ -57,7 +57,7 @@ describe("createExpenseMutationNotifier", () => {
 
     expect(message).toMatchObject({
       type: "flex",
-      altText: "ひとみさんが支出を追加しました: アイス ￥328",
+      altText: "花子さんが支出を追加しました: アイス ￥328",
       contents: {
         type: "bubble",
         size: "mega",
@@ -94,7 +94,7 @@ describe("createExpenseMutationNotifier", () => {
     expect(messageJson).toContain("アイス");
     expect(messageJson).toContain("￥328");
     expect(messageJson).toContain("2026/07/22");
-    expect(messageJson).toContain("ひとみ");
+    expect(messageJson).toContain("花子");
     expect(messageJson).not.toContain("通知ID");
     expect(messageJson).not.toContain("expense.created");
     expect(messageJson).not.toContain("#D7DED9");

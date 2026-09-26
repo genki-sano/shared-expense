@@ -6,7 +6,7 @@ import { authenticateRequest } from "./request-auth";
 const user: User = {
   id: "woman",
   lineUserId: "line_woman",
-  displayName: "ひとみ",
+  displayName: "花子",
   notifyEnabled: true,
 };
 

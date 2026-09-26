@@ -21,7 +21,7 @@ describe("verifyLineIdToken", () => {
             aud: "channel-1",
             exp: 1780000000,
             iat: 1779999000,
-            name: "ひとみ",
+            name: "花子",
           });
         },
       }),

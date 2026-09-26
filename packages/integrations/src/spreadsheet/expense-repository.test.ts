@@ -35,8 +35,8 @@ describe("SpreadsheetExpenseRepository", () => {
           expect(input.range).toBe("users!A2:F");
           return {
             values: [
-              ["1", "ひとみ", "line_woman", "line_woman", "2021/03/03", "2021/03/03"],
-              ["2", "げんき", "line_man", "line_man", "2021/03/03", "2021/03/03"],
+              ["1", "花子", "line_woman", "line_woman", "2021/03/03", "2021/03/03"],
+              ["2", "太郎", "line_man", "line_man", "2021/03/03", "2021/03/03"],
             ],
           };
         },
@@ -58,13 +58,13 @@ describe("SpreadsheetExpenseRepository", () => {
       {
         id: "woman",
         lineUserId: "line_woman",
-        displayName: "ひとみ",
+        displayName: "花子",
         notifyEnabled: true,
       },
       {
         id: "man",
         lineUserId: "line_man",
-        displayName: "げんき",
+        displayName: "太郎",
         notifyEnabled: true,
       },
     ]);
@@ -79,8 +79,8 @@ describe("SpreadsheetExpenseRepository", () => {
           expect(input.range).toBe("users!A2:F");
           return {
             values: [
-              ["1", "ひとみ", "", "", "2021/03/03", "2021/03/03"],
-              ["2", "げんき", "", "", "2021/03/03", "2021/03/03"],
+              ["1", "花子", "", "", "2021/03/03", "2021/03/03"],
+              ["2", "太郎", "", "", "2021/03/03", "2021/03/03"],
             ],
           };
         },
@@ -120,7 +120,7 @@ describe("SpreadsheetExpenseRepository", () => {
     ).resolves.toEqual({
       id: "woman",
       lineUserId: "line_woman",
-      displayName: "ひとみ",
+      displayName: "花子",
       notifyEnabled: true,
     });
     expect(updates).toEqual([
@@ -134,8 +134,8 @@ describe("SpreadsheetExpenseRepository", () => {
       valuesClient: {
         getValues: async () => ({
           values: [
-            ["1", "ひとみ", "line_existing", "", "2021/03/03", "2021/03/03"],
-            ["2", "げんき", "", "", "2021/03/03", "2021/03/03"],
+            ["1", "花子", "line_existing", "", "2021/03/03", "2021/03/03"],
+            ["2", "太郎", "", "", "2021/03/03", "2021/03/03"],
           ],
         }),
         updateValues: async () => {
@@ -280,8 +280,8 @@ describe("SpreadsheetExpenseRepository", () => {
           if (input.range === "users!A2:F") {
             return {
               values: [
-                ["1", "ひとみ", "line_woman", "line_woman", "2021/03/03", "2021/03/03"],
-                ["2", "げんき", "line_man", "line_man", "2021/03/03", "2021/03/03"],
+                ["1", "花子", "line_woman", "line_woman", "2021/03/03", "2021/03/03"],
+                ["2", "太郎", "line_man", "line_man", "2021/03/03", "2021/03/03"],
               ],
             };
           }
@@ -322,7 +322,7 @@ describe("SpreadsheetExpenseRepository", () => {
       {
         id: "exp_1",
         userId: "woman",
-        userName: "ひとみ",
+        userName: "花子",
         date: "2026-07-18",
         price: 6420,
         category: "食費",
@@ -381,7 +381,7 @@ describe("SpreadsheetExpenseRepository", () => {
       valuesClient: {
         getValues: async (input) => {
           if (input.range === "users!A2:F") {
-            return { values: [["man", "げんき"]] };
+            return { values: [["man", "太郎"]] };
           }
 
           return {
@@ -428,7 +428,7 @@ describe("SpreadsheetExpenseRepository", () => {
     ).resolves.toEqual({
       id: "11",
       userId: "user_a",
-      userName: "げんき",
+      userName: "太郎",
       date: "2026-07-26",
       price: 1200,
       category: "食費",
@@ -459,7 +459,7 @@ describe("SpreadsheetExpenseRepository", () => {
       valuesClient: {
         getValues: async (input) => {
           if (input.range === "users!A2:F") {
-            return { values: [["man", "げんき"]] };
+            return { values: [["man", "太郎"]] };
           }
 
           return {
@@ -507,7 +507,7 @@ describe("SpreadsheetExpenseRepository", () => {
       userId: "user_a",
       price: 1300,
       memo: null,
-      userName: "げんき",
+      userName: "太郎",
     });
     expect(updates).toEqual([
       {
@@ -598,7 +598,7 @@ describe("SpreadsheetExpenseRepository", () => {
       valuesClient: {
         getValues: async (input) => {
           if (input.range === "users!A2:F") {
-            return { values: [["man", "げんき"]] };
+            return { values: [["man", "太郎"]] };
           }
 
           return {
@@ -637,7 +637,7 @@ describe("SpreadsheetExpenseRepository", () => {
     await expect(repository.restore({ id: "10", actor: { id: "user_a" } })).resolves.toEqual({
       id: "10",
       userId: "user_a",
-      userName: "げんき",
+      userName: "太郎",
       date: "2026-07-01",
       price: 1000,
       category: "食費",

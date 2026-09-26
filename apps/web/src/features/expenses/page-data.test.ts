@@ -27,8 +27,8 @@ describe("loadMonthlyExpensesForPage", () => {
             month: "2026-07",
             householdTotal: 1000,
             userTotals: [
-              { userId: "woman", displayName: "ひとみ", total: 1000 },
-              { userId: "man", displayName: "げんき", total: 0 },
+              { userId: "woman", displayName: "花子", total: 1000 },
+              { userId: "man", displayName: "太郎", total: 0 },
             ],
             difference: 1000,
             settlement: {

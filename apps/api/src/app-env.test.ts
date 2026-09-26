@@ -45,8 +45,8 @@ describe("createAppFromEnv", () => {
           ) {
             return Response.json({
               values: [
-                ["1", "ひとみ", "line_woman", "line_woman", "2021/03/03", "2021/03/03"],
-                ["2", "げんき", "line_man", "line_man", "2021/03/03", "2021/03/03"],
+                ["1", "花子", "line_woman", "line_woman", "2021/03/03", "2021/03/03"],
+                ["2", "太郎", "line_man", "line_man", "2021/03/03", "2021/03/03"],
               ],
             });
           }
@@ -95,7 +95,7 @@ describe("createAppFromEnv", () => {
         {
           id: "2148",
           userId: "woman",
-          userName: "ひとみ",
+          userName: "花子",
           date: "2026-07-22",
           price: 328,
           category: "食費",
@@ -105,7 +105,7 @@ describe("createAppFromEnv", () => {
         {
           id: "2145",
           userId: "man",
-          userName: "げんき",
+          userName: "太郎",
           date: "2026-07-20",
           price: 643,
           category: "食費",
@@ -245,8 +245,8 @@ describe("createAppFromEnv", () => {
           ) {
             return Response.json({
               values: [
-                ["1", "ひとみ", "line_woman", "line_woman", "2021/03/03", "2021/03/03"],
-                ["2", "げんき", "line_man", "line_man", "2021/03/03", "2021/03/03"],
+                ["1", "花子", "line_woman", "line_woman", "2021/03/03", "2021/03/03"],
+                ["2", "太郎", "line_man", "line_man", "2021/03/03", "2021/03/03"],
               ],
             });
           }
@@ -282,7 +282,7 @@ describe("createAppFromEnv", () => {
         {
           id: "2148",
           userId: "woman",
-          userName: "ひとみ",
+          userName: "花子",
           date: "2026-07-22",
           price: 328,
           category: "食費",
@@ -333,8 +333,8 @@ describe("createAppFromEnv", () => {
           ) {
             return Response.json({
               values: [
-                ["1", "ひとみ", "line_woman", "line_woman", "2021/03/03", "2021/03/03"],
-                ["2", "げんき", "line_man", "line_man", "2021/03/03", "2021/03/03"],
+                ["1", "花子", "line_woman", "line_woman", "2021/03/03", "2021/03/03"],
+                ["2", "太郎", "line_man", "line_man", "2021/03/03", "2021/03/03"],
               ],
             });
           }
@@ -450,8 +450,8 @@ describe("createAppFromEnv", () => {
           ) {
             return Response.json({
               values: [
-                ["1", "ひとみ", "line_woman", "line_woman", "2021/03/03", "2021/03/03"],
-                ["2", "げんき", "line_man", "line_man", "2021/03/03", "2021/03/03"],
+                ["1", "花子", "line_woman", "line_woman", "2021/03/03", "2021/03/03"],
+                ["2", "太郎", "line_man", "line_man", "2021/03/03", "2021/03/03"],
               ],
             });
           }

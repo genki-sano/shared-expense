@@ -36,7 +36,7 @@ describe("fetchMonthlyExpenses", () => {
             {
               id: "exp_1",
               userId: "user_a",
-              userName: "ひとみ",
+              userName: "花子",
               date: "2026-07-18",
               price: 6420,
               category: "食費",
@@ -65,7 +65,7 @@ describe("fetchMonthlyExpenses", () => {
         {
           id: "exp_1",
           userId: "user_a",
-          userName: "ひとみ",
+          userName: "花子",
           date: "2026-07-18",
           price: 6420,
           category: "食費",
@@ -119,7 +119,7 @@ describe("fetchExpenseDetail", () => {
           expense: {
             id: "exp_1",
             userId: "woman",
-            userName: "ひとみ",
+            userName: "花子",
             date: "2026-07-18",
             price: 6420,
             category: "食費",
@@ -173,8 +173,8 @@ describe("fetchMonthlySettlement", () => {
           month: "2026-07",
           householdTotal: 10000,
           userTotals: [
-            { userId: "woman", displayName: "ひとみ", total: 3000 },
-            { userId: "man", displayName: "げんき", total: 7000 },
+            { userId: "woman", displayName: "花子", total: 3000 },
+            { userId: "man", displayName: "太郎", total: 7000 },
           ],
           difference: 4000,
           settlement: {
@@ -203,8 +203,8 @@ describe("fetchMonthlySettlement", () => {
         month: "2026-07",
         householdTotal: 10000,
         userTotals: [
-          { userId: "woman", displayName: "ひとみ", total: 3000 },
-          { userId: "man", displayName: "げんき", total: 7000 },
+          { userId: "woman", displayName: "花子", total: 3000 },
+          { userId: "man", displayName: "太郎", total: 7000 },
         ],
         difference: 4000,
         settlement: {
@@ -263,7 +263,7 @@ describe("expense mutations", () => {
           {
             id: "exp_created",
             userId: "woman",
-            userName: "ひとみ",
+            userName: "花子",
             date: "2026-07-27",
             price: 1200,
             category: "食費",
