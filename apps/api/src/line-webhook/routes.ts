@@ -167,7 +167,7 @@ async function handleTextMessage(
     });
   }
 
-  await notifyPartnerUsers(dependencies, {
+  await notifyHouseholdUsers(dependencies, {
     actor,
     expense,
     webhookEventId: event.webhookEventId,
@@ -405,20 +405,19 @@ export async function verifyLineWebhookSignature(input: {
   return timingSafeEqual(expected, input.signature);
 }
 
-async function notifyPartnerUsers(
+async function notifyHouseholdUsers(
   dependencies: LineWebhookRoutesDependencies,
   input: { actor: User; expense: Expense; webhookEventId?: string | undefined },
 ): Promise<void> {
   const users = await dependencies.userRepository.listHouseholdUsers();
+  const recipients = users.filter((user) => user.notifyEnabled);
   const results = await Promise.allSettled(
-    users
-      .filter((user) => user.id !== input.actor.id && user.notifyEnabled)
-      .map((user) =>
-        dependencies.lineMessagingClient.pushMessage({
-          to: user.lineUserId,
-          messages: [successFlexMessage(dependencies, input)],
-        }),
-      ),
+    recipients.map((user) =>
+      dependencies.lineMessagingClient.pushMessage({
+        to: user.lineUserId,
+        messages: [successFlexMessage(dependencies, input)],
+      }),
+    ),
   );
 
   for (const [index, result] of results.entries()) {
@@ -426,10 +425,8 @@ async function notifyPartnerUsers(
       continue;
     }
 
-    const recipient = users.filter(
-      (user) => user.id !== input.actor.id && user.notifyEnabled,
-    )[index];
-    console.error("LINE webhook expense partner notification failed", {
+    const recipient = recipients[index];
+    console.error("LINE webhook expense household notification failed", {
       reason: errorMessage(result.reason),
       recipientUserId: recipient?.id,
       webhookEventId: input.webhookEventId,

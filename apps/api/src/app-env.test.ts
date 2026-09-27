@@ -521,8 +521,9 @@ describe("createAppFromEnv", () => {
     const pushBodies = calls
       .filter((call) => call.url === "https://api.line.me/v2/bot/message/push")
       .map((call) => String(call.init?.body));
-    expect(pushBodies).toHaveLength(1);
-    expect(pushBodies[0]).toContain('"to":"line_man"');
+    expect(pushBodies).toHaveLength(2);
+    expect(pushBodies[0]).toContain('"to":"line_woman"');
+    expect(pushBodies[1]).toContain('"to":"line_man"');
     expect(pushBodies[0]).toContain('"type":"flex"');
     expect(pushBodies.join("\n")).toContain("コンビニ");
     expect(pushBodies.join("\n")).toContain("￥1,200");

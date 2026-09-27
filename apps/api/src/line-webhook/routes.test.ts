@@ -222,7 +222,7 @@ describe("createLineWebhookRoutes", () => {
     });
   });
 
-  it("creates today's expense from a LINE text message, replies to the sender, and pushes to the partner", async () => {
+  it("creates today's expense from a LINE text message, replies to the sender, and pushes to notification-enabled household users", async () => {
     const repository = new InMemoryExpenseRepository([]);
     const pushed: Array<{ to: string; messages: LineMessage[] }> = [];
     const replied: ReplyLineMessageInput[] = [];
@@ -275,7 +275,7 @@ describe("createLineWebhookRoutes", () => {
         memo: "コンビニ",
       },
     ]);
-    expect(pushed.map((message) => message.to)).toEqual(["line_man"]);
+    expect(pushed.map((message) => message.to)).toEqual(["line_woman", "line_man"]);
     expect((pushed[0]?.messages[0] as LineFlexMessage | undefined)?.type).toBe("flex");
     expect(JSON.stringify(pushed)).toContain("支出を追加しました");
     expect(JSON.stringify(pushed)).toContain("コンビニ");

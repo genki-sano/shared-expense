@@ -19,3 +19,4 @@
 - 2026-08-02: For static-exported Next.js pages, verify the actual `out/` file path before writing Cloudflare Pages `_redirects`; `/route` may emit `route.html`, not `route/index.html`.
 - 2026-09-26: When the user asks for a LINE friend-add onboarding flow, do not assume it belongs inside LIFF. Clarify whether the desired primary surface is LINE talk via Messaging API webhooks (`follow`, `message`, `postback`) before adding LIFF UI.
 - 2026-09-26: Do not let one feature route import another feature route's repository contract just because the type is nearby. Put shared domain/application contracts under `apps/api/src/core/**` so features such as LINE webhook and Expenses routes depend inward.
+- 2026-09-27: 支出登録通知の変更では、LIFF/API経由の `ExpenseMutationNotifier` だけでなく、LINE Webhook経由の独自通知処理も同時に確認する。登録導線が複数ある場合は、それぞれの通知先テストを更新する。

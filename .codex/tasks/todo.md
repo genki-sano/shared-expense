@@ -3226,3 +3226,28 @@
 - 2026-09-27 JST: `pnpm test apps/api/src/core/notifications/expense-mutation-notifier.test.ts` passed with 3 tests.
 - 2026-09-27 JST: `pnpm test apps/api/src` passed with 11 files and 57 tests.
 - 2026-09-27 JST: `pnpm typecheck` passed; Redocly repeated existing warnings for missing OpenAPI license and localhost server URL.
+
+## Task: Notify Actor on LINE Webhook Expense Creation
+
+### Checklist
+
+- [x] Confirm LINE webhook expense creation notification behavior
+- [x] Update LINE webhook push notification recipients to include the actor
+- [x] Update LINE webhook tests
+- [x] Run targeted LINE webhook tests
+- [x] Run API test suite and typecheck
+- [x] Report verification results
+
+### Progress Log
+
+- 2026-09-27 JST: Investigated missing self notification after expense registration and found LINE webhook expense creation still pushed only to partner users.
+- 2026-09-27 JST: Changed LINE webhook expense creation push recipients to all notification-enabled household users.
+- 2026-09-27 JST: Updated route and env wiring tests to expect pushes to both the actor and partner.
+
+### Verification Log
+
+- 2026-09-27 JST: `pnpm test apps/api/src/line-webhook/routes.test.ts` failed as expected before implementation; push recipients were only `line_man`.
+- 2026-09-27 JST: `pnpm test apps/api/src/line-webhook/routes.test.ts` passed with 9 tests.
+- 2026-09-27 JST: `pnpm test apps/api/src` initially failed because `app-env.test.ts` still expected one webhook push body.
+- 2026-09-27 JST: `pnpm test apps/api/src` passed with 11 files and 57 tests after updating env wiring expectations.
+- 2026-09-27 JST: `pnpm typecheck` passed; Redocly repeated existing warnings for missing OpenAPI license and localhost server URL.
