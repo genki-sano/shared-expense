@@ -3,12 +3,7 @@ import type {
   LineFlexMessage,
   LineMessagingClient,
 } from "@shared-expense/integrations";
-import {
-  findPartnerUser,
-  type Expense,
-  type ExpenseEventType,
-  type User,
-} from "@shared-expense/shared";
+import type { Expense, ExpenseEventType, User } from "@shared-expense/shared";
 import type { HouseholdUserRepository } from "../users/repository";
 
 export type ExpenseMutationNotificationInput = {
@@ -47,17 +42,17 @@ export function createExpenseMutationNotifier(
   return {
     async notify(notification): Promise<void> {
       const users = await input.userRepository.listHouseholdUsers();
-      const recipient = findPartnerUser(users, notification.actor.id);
-      if (recipient === null || !recipient.notifyEnabled) {
-        return;
-      }
-
-      await input.lineMessagingClient.pushMessage({
-        to: recipient.lineUserId,
-        messages: [
-          expenseMutationFlexMessage(notification, input.detailBaseUrl),
-        ],
-      });
+      const message = expenseMutationFlexMessage(notification, input.detailBaseUrl);
+      await Promise.all(
+        users
+          .filter((user) => user.notifyEnabled)
+          .map((user) =>
+            input.lineMessagingClient.pushMessage({
+              to: user.lineUserId,
+              messages: [message],
+            }),
+          ),
+      );
     },
   };
 }

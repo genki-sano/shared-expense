@@ -29,7 +29,7 @@ const expense: Expense = {
 };
 
 describe("createExpenseMutationNotifier", () => {
-  it("pushes an expense mutation message to the partner", async () => {
+  it("pushes an expense mutation message to notification-enabled household users", async () => {
     const pushed: Parameters<LineMessagingClient["pushMessage"]>[0][] = [];
     const notifier = createExpenseMutationNotifier({
       userRepository: new InMemoryHouseholdUserRepository([actor, partner]),
@@ -48,8 +48,8 @@ describe("createExpenseMutationNotifier", () => {
       expense,
     });
 
-    expect(pushed).toHaveLength(1);
-    expect(pushed[0]?.to).toBe("line_man");
+    expect(pushed).toHaveLength(2);
+    expect(pushed.map((input) => input.to)).toEqual(["line_woman", "line_man"]);
     const message = pushed[0]?.messages[0];
     if (message?.type !== "flex") {
       throw new Error("Expected a Flex Message");
@@ -120,17 +120,17 @@ describe("createExpenseMutationNotifier", () => {
     const messages = pushed.map((input) => JSON.stringify(input.messages[0]));
     expect(messages[0]).toContain("#648A70");
     expect(messages[0]).toContain("#EEF6F0");
-    expect(messages[1]).toContain("#E9B64E");
-    expect(messages[1]).toContain("#FFF9F2");
-    expect(messages[2]).toContain("#D9685D");
-    expect(messages[2]).toContain("#FFF0ED");
+    expect(messages[2]).toContain("#E9B64E");
+    expect(messages[2]).toContain("#FFF9F2");
+    expect(messages[4]).toContain("#D9685D");
+    expect(messages[4]).toContain("#FFF0ED");
   });
 
-  it("skips when the partner disabled notifications", async () => {
+  it("skips users who disabled notifications", async () => {
     const pushed: Parameters<LineMessagingClient["pushMessage"]>[0][] = [];
     const notifier = createExpenseMutationNotifier({
       userRepository: new InMemoryHouseholdUserRepository([
-        actor,
+        { ...actor, notifyEnabled: false },
         { ...partner, notifyEnabled: false },
       ]),
       lineMessagingClient: {

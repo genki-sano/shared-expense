@@ -3204,3 +3204,25 @@
 - 2026-07-20 14:34 JST: `pnpm typecheck` passed for `@shared-expense/api-contract`, `@shared-expense/shared`, `@shared-expense/integrations`, and `@shared-expense/api`; Redocly repeated existing warnings for missing `info.license` and localhost server URL.
 - 2026-07-20 14:35 JST: Final pre-amend `pnpm test apps/api/src/auth/liff-token.test.ts` passed with 6 tests.
 - 2026-07-20 14:35 JST: Final pre-amend `pnpm typecheck` passed for `@shared-expense/api-contract`, `@shared-expense/shared`, `@shared-expense/integrations`, and `@shared-expense/api`; Redocly repeated existing warnings for missing `info.license` and localhost server URL.
+## Task: Notify Actor on Expense Mutations
+
+### Checklist
+
+- [x] Confirm current API expense mutation notification behavior
+- [x] Change expense mutation notification recipients to include the actor
+- [x] Update notifier tests for all notification-enabled household users
+- [x] Run targeted notification tests
+- [x] Report verification results
+
+### Progress Log
+
+- 2026-09-27 JST: Started change to include the actor in successful expense create/update/delete/restore LINE push notifications.
+- 2026-09-27 JST: Updated expense mutation notifier to push to every notification-enabled household user, including the actor.
+- 2026-09-27 JST: Updated notification tests from partner-only expectations to notification-enabled household user expectations.
+
+### Verification Log
+
+- 2026-09-27 JST: `pnpm test apps/api/src/core/notifications/expense-mutation-notifier.test.ts` failed as expected before implementation; only the partner received a push notification.
+- 2026-09-27 JST: `pnpm test apps/api/src/core/notifications/expense-mutation-notifier.test.ts` passed with 3 tests.
+- 2026-09-27 JST: `pnpm test apps/api/src` passed with 11 files and 57 tests.
+- 2026-09-27 JST: `pnpm typecheck` passed; Redocly repeated existing warnings for missing OpenAPI license and localhost server URL.
