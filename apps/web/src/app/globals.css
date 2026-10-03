@@ -265,6 +265,7 @@ button:disabled {
 }
 
 .addButton {
+  text-decoration: none;
   display: grid;
   place-items: center;
   width: 42px;
@@ -437,6 +438,7 @@ button:disabled {
 }
 
 .expenseTapTarget {
+  text-decoration: none;
   display: grid;
   grid-template-columns: 48px minmax(0, 1fr) auto;
   align-items: center;
@@ -452,10 +454,6 @@ button:disabled {
 
 .expenseTapTarget:active {
   background: var(--color-background);
-}
-
-.expenseTapTarget:disabled {
-  opacity: 1;
 }
 
 .expenseBody {

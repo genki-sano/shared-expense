@@ -416,8 +416,8 @@ describe("createAppFromEnv", () => {
     expect(String(calls.at(-1)?.init?.body)).toContain(
       "https://liff.line.me/1234567890-shared-expense",
     );
-    expect(String(calls.at(-1)?.init?.body)).toContain("/expense?");
-    expect(String(calls.at(-1)?.init?.body)).toContain("expenseId=");
+    expect(String(calls.at(-1)?.init?.body)).toContain("/expenses/detail?");
+    expect(String(calls.at(-1)?.init?.body)).toContain("id=");
     expect(String(calls.at(-1)?.init?.body)).not.toContain("通知ID");
   });
 
@@ -514,9 +514,9 @@ describe("createAppFromEnv", () => {
     expect(replyBodies[0]).toContain("コンビニ");
     expect(replyBodies[0]).toContain("￥1,200");
     expect(replyBodies[0]).toContain(
-      "https://liff.line.me/1234567890-shared-expense/expense?",
+      "https://liff.line.me/1234567890-shared-expense/expenses/detail?",
     );
-    expect(replyBodies[0]).toContain("expenseId=");
+    expect(replyBodies[0]).toContain("id=");
 
     const pushBodies = calls
       .filter((call) => call.url === "https://api.line.me/v2/bot/message/push")

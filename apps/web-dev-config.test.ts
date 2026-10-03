@@ -101,7 +101,6 @@ describe("web dev configuration", () => {
     expect(readText("apps/web/src/lib/api-auth.ts")).toContain('process.env.NODE_ENV === "development"');
     expect(homeClientSource).toContain("hasLiffPrimaryRedirectParams(searchParams)");
     expect(homeClientSource).toContain("<LiffPrimaryRedirectGate");
-    expect(dashboardSource).toContain("idToken: currentIdToken");
     expect(dashboardSource).toContain("useSuspenseQuery(monthlyExpensesQuery");
     expect(dashboardSource).not.toContain("useEffect");
     expect(readText("apps/web/src/features/expenses/queries/expense-queries.ts")).toContain("signal");
@@ -167,7 +166,7 @@ describe("web dev configuration", () => {
   test("notification detail links open the matching expense details", () => {
     const appSource = readText("apps/web/src/app/page.tsx");
     const homeClientSource = readText("apps/web/src/features/expenses/home-client.tsx");
-    const detailPageSource = readText("apps/web/src/app/expense/page.tsx");
+    const detailPageSource = readText("apps/web/src/app/expenses/detail/page.tsx");
     const detailClientSource = readText(
       "apps/web/src/features/expenses/components/expense-detail-client.tsx",
     );
@@ -180,7 +179,9 @@ describe("web dev configuration", () => {
       "apps/api/src/core/notifications/expense-mutation-notifier.ts",
     );
 
-    expect(appSource).toContain("<HomeClient />");
+    expect(readText("apps/web/src/app/expenses/page.tsx")).toContain("<HomeClient />");
+    expect(appSource).toContain('"./expenses/page"');
+    expect(existsSync(join(rootDir, "apps/web/src/app/expense/page.tsx"))).toBe(false);
     expect(homeClientSource).toContain("searchParams.get(\"month\")");
     expect(homeClientSource).not.toContain("searchParams.get(\"expenseId\")");
     expect(homeClientSource).not.toContain("selectedExpenseId=");
@@ -191,7 +192,8 @@ describe("web dev configuration", () => {
     expect(liffGateSource).toContain("LINE認証を確認しています");
     expect(dashboardSource).not.toContain("LINE認証に失敗しました");
     expect(detailPageSource).toContain("<ExpenseDetailClient />");
-    expect(detailClientSource).toContain('searchParams.get("id") ?? searchParams.get("expenseId")');
+    expect(detailClientSource).toContain('searchParams.get("id")');
+    expect(detailClientSource).not.toContain('searchParams.get("expenseId")');
     expect(detailClientSource).not.toContain("usePathname()");
     expect(detailClientSource).toContain("monthFromExpenseDate(state.expense.date)");
     expect(detailClientSource).not.toContain("formatMonthLabel(detailMonth)");
@@ -205,8 +207,8 @@ describe("web dev configuration", () => {
     expect(dashboardSource).not.toContain("expenseElementsRef");
     expect(dashboardSource).not.toContain("scrollIntoView");
     expect(dashboardSource).not.toContain("通知対象");
-    expect(notificationSource).toContain('/expense');
-    expect(notificationSource).toContain('url.searchParams.set("expenseId", expense.id)');
+    expect(notificationSource).toContain('/expenses/detail');
+    expect(notificationSource).toContain('url.searchParams.set("id", expense.id)');
     expect(notificationSource).not.toContain('searchParams.set("month"');
     expect(cssSource).not.toContain('.expense[data-selected="true"]');
     expect(cssSource).not.toContain(".selectedPill");
@@ -246,39 +248,32 @@ describe("web dev configuration", () => {
     expect(pageSource).not.toContain("{expense.category}\n                  <span");
   });
 
-  test("expense dashboard exposes create, edit, and delete controls backed by the API client", () => {
-    const homeClientSource = readText("apps/web/src/features/expenses/home-client.tsx");
+  test("expense dashboard links to canonical create and detail pages", () => {
     const dashboardSource = readText("apps/web/src/features/expenses/components/expense-dashboard.tsx");
-    const cssSource = readText("apps/web/src/app/globals.css");
+    const detailSource = readText("apps/web/src/features/expenses/components/expense-detail-client.tsx");
+    const newSource = readText("apps/web/src/features/expenses/components/expense-new-client.tsx");
 
-    expect(homeClientSource).toContain("<ExpenseDashboard");
-    expect(dashboardSource).toContain('"use client"');
-    expect(dashboardSource).toContain("createMutation.mutateAsync(");
-    expect(dashboardSource).toContain("updateMutation.mutateAsync(");
-    expect(dashboardSource).toContain("deleteMutation.mutateAsync(");
-    expect(dashboardSource).toContain("restoreMutation.mutateAsync(");
-    expect(dashboardSource).toContain("console.error");
-    expect(dashboardSource).toContain("errorMessageForUser(error)");
+    expect(dashboardSource).toContain('href={`/expenses/new?month=${displayMonth}`}');
+    expect(dashboardSource).toContain('href={`/expenses/detail?id=${encodeURIComponent(expense.id)}`}');
     expect(dashboardSource).toContain('aria-label="支出を追加"');
-    expect(dashboardSource).toContain('aria-label={`支出を編集:');
-    expect(readText("apps/web/src/features/expenses/components/expense-form.tsx")).toContain('aria-label="支出を削除"');
-    expect(dashboardSource).toContain("元に戻す");
-    expect(cssSource).toContain(".statusLink");
-    expect(cssSource).toContain(".expenseForm");
+    expect(dashboardSource).toContain('aria-label={`支出詳細:');
+    expect(dashboardSource).not.toContain("ExpenseForm");
+    expect(dashboardSource).not.toContain("useMutation");
+    expect(dashboardSource).not.toContain("isCreateOpen");
+    expect(dashboardSource).not.toContain("editingExpenseId");
+    expect(newSource).toContain("mutation.mutateAsync(");
+    for (const operation of ["update", "delete", "restore"]) {
+      expect(detailSource).toContain(`${operation}Mutation.mutateAsync(`);
+    }
   });
 
-  test("expense edit and delete controls are optimized for mobile tapping", () => {
+  test("expense detail navigation preserves mobile tap targets", () => {
     const dashboardSource = readText("apps/web/src/features/expenses/components/expense-dashboard.tsx");
     const cssSource = readText("apps/web/src/app/globals.css");
-
     expect(dashboardSource).toContain('className="expenseTapTarget"');
-    expect(dashboardSource).toContain('aria-label={`支出を編集:');
-    expect(dashboardSource).toContain("deleteLabel=");
-    expect(dashboardSource).not.toContain('className="rowActions"');
     expect(cssSource).toContain(".expenseTapTarget");
     expect(cssSource).toContain("min-height: 58px");
-    expect(cssSource).toContain(".deleteButton");
-    expect(cssSource).not.toContain(".rowActions");
+    expect(cssSource).toContain("text-decoration: none");
   });
 
   test("expense form captures payment content without a category field", () => {

@@ -281,7 +281,7 @@ describe("createLineWebhookRoutes", () => {
     expect(JSON.stringify(pushed)).toContain("コンビニ");
     expect(JSON.stringify(pushed)).toContain("￥1,200");
     expect(JSON.stringify(pushed)).toContain(
-      "https://liff.line.me/1234567890-shared-expense/expense?expenseId=exp_1",
+      "https://liff.line.me/1234567890-shared-expense/expenses/detail?id=exp_1",
     );
     expect(replied).toEqual([
       {

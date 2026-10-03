@@ -168,8 +168,8 @@ function detailUrlForExpense(
   }
 
   const url = new URL(baseUrl);
-  url.pathname = `${url.pathname.replace(/\/$/, "")}/expense`;
-  url.searchParams.set("expenseId", expense.id);
+  url.pathname = `${url.pathname.replace(/\/$/, "")}/expenses/detail`;
+  url.searchParams.set("id", expense.id);
   return url.toString();
 }
 

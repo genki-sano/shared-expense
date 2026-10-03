@@ -9,28 +9,12 @@ import type {
   MonthlySettlementSummary,
 } from "@shared-expense/shared";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
-import {
-  createExpense,
-  deleteExpense,
-  restoreExpense,
-  updateExpense,
-  type CreateExpensePayload,
-  type UpdateExpensePayload,
-} from "../api";
-import {
-  useMutation,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
-import {
-  monthlyExpensesQuery,
-  expenseMutationOptions,
-} from "../queries/expense-queries";
+import { useMemo, useTransition } from "react";
+import Link from "next/link";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { monthlyExpensesQuery } from "../queries/expense-queries";
 import { errorMessageForUser } from "../error-message";
 import { addMonths, formatMonthLabel } from "../month";
-
-import { ExpenseForm, defaultDraftForMonth } from "./expense-form";
 
 type ExpenseDashboardProps = {
   month: string;
@@ -38,8 +22,6 @@ type ExpenseDashboardProps = {
   idToken: string | undefined;
   currentMonth: string;
 };
-
-type ExpenseFormDraft = { date: string; price: string; memo: string };
 
 const numberFormatter = new Intl.NumberFormat("ja-JP", {
   style: "currency",
@@ -49,39 +31,14 @@ const numberFormatter = new Intl.NumberFormat("ja-JP", {
 
 export function ExpenseDashboard(props: ExpenseDashboardProps) {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const {
     data,
     error: readError,
     refetch,
   } = useSuspenseQuery(monthlyExpensesQuery(props, props.month));
   const expenses = sortExpenses(data.expenses);
-  const idToken = props.idToken;
   const settlementSummary = data.settlement;
   const displayMonth = props.month;
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const createMutation = useMutation(
-    expenseMutationOptions(queryClient, createExpense),
-  );
-  const updateMutation = useMutation(
-    expenseMutationOptions(queryClient, updateExpense),
-  );
-  const deleteMutation = useMutation(
-    expenseMutationOptions(queryClient, deleteExpense),
-  );
-  const restoreMutation = useMutation(
-    expenseMutationOptions(queryClient, restoreExpense),
-  );
-  const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
-  const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [restorableExpense, setRestorableExpense] = useState<Expense | null>(
-    null,
-  );
-  const isSubmitting =
-    createMutation.isPending ||
-    updateMutation.isPending ||
-    deleteMutation.isPending ||
-    restoreMutation.isPending;
   const [isMonthPending, startMonthTransition] = useTransition();
 
   const total = useMemo(
@@ -96,115 +53,16 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
     () => calculateMonthlySettlement(displayMonth, settlementUsers, expenses),
     [displayMonth, expenses, settlementUsers],
   );
-  const isMutationEnabled =
-    props.apiBaseUrl !== undefined &&
-    props.apiBaseUrl.trim() !== "" &&
-    idToken !== undefined &&
-    idToken.trim() !== "";
   const isMonthLoading = isMonthPending;
-  const canMutate = isMutationEnabled && !isMonthLoading;
 
   function navigateToMonth(nextMonth: string): void {
     if (nextMonth === displayMonth) {
       return;
     }
 
-    setIsCreateOpen(false);
-    setEditingExpenseId(null);
-    setRestorableExpense(null);
     startMonthTransition(() => {
       router.push(`/expenses?month=${nextMonth}`);
     });
-  }
-
-  async function handleCreate(payload: CreateExpensePayload): Promise<void> {
-    setStatusMessage(null);
-    setRestorableExpense(null);
-    try {
-      const currentIdToken = props.idToken;
-      await createMutation.mutateAsync({
-        apiBaseUrl: props.apiBaseUrl,
-        idToken: currentIdToken,
-        idempotencyKey: createIdempotencyKey("expense-create"),
-        expense: payload,
-      });
-      setIsCreateOpen(false);
-      setStatusMessage("支出を追加しました");
-    } catch (error) {
-      logExpenseMutationError("create", error);
-      setStatusMessage(
-        `支出を追加できませんでした。${errorMessageForUser(error)}`,
-      );
-    }
-  }
-
-  async function handleUpdate(
-    expense: Expense,
-    payload: UpdateExpensePayload,
-  ): Promise<void> {
-    setStatusMessage(null);
-    setRestorableExpense(null);
-    try {
-      const currentIdToken = props.idToken;
-      await updateMutation.mutateAsync({
-        apiBaseUrl: props.apiBaseUrl,
-        idToken: currentIdToken,
-        idempotencyKey: createIdempotencyKey(`expense-update-${expense.id}`),
-        id: expense.id,
-        expense: payload,
-      });
-      setEditingExpenseId(null);
-      setStatusMessage("支出を更新しました");
-    } catch (error) {
-      logExpenseMutationError("update", error);
-      setStatusMessage(
-        `支出を更新できませんでした。${errorMessageForUser(error)} 再読み込みしてからやり直してください`,
-      );
-    }
-  }
-
-  async function handleDelete(expense: Expense): Promise<void> {
-    if (!window.confirm("この支出を削除しますか？")) {
-      return;
-    }
-
-    setStatusMessage(null);
-    try {
-      const currentIdToken = props.idToken;
-      await deleteMutation.mutateAsync({
-        apiBaseUrl: props.apiBaseUrl,
-        idToken: currentIdToken,
-        idempotencyKey: createIdempotencyKey(`expense-delete-${expense.id}`),
-        id: expense.id,
-      });
-      setEditingExpenseId(null);
-      setRestorableExpense(expense);
-      setStatusMessage("支出を削除しました");
-    } catch (error) {
-      logExpenseMutationError("delete", error);
-      setStatusMessage(
-        `支出を削除できませんでした。${errorMessageForUser(error)}`,
-      );
-    }
-  }
-
-  async function handleRestore(expense: Expense): Promise<void> {
-    try {
-      const currentIdToken = props.idToken;
-      await restoreMutation.mutateAsync({
-        apiBaseUrl: props.apiBaseUrl,
-        idToken: currentIdToken,
-        idempotencyKey: createIdempotencyKey(`expense-restore-${expense.id}`),
-        id: expense.id,
-      });
-      setRestorableExpense(null);
-      setStatusMessage("支出を復元しました");
-    } catch (error) {
-      logExpenseMutationError("restore", error);
-      setStatusMessage(
-        `支出を復元できませんでした。${errorMessageForUser(error)}`,
-      );
-    }
   }
 
   return (
@@ -215,19 +73,13 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
             <p className="month">{formatMonthLabel(displayMonth)}</p>
             <h1 className="title">月次支出</h1>
           </div>
-          <button
+          <Link
             className="addButton"
-            type="button"
             aria-label="支出を追加"
-            aria-expanded={isCreateOpen}
-            disabled={!canMutate}
-            onClick={() => {
-              setIsCreateOpen((current) => !current);
-              setEditingExpenseId(null);
-            }}
+            href={`/expenses/new?month=${displayMonth}`}
           >
             +
-          </button>
+          </Link>
         </header>
 
         <div
@@ -245,7 +97,7 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
           </button>
           <form
             className="monthPicker"
-            action="/"
+            action="/expenses"
             onSubmit={(event) => event.preventDefault()}
           >
             <input
@@ -301,44 +153,12 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
           </p>
         ) : null}
 
-        {isCreateOpen ? (
-          <ExpenseForm
-            defaultDraft={defaultDraftForMonth(displayMonth)}
-            disabled={isSubmitting}
-            submitLabel="追加"
-            onCancel={() => setIsCreateOpen(false)}
-            onSubmit={(payload) => handleCreate(payload)}
-          />
-        ) : null}
-
         <div className="toolbar">
           <h2 className="sectionTitle">明細</h2>
           {data.source === "sample" ? (
             <span className="sourceBadge">Sample</span>
           ) : null}
         </div>
-
-        {statusMessage === null ? null : (
-          <p className="statusMessage" role="status">
-            {statusMessage}
-            {statusMessage === "支出を削除しました" &&
-            restorableExpense !== null ? (
-              <button
-                className="statusLink"
-                type="button"
-                disabled={isSubmitting}
-                onClick={() => void handleRestore(restorableExpense)}
-              >
-                元に戻す
-              </button>
-            ) : null}
-          </p>
-        )}
-        {isMutationEnabled ? null : (
-          <p className="errorMessage">
-            APIまたは認証が未設定のため、追加・編集・削除はできません
-          </p>
-        )}
 
         {readError ? (
           <p className="errorMessage" role="status">
@@ -359,18 +179,10 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
               className={`expense ${payerClassName(expense.userId)}`}
               key={expense.id}
             >
-              <button
+              <Link
                 className="expenseTapTarget"
-                type="button"
-                aria-label={`支出を編集: ${expense.memo ?? expense.category}`}
-                aria-expanded={editingExpenseId === expense.id}
-                disabled={!canMutate || isSubmitting}
-                onClick={() => {
-                  setEditingExpenseId((current) =>
-                    current === expense.id ? null : expense.id,
-                  );
-                  setIsCreateOpen(false);
-                }}
+                aria-label={`支出詳細: ${expense.memo ?? expense.category}`}
+                href={`/expenses/detail?id=${encodeURIComponent(expense.id)}`}
               >
                 <span className="dateBadge">
                   {formatMonthDay(expense.date)}
@@ -390,37 +202,13 @@ export function ExpenseDashboard(props: ExpenseDashboardProps) {
                 <span className="amount">
                   {numberFormatter.format(expense.price)}
                 </span>
-              </button>
-              {editingExpenseId === expense.id ? (
-                <ExpenseForm
-                  defaultDraft={draftFromExpense(expense)}
-                  deleteLabel="削除"
-                  disabled={isSubmitting}
-                  submitLabel="保存"
-                  onCancel={() => setEditingExpenseId(null)}
-                  onDelete={() => handleDelete(expense)}
-                  onSubmit={(payload) =>
-                    handleUpdate(expense, {
-                      ...payload,
-                      version: expense.version,
-                    })
-                  }
-                />
-              ) : null}
+              </Link>
             </article>
           ))}
         </section>
       </div>
     </main>
   );
-}
-
-function draftFromExpense(expense: Expense): ExpenseFormDraft {
-  return {
-    date: expense.date,
-    price: String(expense.price),
-    memo: expense.memo ?? "",
-  };
 }
 
 function sortExpenses(expenses: Expense[]): Expense[] {
@@ -466,14 +254,6 @@ function settlementDirectionLabel(
   return `${fromUser?.displayName ?? "支払う人"} → ${toUser?.displayName ?? "受け取る人"}`;
 }
 
-function createIdempotencyKey(prefix: string): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return `${prefix}-${crypto.randomUUID()}`;
-  }
-
-  return `${prefix}-${Date.now()}`;
-}
-
 function formatMonthDay(date: string): string {
   return date.slice(5).replace("-", "/");
 }
@@ -490,12 +270,4 @@ function payerClassName(
   }
 
   return "payerUnknown";
-}
-
-function logExpenseMutationError(
-  operation:
-    "authenticate" | "load" | "create" | "update" | "delete" | "restore",
-  error: unknown,
-): void {
-  console.error(`Expense ${operation} failed`, error);
 }

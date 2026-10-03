@@ -3294,3 +3294,27 @@ Live LINE verification requires credentials; record limitation.
 ### Remaining limits
 - Actual LINE login and deployed Workers/Spreadsheet requests were not exercised: browser tests use mocked API with local-dev auth; unit tests cover production LIFF token resolution and expiry/login flows.
 - OpenAPI-generated types are checked in; regenerate using generate:api-types when contract changes.
+
+## Task: Canonical expense page navigation (2026-10-03)
+
+### Cause and plan
+Previous refactor preserved inline-create/edit handlers and merely added route aliases; actual entry clicks never used new pages. User authorizes breaking legacy URLs before production operation.
+- [x] Replace plus and expense-row handlers with Next Link to /expenses/new?month= and /expenses/detail?id=; remove dashboard mutation/form state and code
+- [x] Make canonical pages own routing composition, remove /expense and expenseId fallback; retain root as LIFF entry composition
+- [x] Update LINE notification detail links and related tests; no Backend API contract change
+- [x] Verify actual clicks, create return/list invalidation, detail mutation, browser back, typecheck/lint/tests/static export
+
+### Scope
+Frontend dashboard/routes/detail query parsing, corresponding frontend tests, LINE notification URL builder/tests, task/lesson logs. Existing CSS/layout/auth/query/API behavior retained.
+
+### Execution / verification
+- Replaced dashboard plus/row buttons with Next Links; removed all inline forms, mutation handlers and related UI state (~250 lines). Links remain usable for sample/read-only viewing; mutation controls belong to new/detail pages.
+- Canonical /expenses and /expenses/detail now own page composition. Root remains a LIFF entry rendering the canonical list; removed /expense page and expenseId query fallback.
+- LINE push/reply detail links now use /expenses/detail?id=; API endpoint paths/contracts unchanged. Both frontend and API deployment required for notification URL change.
+- Updated source regression assertions to require entry hrefs, reject inline forms/mutation state, and verify canonical query parsing. Recorded correction in lessons.md.
+- pnpm test (targeted): PASS 74 tests; pnpm test (all): PASS 31 files / 174 tests.
+- pnpm --filter @shared-expense/web lint: PASS. pnpm typecheck: PASS all workspaces; only existing Redocly warnings for info.license and localhost URL.
+- pnpm build:web: PASS static /, /expenses, /expenses/new, /expenses/detail; no /expense output. Reran after removing redundant CSS declaration.
+- node /private/tmp/shared-expense-browser-check/static-navigation.cjs: PASS on mobile 390x844 and desktop 1280x800. Plain static HTTP server (no Next runtime), actual plus/row clicks, URLs/new/detail rendering, list return and browser back, no browser errors; expense.html absent.
+- node /private/tmp/shared-expense-browser-check/navigation.cjs: PASS with mocked API/Bearer local-dev. Actual plus -> create -> correct-month list, invalidation-triggered list refetch, row -> detail update/delete/restore -> list, cancel, browser back, desktop keyboard Enter, previous month carried into creation date. Initial browser assertion raced loading; added explicit form-ready wait and reran successfully.
+- git diff --check: PASS. Local dev server stopped. Real LINE login/production Spreadsheet not used for this verification.

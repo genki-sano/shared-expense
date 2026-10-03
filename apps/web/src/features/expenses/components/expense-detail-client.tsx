@@ -44,7 +44,7 @@ const numberFormatter = new Intl.NumberFormat("ja-JP", {
 export function ExpenseDetailClient() {
   const searchParams = useSearchParams();
   const expenseId = normalizeStringParam(
-    searchParams.get("id") ?? searchParams.get("expenseId") ?? undefined,
+    searchParams.get("id") ?? undefined,
   );
   const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
   const normalizedLiffId = liffId?.trim();
