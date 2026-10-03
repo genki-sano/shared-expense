@@ -25,3 +25,6 @@
 - User correction: plus/expense rows must navigate to canonical new/detail pages; legacy compatibility is unnecessary before production use.
 - A route being directly accessible does not establish the intended user flow. When adding pages, update the existing entry controls and test their actual clicks and destination URLs.
 - Do not let inferred compatibility override explicitly requested page-based navigation. Keep legacy URLs only when there is an actual requirement, and update notification producers with consumers.
+
+## 2026-10-03: Place feature composition components consistently
+- User noted HomeClient sits outside components although it composes React feature UI. Keep feature React components, including composition/auth wrappers, under the existing components directory; app owns route files.

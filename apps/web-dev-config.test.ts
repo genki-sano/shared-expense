@@ -72,7 +72,7 @@ describe("web dev configuration", () => {
     expect(existsSync(join(rootDir, "apps/web/wrangler.jsonc"))).toBe(false);
     expect(rootPackage.scripts).not.toHaveProperty("deploy:web");
     expect(existsSync(join(rootDir, "apps/web/src/app/page.tsx"))).toBe(true);
-    expect(existsSync(join(rootDir, "apps/web/src/features/expenses/home-client.tsx"))).toBe(true);
+    expect(existsSync(join(rootDir, "apps/web/src/features/expenses/components/home-client.tsx"))).toBe(true);
   });
 
   test("web app asks search engines not to index it", () => {
@@ -89,7 +89,7 @@ describe("web dev configuration", () => {
 
   test("web app can initialize LIFF ID tokens for production auth", () => {
     const webPackage = readPackageJson("apps/web/package.json");
-    const homeClientSource = readText("apps/web/src/features/expenses/home-client.tsx");
+    const homeClientSource = readText("apps/web/src/features/expenses/components/home-client.tsx");
     const dashboardSource = readText("apps/web/src/features/expenses/components/expense-dashboard.tsx");
     const liffClientSource = readText("apps/web/src/lib/liff-client.ts");
 
@@ -140,7 +140,7 @@ describe("web dev configuration", () => {
 
   test("expense dashboard exposes mobile month navigation", () => {
     const appSource = readText("apps/web/src/app/page.tsx");
-    const homeClientSource = readText("apps/web/src/features/expenses/home-client.tsx");
+    const homeClientSource = readText("apps/web/src/features/expenses/components/home-client.tsx");
     const dashboardSource = readText("apps/web/src/features/expenses/components/expense-dashboard.tsx");
     const cssSource = readText("apps/web/src/app/globals.css");
 
@@ -165,7 +165,7 @@ describe("web dev configuration", () => {
 
   test("notification detail links open the matching expense details", () => {
     const appSource = readText("apps/web/src/app/page.tsx");
-    const homeClientSource = readText("apps/web/src/features/expenses/home-client.tsx");
+    const homeClientSource = readText("apps/web/src/features/expenses/components/home-client.tsx");
     const detailPageSource = readText("apps/web/src/app/expenses/detail/page.tsx");
     const detailClientSource = readText(
       "apps/web/src/features/expenses/components/expense-detail-client.tsx",
