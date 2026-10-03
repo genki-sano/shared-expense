@@ -40,3 +40,6 @@
 - When proposing create/edit form layouts, include the existing archived/deleted and restored states in design review. Show retained content, disabled editing, and the restore action explicitly.
 - Expense form design uses the user's preferred currency notation: ¥ before the grouped amount, consistently across create, edit and archived states.
 - Expense detail screen keeps the heading 支出詳細 even when editing is available or after an archived expense is restored.
+
+## 2026-10-03: Account for native mobile date styling
+- Shared date-input visual review must include iOS's internal ::-webkit-date-and-time-value alignment. Explicitly align both the input and native value element; desktop/mobile viewport emulation alone does not verify actual iOS native controls.

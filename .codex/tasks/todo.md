@@ -3423,3 +3423,12 @@ Frontend dashboard/routes/detail query parsing, corresponding frontend tests, LI
 - README updated for amount-input placement, shared payer/form/archived responsibility and authenticated form options query.
 - git diff --check PASS. Development server stopped; no generated next-env.d.ts changes.
 - Real LINE login and production Workers/Spreadsheet connection not exercised. API and frontend require coordinated deployment (API first); no deployment or commit performed.
+
+## Mobile date alignment (2026-10-03)
+- [x] Inspect shared date styles: no explicit alignment of WebKit's internal date value.
+- [ ] Set left alignment on the date input and WebKit date-value pseudo-element, preserving native picker.
+- [ ] Verify CSS, lint, existing web tests and diff; iPhone physical-device confirmation remains unavailable.
+- README reviewed: no change needed for CSS-only alignment within the documented shared form.
+- [x] Added text-align:left to shared date input and ::-webkit-date-and-time-value. Native type=date picker retained; applies to create/detail/archived forms.
+- [x] pnpm --filter @shared-expense/web lint PASS; pnpm test apps/web apps/web-dev-config.test.ts PASS (7 files / 57 tests); git diff --check PASS.
+- Verified selector scope and declarations by diff review. Physical iPhone/Safari rendering was not tested; browser unspecified by user, WebKit-specific alignment is supported by its native stylesheet behavior.
