@@ -4,13 +4,12 @@ import { errorMessageForUser } from "../error-message";
 import type { Expense } from "@shared-expense/shared";
 import Link from "next/link";
 import { hasLiffPrimaryRedirectParams } from "../../../lib/liff-client";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import {
   deleteExpense,
   restoreExpense,
   updateExpense,
-  type CreateExpensePayload,
   type UpdateExpensePayload,
 } from "../api";
 import {
@@ -23,30 +22,16 @@ import type { ApiSession } from "../../../lib/api-auth";
 import { QueryBoundary } from "../../../components/query-boundary";
 import {
   expenseQuery,
+  expenseFormOptionsQuery,
   expenseMutationOptions,
 } from "../queries/expense-queries";
-import {
-  LiffPrimaryRedirectGate,
-} from "../../../components/liff-primary-redirect-gate";
+import { LiffPrimaryRedirectGate } from "../../../components/liff-primary-redirect-gate";
 
-type ExpenseDetailDraft = {
-  date: string;
-  price: string;
-  memo: string;
-};
-
-const DEFAULT_EXPENSE_CATEGORY = "その他";
-const numberFormatter = new Intl.NumberFormat("ja-JP", {
-  style: "currency",
-  currency: "JPY",
-  maximumFractionDigits: 0,
-});
+import { ExpenseForm } from "./expense-form";
 
 export function ExpenseDetailClient() {
   const searchParams = useSearchParams();
-  const expenseId = normalizeStringParam(
-    searchParams.get("id") ?? undefined,
-  );
+  const expenseId = normalizeStringParam(searchParams.get("id") ?? undefined);
   const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
   const normalizedLiffId = liffId?.trim();
   const shouldGateLiffPrimaryRedirect =
@@ -87,6 +72,10 @@ function ExpenseDetail({
   expenseId,
   ...session
 }: ApiSession & { expenseId: string }) {
+  const router = useRouter();
+  const { data: formOptions } = useSuspenseQuery(
+    expenseFormOptionsQuery(session),
+  );
   const { apiBaseUrl, idToken } = session;
   const queryClient = useQueryClient();
   const {
@@ -207,135 +196,35 @@ function ExpenseDetail({
           </p>
         ) : null}
 
-        <section
-          className="detailPanel"
-          data-deleted={state.deleted ? "true" : undefined}
-        >
-          <div className="detailHeader">
-            <span className="dateBadge">
-              {formatMonthDay(state.expense.date)}
-            </span>
-            <div>
-              <p className="detailName">
-                {state.expense.memo ?? state.expense.category}
-              </p>
-              <p className="detailMeta">
-                {state.expense.userName ?? state.expense.userId}
-                {state.deleted ? " / 削除済み" : ""}
-              </p>
-            </div>
-            <strong className="amount">
-              {numberFormatter.format(state.expense.price)}
-            </strong>
+        {state.deleted ? (
+          <div className="archiveNotice" role="status">
+            <strong>アーカイブ済み</strong>
+            <p>
+              この支出は削除されています。
+              <br />
+              内容を変更するには、先に復元してください。
+            </p>
           </div>
-
-          {state.deleted ? (
-            <div className="detailActions">
-              <button
-                className="primaryButton"
-                type="button"
-                disabled={isSubmitting}
-                onClick={() => void handleRestore(state.expense)}
-              >
-                復元
-              </button>
-            </div>
-          ) : (
-            <DetailExpenseForm
-              defaultDraft={draftFromExpense(state.expense)}
-              disabled={isSubmitting}
-              key={`${state.expense.id}:${state.expense.version}`}
-              onDelete={() => handleDelete(state.expense)}
-              onSubmit={(payload) =>
-                handleUpdate(state.expense, {
-                  ...payload,
-                  version: state.expense.version,
-                })
-              }
-            />
-          )}
-        </section>
+        ) : null}
+        <ExpenseForm
+          defaultDraft={draftFromExpense(state.expense)}
+          members={formOptions.members}
+          submitLabel="変更を保存"
+          disabled={isSubmitting}
+          archived={state.deleted}
+          key={`${state.expense.id}:${state.expense.version}:${state.deleted}`}
+          onCancel={() => router.push(listHref)}
+          onDelete={() => handleDelete(state.expense)}
+          onRestore={() => handleRestore(state.expense)}
+          onSubmit={(payload) =>
+            handleUpdate(state.expense, {
+              ...payload,
+              version: state.expense.version,
+            })
+          }
+        />
       </div>
     </main>
-  );
-}
-
-function DetailExpenseForm(props: {
-  defaultDraft: ExpenseDetailDraft;
-  disabled: boolean;
-  onDelete: () => Promise<void>;
-  onSubmit: (payload: CreateExpensePayload) => Promise<void>;
-}) {
-  const [draft, setDraft] = useState(props.defaultDraft);
-
-  return (
-    <form
-      className="expenseForm detailForm"
-      onSubmit={(event) => {
-        event.preventDefault();
-        void props.onSubmit({
-          date: draft.date,
-          price: Number(draft.price),
-          category: DEFAULT_EXPENSE_CATEGORY,
-          memo: draft.memo.trim() === "" ? null : draft.memo.trim(),
-        });
-      }}
-    >
-      <label className="field">
-        <span>日付</span>
-        <input
-          required
-          type="date"
-          value={draft.date}
-          disabled={props.disabled}
-          onChange={(event) =>
-            setDraft((current) => ({ ...current, date: event.target.value }))
-          }
-        />
-      </label>
-      <label className="field">
-        <span>金額</span>
-        <input
-          required
-          min="0"
-          inputMode="numeric"
-          type="number"
-          value={draft.price}
-          disabled={props.disabled}
-          onChange={(event) =>
-            setDraft((current) => ({ ...current, price: event.target.value }))
-          }
-        />
-      </label>
-      <label className="field wideField">
-        <span>支払内容</span>
-        <input
-          type="text"
-          value={draft.memo}
-          disabled={props.disabled}
-          onChange={(event) =>
-            setDraft((current) => ({ ...current, memo: event.target.value }))
-          }
-        />
-      </label>
-      <div className="formActions">
-        <button
-          className="primaryButton"
-          type="submit"
-          disabled={props.disabled}
-        >
-          保存
-        </button>
-        <button
-          className="deleteButton"
-          type="button"
-          disabled={props.disabled}
-          onClick={() => void props.onDelete()}
-        >
-          削除
-        </button>
-      </div>
-    </form>
   );
 }
 
@@ -351,16 +240,13 @@ function monthFromExpenseDate(date: string): string {
   return date.slice(0, 7);
 }
 
-function draftFromExpense(expense: Expense): ExpenseDetailDraft {
+function draftFromExpense(expense: Expense) {
   return {
+    userId: expense.userId,
     date: expense.date,
     price: String(expense.price),
     memo: expense.memo ?? "",
   };
-}
-
-function formatMonthDay(date: string): string {
-  return date.slice(5).replace("-", "/");
 }
 
 function createIdempotencyKey(prefix: string): string {

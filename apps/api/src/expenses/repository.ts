@@ -50,7 +50,7 @@ export class InMemoryExpenseRepository implements ExpenseRepository {
   async create(input: CreateExpenseInput): Promise<Expense> {
     const expense: Expense = {
       id: `exp_${this.#expenses.length + 1}`,
-      userId: input.actor.id,
+      userId: input.userId ?? input.actor.id,
       date: input.date,
       price: input.price,
       category: input.category,
@@ -84,11 +84,13 @@ export class InMemoryExpenseRepository implements ExpenseRepository {
 
     const next: Expense = {
       ...current,
+      userId: input.patch.userId ?? current.userId,
       date: input.patch.date ?? current.date,
       price: input.patch.price ?? current.price,
       category: input.patch.category ?? current.category,
       memo: "memo" in input.patch ? input.patch.memo ?? null : current.memo,
     };
+    if (next.userId !== current.userId) delete next.userName;
     this.#expenses[index] = next;
 
     return next;

@@ -3351,3 +3351,75 @@ Frontend dashboard/routes/detail query parsing, corresponding frontend tests, LI
 - pnpm typecheck: PASS all workspaces; pre-existing OpenAPI license/localhost warnings only. Restored build-generated next-env.d.ts noise and reran web typecheck: PASS.
 - README tree checked against filesystem: PASS all 31 listed files. Confirmed no lib TSX or removed-module references in current web source. git diff --check: PASS.
 - README updated because placement rules, scoped agent instructions and cleanup changed documented structure.
+
+## Task: Share expense create/detail form design (2026-10-03)
+- [x] Read scoped AGENTS/README and inspect both forms and CSS
+- [x] Use feature ExpenseForm for both create and detail; share input state, validation, payload conversion and markup
+- [x] Keep event/mutation handling in screens; preserve create/cancel and detail/save/delete/restore/version-key behavior
+- [x] Remove detail-only form styling and give both forms identical container/input styles; update README management rule
+- [x] Verify form interactions/design at mobile and desktop widths, full tests, lint, typecheck and Static Export; record results
+- Scope: form/detail/CSS, relevant regression checks and README. Detail summary remains distinct from editable form.
+
+### Design and verification
+- Original forms were separate ExpenseForm / DetailExpenseForm with duplicated fields/state/payload conversion and detail-only CSS. Both now render ExpenseForm with same input/container/action-grid styles.
+- Shared form supports actual create/cancel and save/delete callbacks; screens retain authentication, mutations, navigation, version handling and deleted-state restore. Detail summary is independent above form so it cannot narrow the form or override its design.
+- Removed DetailExpenseForm and detailForm/obsolete inline-form CSS. Added source regression test requiring both screens use ExpenseForm without their own form/input markup.
+- README updated: shared form is the single implementation for inputs/state/validation/conversion/layout; screen-specific callbacks and summary remain in screens.
+- pnpm test: PASS 29 files / 172 tests; targeted web tests: PASS 54 tests.
+- pnpm --filter @shared-expense/web lint: PASS; pnpm typecheck: PASS all workspaces (existing OpenAPI license/localhost warnings only); pnpm build:web: PASS Static Export.
+- node /private/tmp/shared-expense-browser-check/forms.cjs: PASS at 350/390/1280px. Compared form/input/label/button computed dimensions, padding, borders, colors, font, layout and validation attributes; matching inputs and form geometry, screen-specific actions preserved. Create/detail screenshots inspected.
+- node /private/tmp/shared-expense-browser-check/navigation.cjs: PASS actual create/save/delete/restore, refetch/list return, cancel, mobile/desktop navigation and browser back with mocked API.
+- Stopped local dev server; restored generated next-env.d.ts noise; web typecheck and git diff --check PASS. Real production API/LINE not exercised.
+
+## Task: Expense form redesign with design alignment (2026-10-03)
+- [x] Inspect reference image/current shared form/palette/API and confirm payer changes unsupported today
+- [ ] Create reviewable interactive mock for create/edit: amount-first, grouped yen input, household payer selection, date and memo, existing palette
+- [ ] Align mock and amount-entry/payer behavior with user before editing application implementation
+- [ ] After agreement, extend contract/backend/persistence with validated household payer while keeping authenticated actor separate; use shared form
+- [ ] Verify input caret/grouping/validation, payer changes, create/update/cache/notifications, typecheck/lint/tests/static export and README impact
+- Existing shared-form refactor is uncommitted and must be preserved. Mock is a design artifact, not production form implementation.
+
+### Design proposal verification
+- [x] Created docs/design/expense-form-proposal.html with interactive create/edit examples using existing palette.
+- [x] Chrome/Playwright: live comma formatting, fullwidth digits, payer selection, preview submit, and 390px overflow checks PASS.
+- Application implementation is pending user design feedback. No production code changed for this redesign; prior uncommitted shared-form changes preserved.
+- README update is unnecessary at this proposal stage because application structure and behavior have not changed.
+
+### Archived expense design follow-up
+- [ ] Add archived detail proposal: readable values, disabled editing, clear archived status and restore action.
+- [ ] Verify restore preview and mobile layout before presenting for design alignment.
+- [x] Added third archived-detail example to the proposal; values retain shared layout, fields are disabled, save/delete are replaced with restore.
+- [x] Chrome/Playwright PASS: archived fields locked, values visible, delete hidden, restore switches to editable form and working save preview, no overflow at 390px.
+- Proposal only; no production changes or README update needed. Archived design awaits feedback before implementation.
+
+### Currency notation alignment
+- [x] Updated create/edit/archived proposals to prefix amounts with ¥ instead of suffixing 円.
+- [ ] Verify currency placement and existing proposal interactions in Chrome.
+- [x] Chrome/Playwright PASS: all three amount rows start with ¥, comma/fullwidth input and payer selection preserved, archived restore/save preserved, mobile overflow checks pass.
+- Design artifact only; apps/web README update remains unnecessary.
+
+### Detail heading alignment
+- [x] Use 支出詳細 for edit and archived proposals, including after restore.
+- [x] Verified both initial headings and restored-state heading; no 支出を編集 remains in proposal.
+- Proposal-only wording change; apps/web README update unnecessary.
+
+## Approved form implementation
+- [x] Design approved: amount-first ¥ notation, grouped input, payer buttons, shared create/detail layout, disabled archived form and restore; detail heading stays 支出詳細.
+- [x] Extend OpenAPI with optional payer userId and authenticated expense form-options (member names/IDs and actor ID); validate payer against registered household users.
+- [x] Persist payer separately from actor in memory/Spreadsheet and preserve notification actor and audit columns.
+- [x] Implement shared form, caret-safe grouped input and archived restore UI; update README responsibilities.
+- [x] Add targeted API/persistence/input tests; run typecheck, lint, existing tests, static export and browser flows.
+
+### Implementation verification (2026-10-03)
+- generate:api-types PASS; regenerated types from OpenAPI without manual edits.
+- pnpm typecheck PASS across workspace. Existing OpenAPI warnings for license and localhost unchanged.
+- pnpm --filter @shared-expense/web lint PASS.
+- pnpm test PASS: 30 files / 179 tests. Added payer validation, auth-only form options, notification actor, Spreadsheet payer vs audit columns, query auth/signal/session isolation, amount grouping/caret tests.
+- pnpm build:web PASS: /expenses, /expenses/new and /expenses/detail exported statically.
+- Chrome navigation.cjs PASS (mock Backend API + bearer authentication): plus/row navigation, create payer selection, update payer selection, list refetch, delete/restore, cancel/back, keyboard navigation.
+- Chrome forms.cjs PASS: shared input/card/action styles match at 350/390/1280px; middle input/backspace caret and fullwidth paste work.
+- Chrome static-navigation.cjs PASS: out served by plain HTTP server; mobile/desktop links/new/detail/back function without Next.js runtime.
+- Archived currency prefix matches muted disabled amount color; header remains 支出詳細 after restore.
+- README updated for amount-input placement, shared payer/form/archived responsibility and authenticated form options query.
+- git diff --check PASS. Development server stopped; no generated next-env.d.ts changes.
+- Real LINE login and production Workers/Spreadsheet connection not exercised. API and frontend require coordinated deployment (API first); no deployment or commit performed.

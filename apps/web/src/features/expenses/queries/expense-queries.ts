@@ -4,6 +4,7 @@ import {
   fetchMonthlyExpenses,
   fetchMonthlySettlement,
   fetchExpenseDetail,
+  fetchExpenseFormOptions,
 } from "../api";
 
 export const expenseQueryKey = ["expenses"] as const;
@@ -52,3 +53,14 @@ export function expenseMutationOptions<
     onSuccess: () => client.invalidateQueries({ queryKey: expenseQueryKey }),
   };
 }
+
+export const expenseFormOptionsQuery = (session: ApiSession) =>
+  queryOptions({
+    queryKey: [
+      ...expenseQueryKey,
+      session.apiBaseUrl,
+      session.idToken,
+      "form-options",
+    ],
+    queryFn: ({ signal }) => fetchExpenseFormOptions({ ...session, signal }),
+  });

@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+    "/api/expenses/form-options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 支出フォームのメンバーと操作本人を取得 */
+        get: operations["getExpenseFormOptions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/expenses": {
         parameters: {
             query?: never;
@@ -100,7 +117,16 @@ export interface components {
             /** @example 1 */
             version: number;
         };
+        ExpenseFormOptions: {
+            actorId: string;
+            members: {
+                id: string;
+                displayName: string;
+            }[];
+        };
         CreateExpenseRequest: {
+            /** @description Registered household payer ID; defaults to the actor on create and retains the payer on update. */
+            userId?: string;
             /**
              * Format: date
              * @example 2026-02-15
@@ -114,6 +140,8 @@ export interface components {
             memo?: string | null;
         };
         UpdateExpenseRequest: {
+            /** @description Registered household payer ID; defaults to the actor on create and retains the payer on update. */
+            userId?: string;
             /**
              * Format: date
              * @example 2026-02-15
@@ -303,6 +331,27 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    getExpenseFormOptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Registered household members without LINE identifiers */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExpenseFormOptions"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
     listExpensesByMonth: {
         parameters: {
             query: {

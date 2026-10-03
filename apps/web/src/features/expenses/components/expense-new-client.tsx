@@ -3,16 +3,22 @@
 import Link from "next/link";
 import { hasLiffPrimaryRedirectParams } from "../../../lib/liff-client";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { useState } from "react";
 import { ApiSessionBoundary } from "../../../components/api-session";
 import type { ApiSession } from "../../../lib/api-auth";
-import {
-  LiffPrimaryRedirectGate,
-} from "../../../components/liff-primary-redirect-gate";
+import { LiffPrimaryRedirectGate } from "../../../components/liff-primary-redirect-gate";
 import { errorMessageForUser } from "../error-message";
 import { createExpense, type CreateExpensePayload } from "../api";
-import { expenseMutationOptions } from "../queries/expense-queries";
+import { QueryBoundary } from "../../../components/query-boundary";
+import {
+  expenseFormOptionsQuery,
+  expenseMutationOptions,
+} from "../queries/expense-queries";
 import { currentMonthInJst, normalizeMonthParam } from "../month";
 import { ExpenseForm, defaultDraftForMonth } from "./expense-form";
 
@@ -27,12 +33,24 @@ export function ExpenseNewClient() {
     return <LiffPrimaryRedirectGate liffId={liffId} />;
   return (
     <ApiSessionBoundary>
-      {(session) => <ExpenseNew {...session} month={month} key={month} />}
+      {(session) => (
+        <QueryBoundary
+          loading="支出フォームを読み込んでいます"
+          formatError={(error) =>
+            `支出フォームを取得できませんでした。${errorMessageForUser(error)}`
+          }
+        >
+          <ExpenseNew {...session} month={month} key={month} />
+        </QueryBoundary>
+      )}
     </ApiSessionBoundary>
   );
 }
 
 function ExpenseNew({ month, ...session }: ApiSession & { month: string }) {
+  const { data: formOptions } = useSuspenseQuery(
+    expenseFormOptionsQuery(session),
+  );
   const router = useRouter();
   const queryClient = useQueryClient();
   const mutation = useMutation(
@@ -60,7 +78,7 @@ function ExpenseNew({ month, ...session }: ApiSession & { month: string }) {
     <main className="shell">
       <div className="app">
         <header className="detailTopbar">
-          <h1 className="title">支出新規作成</h1>
+          <h1 className="title">支出を追加</h1>
           <Link className="backLink" href={listHref}>
             一覧へ
           </Link>
@@ -76,9 +94,10 @@ function ExpenseNew({ month, ...session }: ApiSession & { month: string }) {
           </p>
         ) : null}
         <ExpenseForm
-          defaultDraft={defaultDraftForMonth(month)}
+          defaultDraft={defaultDraftForMonth(month, formOptions.actorId)}
+          members={formOptions.members}
           disabled={!canMutate || mutation.isPending}
-          submitLabel="追加"
+          submitLabel="追加する"
           onCancel={() => router.push(listHref)}
           onSubmit={handleSubmit}
         />

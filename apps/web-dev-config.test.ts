@@ -200,7 +200,7 @@ describe("web dev configuration", () => {
     expect(detailClientSource).toContain("updateMutation.mutateAsync(");
     expect(detailClientSource).toContain("deleteMutation.mutateAsync(");
     expect(detailClientSource).toContain("restoreMutation.mutateAsync(");
-    expect(detailClientSource).toContain('key={`${state.expense.id}:${state.expense.version}`}');
+    expect(detailClientSource).toContain('key={`${state.expense.id}:${state.expense.version}:${state.deleted}`}');
     expect(detailClientSource).not.toContain("setDraft(props.defaultDraft)");
     expect(detailClientSource).toContain("一覧へ");
     expect(dashboardSource).not.toContain("selectedExpenseId");
@@ -212,9 +212,8 @@ describe("web dev configuration", () => {
     expect(notificationSource).not.toContain('searchParams.set("month"');
     expect(cssSource).not.toContain('.expense[data-selected="true"]');
     expect(cssSource).not.toContain(".selectedPill");
-    expect(cssSource).toContain(".detailPanel");
-    expect(cssSource).toContain(".detailForm .deleteButton");
-    expect(cssSource).toContain("grid-column: auto");
+    expect(cssSource).toContain(".expenseFormCard");
+    expect(cssSource).not.toContain(".detailForm");
   });
 
   test("web app pins light rendering colors to avoid dark mode text inversion", () => {
@@ -274,6 +273,27 @@ describe("web dev configuration", () => {
     expect(cssSource).toContain(".expenseTapTarget");
     expect(cssSource).toContain("min-height: 58px");
     expect(cssSource).toContain("text-decoration: none");
+  });
+
+  test("create and detail share the same expense input form and styling", () => {
+    const detail = readText("apps/web/src/features/expenses/components/expense-detail-client.tsx");
+    const create = readText("apps/web/src/features/expenses/components/expense-new-client.tsx");
+    const form = readText("apps/web/src/features/expenses/components/expense-form.tsx");
+    const css = readText("apps/web/src/app/globals.css");
+    for (const screen of [detail, create]) {
+      expect(screen).toContain('from "./expense-form"');
+      expect(screen).toContain("<ExpenseForm");
+      expect(screen).not.toContain("<form");
+      expect(screen).not.toContain("<input");
+    }
+    expect(detail).not.toContain("DetailExpenseForm");
+    expect(detail).toContain('submitLabel="変更を保存"');
+    expect(create).toContain('submitLabel="追加する"');
+    expect(form).toContain('className="expenseForm"');
+    expect(form).toContain("props.onDelete");
+    expect(form).toContain("props.onCancel");
+    expect(css).not.toContain(".detailForm");
+    expect(css).not.toContain(".expense .expenseForm");
   });
 
   test("expense form captures payment content without a category field", () => {

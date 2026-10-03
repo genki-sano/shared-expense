@@ -159,3 +159,35 @@ describe("expense server state", () => {
     }
   });
 });
+
+it("fetches authenticated form options with cancellation and isolates sessions", async () => {
+  const { expenseFormOptionsQuery } = await import("./expense-queries");
+  const options = {
+    actorId: "woman",
+    members: [
+      { id: "woman", displayName: "A" },
+      { id: "man", displayName: "B" },
+    ],
+  };
+  const fetcher = vi.fn(async (_url: string, init?: RequestInit) => {
+    expect(init?.headers).toMatchObject({
+      Authorization: "Bearer verified-token",
+    });
+    expect(init?.signal).toBeInstanceOf(AbortSignal);
+    return Response.json(options);
+  });
+  vi.stubGlobal("fetch", fetcher);
+  const client = new QueryClient();
+  try {
+    const query = expenseFormOptionsQuery(session);
+    expect(await client.fetchQuery(query)).toEqual(options);
+    expect(fetcher.mock.calls[0]?.[0]).toBe(
+      "https://api.example.com/api/expenses/form-options",
+    );
+    expect(query.queryKey).not.toEqual(
+      expenseFormOptionsQuery({ ...session, idToken: "other-user" }).queryKey,
+    );
+  } finally {
+    client.clear();
+  }
+});

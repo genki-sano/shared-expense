@@ -35,3 +35,8 @@
 ## 2026-10-03: Keep conventions actionable and remove confirmed dead code
 - User requested ordered responsibility-based placement rules and explicit prohibited dependencies. Separate normative rules from existing exceptions; verify unused code references before removing it.
 - For every apps/web change, consult scoped AGENTS and review README impact; update documentation when responsibilities, structure, routes or verification commands change.
+
+## 2026-10-03: Review archived states alongside expense form design
+- When proposing create/edit form layouts, include the existing archived/deleted and restored states in design review. Show retained content, disabled editing, and the restore action explicitly.
+- Expense form design uses the user's preferred currency notation: ¥ before the grouped amount, consistently across create, edit and archived states.
+- Expense detail screen keeps the heading 支出詳細 even when editing is available or after an archived expense is restored.

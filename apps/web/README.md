@@ -51,6 +51,7 @@ apps/web/
     │       ├── queries/
     │       │   └── expense-queries.ts
     │       ├── api.ts
+    │       ├── amount-input.ts
     │       ├── month.ts
     │       └── error-message.ts
     ├── components/
@@ -112,6 +113,20 @@ URLを変更するときは、画面だけでなく一覧からのリンク、�
 複数画面で利用するという理由だけで共通 `components/` や `lib/` へ移動しない。
 
 **再利用されることと、feature非依存であることは別である。**
+
+### 支出の新規作成と詳細は同じ入力フォームを利用する
+
+新規作成・詳細編集・アーカイブ済み表示の金額・支払者・日付・支払内容は、`features/expenses/components/expense-form.tsx` の `ExpenseForm` で管理する。
+入力欄、入力中のstate、バリデーション、送信値への変換、フォームのレイアウトはこのコンポーネントを唯一の実装とする。
+両画面の入力デザインを変更する場合は、このコンポーネントと共通の `.expenseForm` / `.expenseFormCard` / `.field` スタイルを変更する。
+画面別の入力コンポーネントや、詳細だけに適用するフォームのCSS上書きを追加しない。
+
+画面側は初期値、処理中のdisabled、送信ボタンの文言、実際の操作に必要なcallbackを渡す。
+新規作成は追加・キャンセル、詳細は保存・削除・復元を扱い、API通信・Mutation・画面遷移はそれぞれの画面側に残す。
+詳細の保存成功後は支出IDとversionを使ったkeyでフォームを再作成し、再取得した値を初期値として反映する。
+金額は `¥` とカンマ区切りで表示し、入力の整形はReact非依存の `amount-input.ts` に置く。
+アーカイブ済みでも同じフォームを表示し、入力を無効化して保存・削除を復元操作に置き換える。
+フォームのメンバーと操作本人は認証付き `/api/expenses/form-options` をQueryで取得する。支払者は登録済みメンバーから選び、操作本人とは分離する。
 
 ### 共通UI・Provider・Boundaryは `components/` へ置く
 

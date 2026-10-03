@@ -695,3 +695,43 @@ describe("GET /api/settlements", () => {
     });
   });
 });
+
+describe("Expense payer selection", () => {
+  it("returns registered names and actor without exposing LINE identifiers", async () => {
+    const response = await app().request("/api/expenses/form-options", { headers: { Authorization: "Bearer valid" } });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ actorId: "user_a", members: [{ id: "user_a", displayName: "A" }, { id: "user_b", displayName: "B" }] });
+    expect((await app().request("/api/expenses/form-options")).status).toBe(401);
+  });
+  it("creates for another member, changes payer and rejects unknown members", async () => {
+    const api = app();
+    const headers = { Authorization: "Bearer valid", "Content-Type": "application/json", "Idempotency-Key": "payer-test" };
+    const created = await api.request("/api/expenses", { method: "POST", headers, body: JSON.stringify({ date: "2026-07-10", price: 1234, category: "その他", userId: "user_b" }) });
+    expect(created.status).toBe(201);
+    const expense = await created.json() as Expense;
+    expect(expense.userId).toBe("user_b");
+    const updated = await api.request(`/api/expenses/${expense.id}`, { method: "PUT", headers, body: JSON.stringify({ version: expense.version, userId: "user_a" }) });
+    expect(updated.status).toBe(200);
+    expect((await updated.json() as Expense).userId).toBe("user_a");
+    for (const userId of ["stranger", "", null]) {
+      const invalid = await api.request(`/api/expenses/${expense.id}`, { method: "PUT", headers, body: JSON.stringify({ version: 1, userId }) });
+      expect(invalid.status).toBe(400);
+      const createInvalid = await api.request("/api/expenses", { method: "POST", headers, body: JSON.stringify({ date: "2026-07-10", price: 1, category: "その他", userId }) });
+      expect(createInvalid.status).toBe(400);
+    }
+  });
+});
+
+it("keeps the authenticated actor for notifications when another member paid", async () => {
+  const repository = new InMemoryExpenseRepository([]);
+  const notify = vi.fn(async () => {});
+  const api = createApp({ authenticateToken: async () => user, expenseRepository: repository, monthlyExpenseReader: repository,
+    userRepository: new InMemoryHouseholdUserRepository([user, { ...user, id: "user_b", displayName: "B" }]), expenseMutationNotifier: { notify } });
+  const headers = { Authorization: "Bearer valid", "Content-Type": "application/json", "Idempotency-Key": "actor-payer" };
+  const created = await api.request("/api/expenses", { method: "POST", headers, body: JSON.stringify({ date: "2026-10-03", price: 1234, category: "その他", userId: "user_b" }) });
+  expect(created.status).toBe(201);
+  const expense = await created.json() as Expense;
+  expect(notify).toHaveBeenLastCalledWith({ eventType: "expense.created", actor: user, expense });
+  await api.request(`/api/expenses/${expense.id}`, { method: "PUT", headers, body: JSON.stringify({ version: 1, userId: "user_a" }) });
+  expect(notify).toHaveBeenLastCalledWith(expect.objectContaining({ eventType: "expense.updated", actor: user, expense: expect.objectContaining({ userId: "user_a" }) }));
+});

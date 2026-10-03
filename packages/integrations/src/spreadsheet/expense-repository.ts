@@ -45,6 +45,7 @@ export type ClaimSpreadsheetHouseholdUserInput = {
 };
 
 export type CreateSpreadsheetExpenseInput = {
+  userId?: string;
   actor: { id: string };
   date: string;
   price: number;
@@ -57,6 +58,7 @@ export type UpdateSpreadsheetExpenseInput = {
   version: number;
   actor: { id: string };
   patch: {
+    userId?: string;
     date?: string;
     price?: number;
     category?: string;
@@ -202,7 +204,7 @@ export class SpreadsheetExpenseRepository {
     const rowNumber = payments.rows.length + 2;
     const expense: Expense = {
       id,
-      userId: input.actor.id,
+      userId: input.userId ?? input.actor.id,
       date: input.date,
       price: input.price,
       category: input.category,
@@ -214,6 +216,9 @@ export class SpreadsheetExpenseRepository {
       rowNumber,
       timestamp: formatTimestamp(this.#now()),
     });
+
+    row[6] = this.#userTypeFor(input.actor.id);
+    row[7] = this.#userTypeFor(input.actor.id);
 
     await this.#appendValues({
       spreadsheetId: this.#spreadsheetId,
@@ -240,6 +245,7 @@ export class SpreadsheetExpenseRepository {
     const current = expenseFromLegacyPaymentRow(match.row, this.#userTypeToUserId);
     const nextExpense: Expense = {
       ...current,
+      userId: input.patch.userId ?? current.userId,
       date: input.patch.date ?? current.date,
       price: input.patch.price ?? current.price,
       category: input.patch.category ?? current.category,
@@ -250,6 +256,7 @@ export class SpreadsheetExpenseRepository {
       rowNumber: match.rowNumber,
       timestamp: match.row[8],
     });
+    updatedRow[6] = match.row[6];
     updatedRow[7] = this.#userTypeFor(input.actor.id);
     updatedRow[9] = formatTimestamp(this.#now());
 

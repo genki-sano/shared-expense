@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>支出フォーム デザイン案</title>
+<style>
+:root{--background:#fff9f2;--surface:#fffdfc;--text:#5b4638;--muted:#8a7669;--line:#eadbcb;--accent:#e9b64e;--woman:#f48778;--woman-light:#fbe0db;--man:#8fb99a;--man-light:#dcebdd;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text);background:var(--background);color-scheme:light}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button,a,input{touch-action:manipulation}button{cursor:pointer}button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:4px}.review{max-width:920px;margin:40px auto 20px;padding:0 20px}.review h1{margin:0 0 10px;font-size:22px}.review p{font-size:14px;line-height:1.8;color:var(--muted);margin:0}.examples{max-width:920px;margin:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px;padding:24px 20px 40px}.example-label{font-size:12px;font-weight:750;letter-spacing:.05em;color:var(--muted);margin:0 0 12px}.screen{max-width:420px;margin:auto;width:100%;min-height:640px}.topbar{display:flex;align-items:center;justify-content:space-between;margin:0 0 24px;height:42px}.topbar h2{font-size:24px;letter-spacing:-.03em;margin:0}.back{font-size:12px;font-weight:750;border:1px solid var(--line);border-radius:8px;padding:11px 13px;background:var(--surface);color:var(--text)}.form{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}.amount-area{padding:25px 20px 26px}.amount-label{display:block;font-size:12px;font-weight:750;color:var(--muted);margin-bottom:12px}.amount-line{display:flex;align-items:baseline;gap:8px}.amount{width:100%;min-width:0;background:none;border:0;outline:0;color:var(--text);font-size:clamp(38px,5vw,48px);font-weight:800;letter-spacing:-.045em;font-variant-numeric:tabular-nums;padding:0;height:62px;line-height:1.2}.amount::placeholder{color:#c9bdb3}.amount:focus-visible{outline:0;box-shadow:0 2px 0 var(--accent)}.yen{font-size:32px;font-weight:750;flex-shrink:0}.info{border-top:1px solid var(--line);padding:18px 20px}.field-title{font-size:12px;color:var(--muted);font-weight:750;margin:0 0 10px;display:block}.members{display:grid;grid-template-columns:1fr 1fr;gap:8px}.member{display:flex;align-items:center;justify-content:center;gap:8px;min-height:43px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--text);font-weight:750;font-size:14px}.dot{width:9px;height:9px;border-radius:50%;background:var(--woman)}.member[data-member="man"] .dot{background:var(--man)}.member[aria-pressed="true"][data-member="woman"]{border-color:var(--woman);background:var(--woman-light)}.member[aria-pressed="true"][data-member="man"]{border-color:var(--man);background:var(--man-light)}.check{visibility:hidden;font-size:12px}.member[aria-pressed="true"] .check{visibility:visible}.input{display:block;width:100%;border:0;background:none;padding:2px 0;color:var(--text);font-size:16px;font-weight:600;line-height:26px;min-height:34px}.input::placeholder{font-weight:400;color:#b5a599}input[type="date"]{appearance:none;min-width:0}.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.primary,.secondary{min-height:48px;border-radius:9px;font-size:14px;font-weight:800;padding:10px;border:1px solid var(--line)}.primary{border-color:var(--accent);background:var(--accent);color:var(--text)}.secondary{background:var(--surface);color:var(--muted)}.delete{display:block;margin:18px auto 0;min-height:40px;background:none;border:none;color:#d9685d;font-size:13px;font-weight:700;padding:8px 16px}.status{font-size:13px;line-height:1.7;margin:16px 0 0;color:#648a70;min-height:24px}.note{max-width:920px;margin:0 auto 40px;padding:0 20px;color:var(--muted);font-size:13px;line-height:1.8} @media(max-width:700px){.review{margin-top:22px}.examples{grid-template-columns:1fr;gap:28px;max-width:460px;padding-top:22px}.screen{min-height:0}.amount{font-size:46px}.note{max-width:460px}.example-label{margin-bottom:16px}}
+.archive-notice{padding:14px 16px;margin-bottom:18px;border:1px solid var(--line);border-radius:10px;background:#f4ede5;font-size:13px;line-height:1.7}.archive-notice strong{font-size:14px}.archive-notice p{margin:5px 0 0;color:var(--muted)}.archived-form input:disabled{color:var(--muted);-webkit-text-fill-color:var(--muted);opacity:1}.archived-form .yen{color:var(--muted)}.archived-form button:disabled{cursor:default}.archived-form .member:disabled{opacity:.65}[hidden]{display:none!important}</style>
+</head>
+<body>
+<header class="review"><h1>支出フォームのデザイン案</h1><p>一覧の色・温かさを保ち、金額を最初に大きく。金額入力とメンバー選択を試せます。</p></header>
+<main class="examples">
+<section><p class="example-label">新規作成 / 入力前</p><div class="screen">
+<header class="topbar"><h2>支出を追加</h2><button class="back" type="button">一覧へ</button></header>
+<form class="demo-form">
+<div class="form">
+<div class="amount-area"><label class="amount-label" for="new-amount">金額</label><div class="amount-line"><span class="yen" id="new-unit">¥</span><input id="new-amount" class="amount" name="amount" type="text" inputmode="numeric" autocomplete="off" placeholder="0" required aria-describedby="new-unit"></div></div>
+<div class="info"><span class="field-title" id="new-payer-label">支払った人</span><div class="members" role="group" aria-labelledby="new-payer-label"><button type="button" class="member" data-member="woman" aria-pressed="true"><span class="dot"></span>花子<span class="check">✓</span></button><button type="button" class="member" data-member="man" aria-pressed="false"><span class="dot"></span>太郎<span class="check">✓</span></button></div></div>
+<div class="info"><label class="field-title" for="new-date">日付</label><input id="new-date" class="input" name="date" type="date" required value="2026-10-03"></div>
+<div class="info"><label class="field-title" for="new-memo">支払内容</label><input id="new-memo" class="input" name="memo" type="text" placeholder="例：スーパーで食材"></div>
+</div>
+<div class="actions"><button class="secondary" type="button" data-cancel>キャンセル</button><button class="primary" type="submit">追加する</button></div>
+<p class="status" role="status"></p>
+</form></div></section>
+<section><p class="example-label">詳細・編集 / 入力後</p><div class="screen">
+<header class="topbar"><h2>支出詳細</h2><button class="back" type="button">一覧へ</button></header>
+<form class="demo-form">
+<div class="form">
+<div class="amount-area"><label class="amount-label" for="edit-amount">金額</label><div class="amount-line"><span class="yen" id="edit-unit">¥</span><input id="edit-amount" class="amount" name="amount" type="text" inputmode="numeric" autocomplete="off" value="12,800" required aria-describedby="edit-unit"></div></div>
+<div class="info"><span class="field-title" id="edit-payer-label">支払った人</span><div class="members" role="group" aria-labelledby="edit-payer-label"><button type="button" class="member" data-member="woman" aria-pressed="false"><span class="dot"></span>花子<span class="check">✓</span></button><button type="button" class="member" data-member="man" aria-pressed="true"><span class="dot"></span>太郎<span class="check">✓</span></button></div></div>
+<div class="info"><label class="field-title" for="edit-date">日付</label><input id="edit-date" class="input" name="date" type="date" required value="2026-10-02"></div>
+<div class="info"><label class="field-title" for="edit-memo">支払内容</label><input id="edit-memo" class="input" name="memo" type="text" value="スーパーで食材"></div>
+</div>
+<div class="actions"><button class="secondary" type="button" data-cancel>キャンセル</button><button class="primary" type="submit">変更を保存</button></div>
+<button class="delete" type="button">この支出を削除</button>
+<p class="status" role="status"></p>
+</form></div></section>
+<section><p class="example-label">詳細 / アーカイブ済み</p><div class="screen">
+<header class="topbar"><h2>支出詳細</h2><button class="back" type="button">一覧へ</button></header>
+<div class="archive-notice" role="status"><strong>アーカイブ済み</strong><p>この支出は削除されています。<br>内容を変更するには、先に復元してください。</p></div>
+<form class="demo-form archived-form">
+<div class="form">
+<div class="amount-area"><label class="amount-label" for="archived-amount">金額</label><div class="amount-line"><span class="yen" id="archived-unit">¥</span><input disabled id="archived-amount" class="amount" name="amount" type="text" inputmode="numeric" autocomplete="off" value="12,800" required aria-describedby="archived-unit"></div></div>
+<div class="info"><span class="field-title" id="archived-payer-label">支払った人</span><div class="members" role="group" aria-labelledby="archived-payer-label"><button type="button" class="member" disabled data-member="woman" aria-pressed="false"><span class="dot"></span>花子<span class="check">✓</span></button><button type="button" class="member" disabled data-member="man" aria-pressed="true"><span class="dot"></span>太郎<span class="check">✓</span></button></div></div>
+<div class="info"><label class="field-title" for="archived-date">日付</label><input disabled id="archived-date" class="input" name="date" type="date" required value="2026-10-02"></div>
+<div class="info"><label class="field-title" for="archived-memo">支払内容</label><input disabled id="archived-memo" class="input" name="memo" type="text" value="スーパーで食材"></div>
+</div>
+<div class="actions"><button class="secondary" type="button" data-cancel>一覧へ</button><button class="primary" type="button" data-restore>この支出を復元</button></div>
+<button class="delete" hidden type="button">この支出を削除</button>
+<p class="status" role="status"></p>
+</form></div></section>
+</main>
+<p class="note">画面案です。実データの保存・削除・ページ遷移は行いません。花子・太郎は仮の名前です。実装では登録済みメンバー名を表示します。</p>
+<script>
+for(const form of document.querySelectorAll('.demo-form')){
+ const amount=form.querySelector('.amount');
+ const restore=form.querySelector('[data-restore]');
+ if(restore)restore.addEventListener('click',()=>{
+  for(const field of form.querySelectorAll(':disabled'))field.disabled=false;
+  form.classList.remove('archived-form');
+  form.previousElementSibling.hidden=true;
+  form.closest('.screen').querySelector('h2').textContent='支出詳細';
+  form.querySelector('[data-cancel]').textContent='キャンセル';
+  restore.textContent='変更を保存';restore.removeAttribute('data-restore');
+  form.querySelector('.delete').hidden=false;
+  form.querySelector('.status').textContent='プレビュー：支出を復元しました。内容を編集できます。';
+  const save=restore.cloneNode(true);save.type='submit';restore.replaceWith(save);
+ });
+ amount.addEventListener('input',()=>{
+  const position=amount.selectionStart??amount.value.length;
+  const leftDigits=amount.value.slice(0,position).replace(/[^0-9０-９]/g,'').length;
+  const digits=amount.value.replace(/[０-９]/g,char=>String.fromCharCode(char.charCodeAt(0)-65248)).replace(/\D/g,'').replace(/^0+(?=\d)/,'');
+  amount.value=digits.replace(/\B(?=(\d{3})+(?!\d))/g,',');
+  let cursor=0,count=0;while(cursor<amount.value.length&&count<leftDigits){if(/\d/.test(amount.value[cursor]))count++;cursor++}amount.setSelectionRange(cursor,cursor);
+ });
+ for(const member of form.querySelectorAll('.member'))member.addEventListener('click',()=>{for(const item of form.querySelectorAll('.member'))item.setAttribute('aria-pressed',String(item===member))});
+ form.addEventListener('submit',event=>{event.preventDefault();const payer=form.querySelector('.member[aria-pressed="true"]').textContent.replace('✓','').trim();form.querySelector('.status').textContent=`プレビュー：${payer}が ¥ ${amount.value} を支払った支出です。`});
+ for(const button of form.querySelectorAll('[data-cancel],.delete'))button.addEventListener('click',()=>{form.querySelector('.status').textContent='画面案のため、データは変更しません。'});
+}
+</script>
+</body>
+</html>

@@ -96,6 +96,7 @@ export function createApp(dependencies: AppDependencies = defaultDependencies): 
   app.route(
     "/api/expenses",
     createExpenseRoutes({
+      userRepository: dependencies.userRepository,
       authenticateToken: dependencies.authenticateToken,
       expenseRepository: dependencies.expenseRepository,
       ...(dependencies.expenseMutationNotifier === undefined

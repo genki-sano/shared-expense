@@ -652,3 +652,25 @@ describe("SpreadsheetExpenseRepository", () => {
     ]);
   });
 });
+
+it("keeps payer, creator and updater separate when creating and changing payer", async () => {
+  let rows: unknown[][] = [];
+  const repository = new SpreadsheetExpenseRepository({
+    spreadsheetId: "test", userTypeToUserId, userIdToUserType,
+    valuesClient: {
+      getValues: async ({ range }) => ({ values: range === "users!A2:F" ? [["man", "太郎"], ["woman", "花子"]] : rows }),
+      appendValues: async ({ values }) => { rows.push(...values); },
+      updateValues: async ({ values }) => { rows = values; },
+    },
+  });
+  const created = await repository.create({ actor: { id: "user_a" }, userId: "user_b", date: "2026-10-03", price: 1234, category: "その他", memo: null });
+  expect(created.userId).toBe("user_b");
+  expect(created.userName).toBe("花子");
+  expect(rows[0]?.slice(6, 8)).toEqual(["man", "man"]);
+  expect(rows[0]?.[1]).toBe("woman");
+  const updated = await repository.update({ id: created.id, actor: { id: "user_b" }, version: 1, patch: { userId: "user_a" } });
+  expect(updated.userId).toBe("user_a");
+  expect(updated.userName).toBe("太郎");
+  expect(rows[0]?.[1]).toBe("man");
+  expect(rows[0]?.slice(6, 8)).toEqual(["man", "woman"]);
+});

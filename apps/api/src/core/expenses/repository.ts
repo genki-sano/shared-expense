@@ -6,6 +6,7 @@ export type ListExpensesInput = {
 };
 
 export type CreateExpenseInput = {
+  userId?: string;
   actor: User;
   date: string;
   price: number;
@@ -18,6 +19,7 @@ export type UpdateExpenseInput = {
   actor: User;
   version: number;
   patch: {
+    userId?: string;
     date?: string;
     price?: number;
     category?: string;

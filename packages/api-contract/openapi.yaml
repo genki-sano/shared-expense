@@ -16,6 +16,20 @@ tags:
 security:
   - bearerAuth: []
 paths:
+  /api/expenses/form-options:
+    get:
+      tags: [Expenses]
+      summary: 支出フォームのメンバーと操作本人を取得
+      operationId: getExpenseFormOptions
+      responses:
+        '200':
+          description: Registered household members without LINE identifiers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseFormOptions'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /api/expenses:
     get:
       tags:
@@ -372,6 +386,24 @@ components:
           type: integer
           minimum: 1
           example: 1
+    ExpenseFormOptions:
+      type: object
+      additionalProperties: false
+      required: [actorId, members]
+      properties:
+        actorId:
+          type: string
+        members:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [id, displayName]
+            properties:
+              id:
+                type: string
+              displayName:
+                type: string
     CreateExpenseRequest:
       type: object
       additionalProperties: false
@@ -380,6 +412,10 @@ components:
         - price
         - category
       properties:
+        userId:
+          type: string
+          minLength: 1
+          description: Registered household payer ID; defaults to the actor on create and retains the payer on update.
         date:
           type: string
           format: date
@@ -401,6 +437,10 @@ components:
       required:
         - version
       properties:
+        userId:
+          type: string
+          minLength: 1
+          description: Registered household payer ID; defaults to the actor on create and retains the payer on update.
         date:
           type: string
           format: date

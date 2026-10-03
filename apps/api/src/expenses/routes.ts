@@ -7,13 +7,17 @@ import {
   type ExpenseMutationNotifier,
 } from "../core/notifications/expense-mutation-notifier";
 
+import type { HouseholdUserRepository } from "../core/users/repository";
+
 export type ExpenseRoutesDependencies = {
+  userRepository: HouseholdUserRepository;
   authenticateToken: (token: string) => Promise<User>;
   expenseRepository: ExpenseRepository;
   expenseMutationNotifier?: ExpenseMutationNotifier;
 };
 
 type CreateExpenseBody = {
+  userId?: string;
   date: string;
   price: number;
   category: string;
@@ -21,6 +25,7 @@ type CreateExpenseBody = {
 };
 
 type UpdateExpenseBody = {
+  userId?: string;
   version: number;
   date?: string;
   price?: number;
@@ -61,6 +66,13 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
     });
 
     return c.json({ expenses });
+  });
+
+  app.get("/form-options", async (c) => {
+    const auth = await authenticateRequest(c.req.header("Authorization"), dependencies.authenticateToken);
+    if (!auth.ok) return c.json(auth.body, auth.status);
+    const users = await dependencies.userRepository.listHouseholdUsers();
+    return c.json({ actorId: auth.actor.id, members: users.map(({ id, displayName }) => ({ id, displayName })) });
   });
 
   app.get("/:id", async (c) => {
@@ -104,10 +116,15 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
       return c.json(parsedBody.error, 400);
     }
 
+    if (!(await validPayer(parsedBody.value.userId))) {
+      return c.json(invalidField("userId", "must be a registered household member"), 400);
+    }
+
     let expense;
     try {
       expense = await dependencies.expenseRepository.create({
         actor: auth.actor,
+        ...(parsedBody.value.userId === undefined ? {} : { userId: parsedBody.value.userId }),
         date: parsedBody.value.date,
         price: parsedBody.value.price,
         category: parsedBody.value.category,
@@ -157,12 +174,17 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
       return c.json(parsedBody.error, 400);
     }
 
+    if (!(await validPayer(parsedBody.value.userId))) {
+      return c.json(invalidField("userId", "must be a registered household member"), 400);
+    }
+
     try {
       const expense = await dependencies.expenseRepository.update({
         id: c.req.param("id"),
         actor: auth.actor,
         version: parsedBody.value.version,
         patch: {
+          ...(parsedBody.value.userId === undefined ? {} : { userId: parsedBody.value.userId }),
           ...(parsedBody.value.date === undefined ? {} : { date: parsedBody.value.date }),
           ...(parsedBody.value.price === undefined ? {} : { price: parsedBody.value.price }),
           ...(parsedBody.value.category === undefined
@@ -247,6 +269,11 @@ export function createExpenseRoutes(dependencies: ExpenseRoutesDependencies): Ho
       return repositoryErrorResponse(error);
     }
   });
+
+  async function validPayer(userId: string | undefined): Promise<boolean> {
+    if (userId === undefined) return true;
+    return (await dependencies.userRepository.listHouseholdUsers()).some((user) => user.id === userId);
+  }
 
   return app;
 }
@@ -335,6 +362,7 @@ function parseCreateBody(
 
   return {
     value: {
+      ...("userId" in body ? { userId: body.userId as string } : {}),
       date: body.date as string,
       price: body.price as number,
       category: body.category as string,
@@ -361,7 +389,7 @@ function parseUpdateBody(
     return { error: commonError };
   }
 
-  const updateFields = ["date", "price", "category", "memo"].filter((field) => field in body);
+  const updateFields = ["userId", "date", "price", "category", "memo"].filter((field) => field in body);
   if (updateFields.length === 0) {
     return { error: invalidField("body", "must include at least one update field") };
   }
@@ -369,6 +397,7 @@ function parseUpdateBody(
   return {
     value: {
       version: body.version as number,
+      ...("userId" in body ? { userId: body.userId as string } : {}),
       ...("date" in body ? { date: body.date as string } : {}),
       ...("price" in body ? { price: body.price as number } : {}),
       ...("category" in body ? { category: body.category as string } : {}),
@@ -385,6 +414,10 @@ function validateExpenseFields(
     if (!(field in body)) {
       return invalidField(field, "is required");
     }
+  }
+
+  if ("userId" in body && (typeof body.userId !== "string" || body.userId.trim() === "")) {
+    return invalidField("userId", "must be a non-empty string");
   }
 
   if ("date" in body && (typeof body.date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(body.date))) {

@@ -300,3 +300,27 @@ async function expenseApiError(
     responseBody,
   });
 }
+
+export type ExpenseFormOptions = components["schemas"]["ExpenseFormOptions"];
+
+export async function fetchExpenseFormOptions(
+  input: Omit<FetchExpenseDetailInput, "id">,
+): Promise<ExpenseFormOptions> {
+  if (!input.apiBaseUrl?.trim()) {
+    return {
+      actorId: sampleUsers[0].id,
+      members: sampleUsers.map(({ id, displayName }) => ({ id, displayName })),
+    };
+  }
+  const response = await apiFetch(
+    { apiBaseUrl: input.apiBaseUrl, fetcher: input.fetcher ?? fetch },
+    new URL("/api/expenses/form-options", input.apiBaseUrl).toString(),
+    {
+      headers: authorizationHeaders(input.idToken),
+      ...(input.signal === undefined ? {} : { signal: input.signal }),
+    },
+  );
+  if (!response.ok)
+    throw await expenseApiError("fetch expense form options", response);
+  return response.json();
+}

@@ -280,45 +280,83 @@ button:disabled {
 }
 
 .expenseForm {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
   margin: 12px 0;
+}
+.expenseFormCard {
+  overflow: hidden;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: 14px;
   background: var(--color-surface);
-  padding: 12px;
 }
-
-.expense .expenseForm {
-  grid-column: 1 / -1;
-  margin: 2px 0 0;
-  border-color: var(--color-border);
-  background: var(--color-background);
+.amountField {
+  display: block;
+  padding: 25px 20px 26px;
 }
-
-.field {
-  display: grid;
-  gap: 5px;
-  min-width: 0;
+.formFieldLabel,
+.field > span {
+  display: block;
   color: var(--color-text-secondary);
-  font-size: 0.74rem;
-  font-weight: 800;
+  font-size: 0.75rem;
+  font-weight: 750;
+  margin-bottom: 10px;
 }
-
-.field input {
+.amountInputLine {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.currencyPrefix {
+  font-size: 2rem;
+  font-weight: 750;
+  flex-shrink: 0;
+}
+.amountInputLine input {
   width: 100%;
-  height: 40px;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background: var(--color-surface);
+  min-width: 0;
+  height: 62px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   color: var(--color-text-primary);
-  padding: 8px 10px;
-  font-size: 0.92rem;
-  font-weight: 650;
-  line-height: 22px;
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  font-variant-numeric: tabular-nums;
 }
-
+.amountInputLine input::placeholder {
+  color: #c9bdb3;
+}
+.amountInputLine input:focus-visible {
+  outline: none;
+  box-shadow: 0 2px 0 var(--color-accent);
+}
+.formInfoRow {
+  display: block;
+  min-width: 0;
+  border-top: 1px solid var(--color-border);
+  padding: 18px 20px;
+}
+.field input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 34px;
+  padding: 2px 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 26px;
+}
+.field input::placeholder {
+  color: #b5a599;
+  font-weight: 400;
+}
+.field input[type="date"] {
+  appearance: none;
+}
 .monthInput::-webkit-calendar-picker-indicator,
 .field input[type="date"]::-webkit-calendar-picker-indicator {
   width: 18px;
@@ -326,97 +364,121 @@ button:disabled {
   margin: 0;
   padding: 0;
 }
-
-.wideField,
-.formActions {
-  grid-column: 1 / -1;
+.payerOptions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
 }
-
+.payerOption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 43px;
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+.payerDot {
+  width: 9px;
+  height: 9px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--color-woman);
+}
+.payerMan .payerDot {
+  background: var(--color-man);
+}
+.payerWoman[aria-pressed="true"] {
+  border-color: var(--color-woman);
+  background: var(--color-woman-light);
+}
+.payerMan[aria-pressed="true"] {
+  border-color: var(--color-man);
+  background: var(--color-man-light);
+}
+.payerCheck {
+  visibility: hidden;
+  font-size: 0.75rem;
+}
+.payerOption[aria-pressed="true"] .payerCheck {
+  visibility: visible;
+}
 .formActions {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 10px;
+  margin-top: 18px;
 }
-
 .primaryButton,
-.secondaryButton,
-.deleteButton {
+.secondaryButton {
   min-height: 40px;
   border-radius: 8px;
   padding: 8px 10px;
   font-size: 0.85rem;
   font-weight: 850;
 }
+.expenseForm .primaryButton,
+.expenseForm .secondaryButton {
+  min-height: 48px;
+  border-radius: 9px;
+  padding: 10px;
+  font-size: 0.875rem;
+  font-weight: 800;
+}
 
 .primaryButton {
-  border: 0;
+  border: 1px solid var(--color-accent);
   background: var(--color-accent);
   color: var(--color-text-primary);
 }
-
 .secondaryButton {
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text-secondary);
 }
-
 .deleteButton {
-  grid-column: 1 / -1;
-  border: 1px solid var(--color-woman);
-  background: var(--color-woman-light);
-  color: var(--color-woman-dark);
-}
-
-.detailForm .deleteButton {
-  grid-column: auto;
-}
-
-.detailPanel {
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background: var(--color-surface);
-  padding: 12px;
-}
-
-.detailPanel[data-deleted="true"] {
-  background: var(--color-background);
-}
-
-.detailHeader {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 10px;
-  align-items: center;
-}
-
-.detailName {
-  margin: 0;
-  color: var(--color-text-primary);
-  font-size: 1rem;
-  font-weight: 850;
-  line-height: 1.25;
-  overflow-wrap: anywhere;
-}
-
-.detailMeta {
-  margin: 3px 0 0;
-  color: var(--color-text-secondary);
-  font-size: 0.78rem;
-  font-weight: 750;
-}
-
-.detailForm {
-  margin-bottom: 0;
+  display: block;
+  margin: 18px auto 0;
+  min-height: 40px;
+  padding: 8px 16px;
   border: 0;
-  border-top: 1px solid var(--color-border);
-  border-radius: 0;
-  padding: 12px 0 0;
+  background: transparent;
+  color: var(--color-woman-dark);
+  font-size: 0.8125rem;
+  font-weight: 700;
 }
-
-.detailActions {
-  display: grid;
-  gap: 8px;
-  margin-top: 14px;
+.archiveNotice {
+  padding: 14px 16px;
+  margin: 0 0 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: #f4ede5;
+  font-size: 0.8125rem;
+  line-height: 1.7;
+}
+.archiveNotice strong {
+  font-size: 0.875rem;
+}
+.archiveNotice p {
+  margin: 5px 0 0;
+  color: var(--color-text-secondary);
+}
+.expenseForm[data-archived] input:disabled {
+  color: var(--color-text-secondary);
+  -webkit-text-fill-color: var(--color-text-secondary);
+  opacity: 1;
+}
+.expenseForm[data-archived] .currencyPrefix {
+  color: var(--color-text-secondary);
+}
+.expenseForm[data-archived] .payerOption:disabled {
+  opacity: 0.65;
 }
 
 .list {
@@ -561,9 +623,5 @@ button:disabled {
 
   .amount {
     grid-column: 2;
-  }
-
-  .expenseForm {
-    grid-template-columns: 1fr;
   }
 }
