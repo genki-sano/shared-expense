@@ -14,9 +14,8 @@ export async function initializeLiff(liffId: string): Promise<void> {
     return await liffInitPromise;
   }
 
-  const { default: liff } = await import("@line/liff");
   initializedLiffId = liffId;
-  liffInitPromise = liff.init({ liffId });
+  liffInitPromise = import("@line/liff").then(({ default: liff }) => liff.init({ liffId }));
   return await liffInitPromise;
 }
 

@@ -5,17 +5,23 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "generate:api-types": "openapi-typescript ../../packages/api-contract/openapi.yaml -o src/lib/api-schema.d.ts"
   },
   "dependencies": {
     "@line/liff": "^2.29.1",
     "@shared-expense/shared": "workspace:*",
+    "@tanstack/react-query": "^5",
     "next": "^16.2.12",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
     "@types/react": "^19.2.0",
-    "@types/react-dom": "^19.2.0"
+    "@types/react-dom": "^19.2.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.12",
+    "openapi-typescript": "^7"
   }
 }

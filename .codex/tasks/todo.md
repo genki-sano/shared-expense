@@ -3251,3 +3251,46 @@
 - 2026-09-27 JST: `pnpm test apps/api/src` initially failed because `app-env.test.ts` still expected one webhook push body.
 - 2026-09-27 JST: `pnpm test apps/api/src` passed with 11 files and 57 tests after updating env wiring expectations.
 - 2026-09-27 JST: `pnpm typecheck` passed; Redocly repeated existing warnings for missing OpenAPI license and localhost server URL.
+
+## Task: Frontend refactoring (2026-10-03)
+
+### Findings
+Next 16.2.12 / React 19.2, App Router, output: export configured. Existing / and /expense?expenseId= used by LINE: preserve. Dashboard has 2 fetch/auth effects, detail 1; server data copied to state and manually synchronized after mutations. LIFF Promise assignment after import permits concurrent init. API is React-independent, shared domain types exist, no generated contract types or frontend lint. Vitest covers API/LIFF/month and source structure.
+
+### Target structure / responsibilities / affected files
+app: routing/layout/provider composition; features/expenses/components: existing screens/form/new screen; queries: query/mutation options; small api.ts/month.ts retained. lib: LIFF/HTTP/browser-auth-query boundary. components: common loading/error. Generate request types from unchanged OpenAPI. Change web source/package/config/lock, related tests only; no backend/CSS/contract change.
+
+### Phased checklist
+- [x] Inspect AGENTS/code/config/routing/API/LIFF/state/loading/errors/tests
+- [x] Add Query v5, lint, generated request types
+- [x] Centralize LIFF/HTTP/query/auth boundaries
+- [x] Replace dashboard/detail effects and manual server synchronization; preserve UI
+- [x] Move home composition to feature; add /expenses, /expenses/new, /expenses/detail?id= while preserving old routes
+- [x] Add cache invalidation/concurrent init tests; update obsolete source assertions
+- [x] Verify pnpm typecheck, web lint, pnpm test, pnpm build:web and record logs
+
+Live LINE verification requires credentials; record limitation.
+
+### Execution / design log
+- Preserved CSS, inline create/edit/delete/restore, monthly settlement UI, legacy root/list and LINE notification detail URLs. Canonical static routes added as aliases; standalone create reuses existing ExpenseForm.
+- Removed all four frontend useEffects (dashboard auth and load, detail load, primary LIFF redirect initialization). QueryProvider gates browser rendering with useSyncExternalStore so Static Export never initializes LIFF or calls Backend API.
+- useSuspenseQuery handles monthly list + settlement (parallel requests under one cache entry) and detail. Suspense loading/error/retry boundary; background refetch errors retain data with retry action.
+- useMutation handles create/update/delete/restore; awaited invalidateQueries on expenses prefix refreshes active views and marks cached months/details stale. No manual server-state updates; form drafts/messages/undo target remain UI state.
+- LIFF infrastructure/tests moved to lib. Promise assigned before dynamic import to prevent concurrent init; existing login/expiry behavior retained. Mutation event rechecks token expiry. Auth boundary uses Query and render prop, no new Context/custom hooks.
+- Plain HTTP helpers moved to lib; existing shared domain types preserved, request types generated from unchanged OpenAPI. Command: pnpm --filter @shared-expense/web generate:api-types.
+- Added ESLint Next core-web-vitals/typescript config and web lint command. Generated schema excluded from lint.
+
+### Verification log
+- Initial typecheck failed: new query-test fixtures used empty settlement objects. Replaced with shared calculateMonthlySettlement; complete typecheck then passed. A source assertion depended on formatting; changed to whitespace-tolerant assertion.
+- pnpm test: PASS, 31 files / 174 tests, including 10 new query/auth/concurrent-init tests. Expected backend error-case stderr remains.
+- pnpm --filter @shared-expense/web lint: PASS (no warnings/errors).
+- pnpm build:web: PASS; out/ contains /, /expense, /expenses, /expenses/detail, /expenses/new, robots as static output; no Next server runtime needed.
+- pnpm typecheck: PASS all workspace packages. Existing Redocly warnings: missing info.license and localhost server URL only.
+- Playwright + headless Chrome, mobile 390x844, API mock: PASS list, inline create/update/delete/restore, invalidation-triggered list refetch, canonical/legacy detail, standalone create and return-to-month, root compatibility, actionable error and retry, Bearer headers. Command: node /private/tmp/shared-expense-browser-check/check.cjs (temporary tooling, no project dependency).
+- Static output served from plain Node HTTP server (no Next): PASS list/detail/new and legacy detail hydration, no browser errors. Command: node /private/tmp/shared-expense-browser-check/static.cjs.
+- Screenshot inspected: existing monthly layout/palette preserved.
+- Build-generated next-env.d.ts noise restored; web typecheck rerun. git diff --check: PASS. Development server stopped.
+
+### Remaining limits
+- Actual LINE login and deployed Workers/Spreadsheet requests were not exercised: browser tests use mocked API with local-dev auth; unit tests cover production LIFF token resolution and expiry/login flows.
+- OpenAPI-generated types are checked in; regenerate using generate:api-types when contract changes.

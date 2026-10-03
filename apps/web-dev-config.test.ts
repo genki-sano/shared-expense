@@ -72,7 +72,7 @@ describe("web dev configuration", () => {
     expect(existsSync(join(rootDir, "apps/web/wrangler.jsonc"))).toBe(false);
     expect(rootPackage.scripts).not.toHaveProperty("deploy:web");
     expect(existsSync(join(rootDir, "apps/web/src/app/page.tsx"))).toBe(true);
-    expect(existsSync(join(rootDir, "apps/web/src/app/home-client.tsx"))).toBe(true);
+    expect(existsSync(join(rootDir, "apps/web/src/features/expenses/home-client.tsx"))).toBe(true);
   });
 
   test("web app asks search engines not to index it", () => {
@@ -89,26 +89,23 @@ describe("web dev configuration", () => {
 
   test("web app can initialize LIFF ID tokens for production auth", () => {
     const webPackage = readPackageJson("apps/web/package.json");
-    const homeClientSource = readText("apps/web/src/app/home-client.tsx");
-    const dashboardSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
-    const liffClientSource = readText("apps/web/src/features/expenses/liff-client.ts");
+    const homeClientSource = readText("apps/web/src/features/expenses/home-client.tsx");
+    const dashboardSource = readText("apps/web/src/features/expenses/components/expense-dashboard.tsx");
+    const liffClientSource = readText("apps/web/src/lib/liff-client.ts");
 
     expect(webPackage.dependencies).toMatchObject({
       "@line/liff": expect.any(String),
     });
     expect(homeClientSource).toContain("NEXT_PUBLIC_LIFF_ID");
-    expect(homeClientSource).toContain("NEXT_PUBLIC_DEV_ID_TOKEN");
-    expect(homeClientSource).toContain('process.env.NODE_ENV === "development"');
+    expect(readText("apps/web/src/lib/api-auth.ts")).toContain("NEXT_PUBLIC_DEV_ID_TOKEN");
+    expect(readText("apps/web/src/lib/api-auth.ts")).toContain('process.env.NODE_ENV === "development"');
     expect(homeClientSource).toContain("hasLiffPrimaryRedirectParams(searchParams)");
     expect(homeClientSource).toContain("<LiffPrimaryRedirectGate");
-    expect(dashboardSource).toContain("async function resolveIdToken()");
     expect(dashboardSource).toContain("idToken: currentIdToken");
-    expect(dashboardSource).toContain("getLiffIdToken(");
-    expect(dashboardSource).toContain("new AbortController()");
-    expect(dashboardSource).toContain("abortController.abort()");
-    expect(dashboardSource).toContain("fetchMonthlyExpenses({");
-    expect(dashboardSource).toContain("fetchMonthlySettlement({");
-    expect(dashboardSource).toContain("signal: abortController.signal");
+    expect(dashboardSource).toContain("useSuspenseQuery(monthlyExpensesQuery");
+    expect(dashboardSource).not.toContain("useEffect");
+    expect(readText("apps/web/src/features/expenses/queries/expense-queries.ts")).toContain("signal");
+    expect(readText("apps/web/src/lib/api-session.tsx")).toContain("resolveApiToken(apiBaseUrl)");
     expect(liffClientSource).toContain('import("@line/liff")');
     expect(liffClientSource).toContain("export async function initializeLiff");
     expect(liffClientSource).toContain("liff.init({ liffId })");
@@ -119,7 +116,7 @@ describe("web dev configuration", () => {
   });
 
   test("mobile preview uses a compact dashboard summary instead of stacked metric cards", () => {
-    const pageSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
+    const pageSource = readText("apps/web/src/features/expenses/components/expense-dashboard.tsx");
     const apiSource = readText("apps/web/src/features/expenses/api.ts");
 
     expect(pageSource).toContain('className="summaryPanel"');
@@ -144,11 +141,11 @@ describe("web dev configuration", () => {
 
   test("expense dashboard exposes mobile month navigation", () => {
     const appSource = readText("apps/web/src/app/page.tsx");
-    const homeClientSource = readText("apps/web/src/app/home-client.tsx");
-    const dashboardSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
+    const homeClientSource = readText("apps/web/src/features/expenses/home-client.tsx");
+    const dashboardSource = readText("apps/web/src/features/expenses/components/expense-dashboard.tsx");
     const cssSource = readText("apps/web/src/app/globals.css");
 
-    expect(homeClientSource).toContain("normalizeMonthParam(searchParams.get(\"month\")");
+    expect(homeClientSource).toMatch(/normalizeMonthParam\(\s*searchParams.get\("month"\)/);
     expect(homeClientSource).toContain("currentMonthInJst()");
     expect(homeClientSource).toContain("key={month}");
     expect(appSource).not.toContain('const month = "2026-07"');
@@ -158,8 +155,7 @@ describe("web dev configuration", () => {
     expect(dashboardSource).toContain("addMonths(displayMonth, 1)");
     expect(dashboardSource).toContain("useRouter()");
     expect(dashboardSource).toContain("useTransition()");
-    expect(dashboardSource).toContain("router.push(`/?month=${nextMonth}`)");
-    expect(dashboardSource).toContain("setDisplayMonth(nextMonth)");
+    expect(dashboardSource).toContain("router.push(`/expenses?month=${nextMonth}`)");
     expect(dashboardSource).not.toContain("setExpenses(sortExpenses(props.expenses))");
     expect(dashboardSource).toContain('className="monthLoading"');
     expect(cssSource).toContain(".monthControls");
@@ -170,15 +166,15 @@ describe("web dev configuration", () => {
 
   test("notification detail links open the matching expense details", () => {
     const appSource = readText("apps/web/src/app/page.tsx");
-    const homeClientSource = readText("apps/web/src/app/home-client.tsx");
+    const homeClientSource = readText("apps/web/src/features/expenses/home-client.tsx");
     const detailPageSource = readText("apps/web/src/app/expense/page.tsx");
     const detailClientSource = readText(
-      "apps/web/src/features/expenses/expense-detail-client.tsx",
+      "apps/web/src/features/expenses/components/expense-detail-client.tsx",
     );
     const liffGateSource = readText(
-      "apps/web/src/features/expenses/liff-primary-redirect-gate.tsx",
+      "apps/web/src/lib/liff-primary-redirect-gate.tsx",
     );
-    const dashboardSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
+    const dashboardSource = readText("apps/web/src/features/expenses/components/expense-dashboard.tsx");
     const cssSource = readText("apps/web/src/app/globals.css");
     const notificationSource = readText(
       "apps/api/src/core/notifications/expense-mutation-notifier.ts",
@@ -193,22 +189,15 @@ describe("web dev configuration", () => {
     expect(homeClientSource).toContain("hasLiffPrimaryRedirectParams(searchParams)");
     expect(detailClientSource).toContain("hasLiffPrimaryRedirectParams(searchParams)");
     expect(liffGateSource).toContain("LINE認証を確認しています");
-    expect(dashboardSource).toContain("支出明細を読み込んでいます");
-    expect(dashboardSource).toContain("支出明細を読み込めませんでした");
     expect(dashboardSource).not.toContain("LINE認証に失敗しました");
-    expect(dashboardSource).toContain("isMutationEnabled || isAuthenticating");
     expect(detailPageSource).toContain("<ExpenseDetailClient />");
-    expect(detailClientSource).toContain('searchParams.get("expenseId")');
+    expect(detailClientSource).toContain('searchParams.get("id") ?? searchParams.get("expenseId")');
     expect(detailClientSource).not.toContain("usePathname()");
     expect(detailClientSource).toContain("monthFromExpenseDate(state.expense.date)");
     expect(detailClientSource).not.toContain("formatMonthLabel(detailMonth)");
-    expect(detailClientSource).toContain("fetchExpenseDetail(");
-    expect(detailClientSource).toContain("new AbortController()");
-    expect(detailClientSource).toContain("abortController.abort()");
-    expect(detailClientSource).toContain("signal: abortController.signal");
-    expect(detailClientSource).toContain("updateExpense(");
-    expect(detailClientSource).toContain("deleteExpense(");
-    expect(detailClientSource).toContain("restoreExpense(");
+    expect(detailClientSource).toContain("updateMutation.mutateAsync(");
+    expect(detailClientSource).toContain("deleteMutation.mutateAsync(");
+    expect(detailClientSource).toContain("restoreMutation.mutateAsync(");
     expect(detailClientSource).toContain('key={`${state.expense.id}:${state.expense.version}`}');
     expect(detailClientSource).not.toContain("setDraft(props.defaultDraft)");
     expect(detailClientSource).toContain("一覧へ");
@@ -239,7 +228,7 @@ describe("web dev configuration", () => {
   });
 
   test("expense rows expose payer bars and payer pills for quick scanning", () => {
-    const pageSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
+    const pageSource = readText("apps/web/src/features/expenses/components/expense-dashboard.tsx");
     const cssSource = readText("apps/web/src/app/globals.css");
 
     expect(pageSource).toContain("payerClassName(expense.userId)");
@@ -251,35 +240,35 @@ describe("web dev configuration", () => {
   });
 
   test("expense row meta shows only the payer pill, not category text", () => {
-    const pageSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
+    const pageSource = readText("apps/web/src/features/expenses/components/expense-dashboard.tsx");
 
     expect(pageSource).toContain('className="expenseMeta"');
     expect(pageSource).not.toContain("{expense.category}\n                  <span");
   });
 
   test("expense dashboard exposes create, edit, and delete controls backed by the API client", () => {
-    const homeClientSource = readText("apps/web/src/app/home-client.tsx");
-    const dashboardSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
+    const homeClientSource = readText("apps/web/src/features/expenses/home-client.tsx");
+    const dashboardSource = readText("apps/web/src/features/expenses/components/expense-dashboard.tsx");
     const cssSource = readText("apps/web/src/app/globals.css");
 
     expect(homeClientSource).toContain("<ExpenseDashboard");
     expect(dashboardSource).toContain('"use client"');
-    expect(dashboardSource).toContain("createExpense(");
-    expect(dashboardSource).toContain("updateExpense(");
-    expect(dashboardSource).toContain("deleteExpense(");
-    expect(dashboardSource).toContain("restoreExpense(");
+    expect(dashboardSource).toContain("createMutation.mutateAsync(");
+    expect(dashboardSource).toContain("updateMutation.mutateAsync(");
+    expect(dashboardSource).toContain("deleteMutation.mutateAsync(");
+    expect(dashboardSource).toContain("restoreMutation.mutateAsync(");
     expect(dashboardSource).toContain("console.error");
     expect(dashboardSource).toContain("errorMessageForUser(error)");
     expect(dashboardSource).toContain('aria-label="支出を追加"');
     expect(dashboardSource).toContain('aria-label={`支出を編集:');
-    expect(dashboardSource).toContain('aria-label="支出を削除"');
+    expect(readText("apps/web/src/features/expenses/components/expense-form.tsx")).toContain('aria-label="支出を削除"');
     expect(dashboardSource).toContain("元に戻す");
     expect(cssSource).toContain(".statusLink");
     expect(cssSource).toContain(".expenseForm");
   });
 
   test("expense edit and delete controls are optimized for mobile tapping", () => {
-    const dashboardSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
+    const dashboardSource = readText("apps/web/src/features/expenses/components/expense-dashboard.tsx");
     const cssSource = readText("apps/web/src/app/globals.css");
 
     expect(dashboardSource).toContain('className="expenseTapTarget"');
@@ -293,7 +282,7 @@ describe("web dev configuration", () => {
   });
 
   test("expense form captures payment content without a category field", () => {
-    const dashboardSource = readText("apps/web/src/features/expenses/expense-dashboard.tsx");
+    const dashboardSource = readText("apps/web/src/features/expenses/components/expense-form.tsx");
 
     expect(dashboardSource).toContain("<span>支払内容</span>");
     expect(dashboardSource).toContain('category: DEFAULT_EXPENSE_CATEGORY');

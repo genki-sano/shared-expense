@@ -1,3 +1,5 @@
+import type { components } from "../../lib/api-schema";
+import { authorizationHeaders, apiFetch } from "../../lib/http-client";
 import { calculateMonthlySettlement, type Expense } from "@shared-expense/shared";
 import type { HouseholdUsers, MonthlySettlementSummary } from "@shared-expense/shared";
 
@@ -28,16 +30,8 @@ export type FetchMonthlyExpensesInput = {
 
 export type FetchMonthlySettlementInput = FetchMonthlyExpensesInput;
 
-export type CreateExpensePayload = {
-  date: string;
-  price: number;
-  category: string;
-  memo: string | null;
-};
-
-export type UpdateExpensePayload = CreateExpensePayload & {
-  version: number;
-};
+export type CreateExpensePayload = components["schemas"]["CreateExpenseRequest"];
+export type UpdateExpensePayload = components["schemas"]["UpdateExpenseRequest"];
 
 export type ExpenseMutationInput = {
   apiBaseUrl: string | undefined;
@@ -138,7 +132,7 @@ export async function fetchMonthlyExpenses(
   const url = new URL("/api/expenses", input.apiBaseUrl);
   url.searchParams.set("date", input.month);
 
-  const response = await fetcher(url.toString(), {
+  const response = await apiFetch({ apiBaseUrl: input.apiBaseUrl, fetcher }, url.toString(), {
     headers: authorizationHeaders(input.idToken),
     ...(input.signal === undefined ? {} : { signal: input.signal }),
   });
@@ -165,7 +159,7 @@ export async function fetchMonthlySettlement(
   const url = new URL("/api/settlements", input.apiBaseUrl);
   url.searchParams.set("month", input.month);
 
-  const response = await fetcher(url.toString(), {
+  const response = await apiFetch({ apiBaseUrl: input.apiBaseUrl, fetcher }, url.toString(), {
     headers: authorizationHeaders(input.idToken),
     ...(input.signal === undefined ? {} : { signal: input.signal }),
   });
@@ -191,8 +185,9 @@ export async function fetchExpenseDetail(
   }
 
   const fetcher = input.fetcher ?? fetch;
-  const response = await fetcher(
-    new URL(`/api/expenses/${encodeURIComponent(input.id)}`, input.apiBaseUrl).toString(),
+  const response = await apiFetch(
+    { apiBaseUrl: input.apiBaseUrl, fetcher },
+    `/api/expenses/${encodeURIComponent(input.id)}`,
     {
       headers: authorizationHeaders(input.idToken),
       ...(input.signal === undefined ? {} : { signal: input.signal }),
@@ -222,7 +217,7 @@ export async function createExpense(input: CreateExpenseInput): Promise<Expense>
 
 export async function updateExpense(input: UpdateExpenseInput): Promise<Expense> {
   const operation = "update expense";
-  const response = await mutationFetch(input, `/api/expenses/${input.id}`, {
+  const response = await mutationFetch(input, `/api/expenses/${encodeURIComponent(input.id)}`, {
     method: "PUT",
     json: input.expense,
   });
@@ -236,7 +231,7 @@ export async function updateExpense(input: UpdateExpenseInput): Promise<Expense>
 
 export async function deleteExpense(input: DeleteExpenseInput): Promise<void> {
   const operation = "delete expense";
-  const response = await mutationFetch(input, `/api/expenses/${input.id}`, {
+  const response = await mutationFetch(input, `/api/expenses/${encodeURIComponent(input.id)}`, {
     method: "DELETE",
   });
 
@@ -247,7 +242,7 @@ export async function deleteExpense(input: DeleteExpenseInput): Promise<void> {
 
 export async function restoreExpense(input: RestoreExpenseInput): Promise<Expense> {
   const operation = "restore expense";
-  const response = await mutationFetch(input, `/api/expenses/${input.id}/restore`, {
+  const response = await mutationFetch(input, `/api/expenses/${encodeURIComponent(input.id)}/restore`, {
     method: "POST",
   });
 
@@ -285,15 +280,7 @@ async function mutationFetch(
     init.body = JSON.stringify(options.json);
   }
 
-  return await fetcher(new URL(path, input.apiBaseUrl).toString(), init);
-}
-
-function authorizationHeaders(idToken: string | undefined): Record<string, string> {
-  if (idToken === undefined || idToken === "") {
-    return {};
-  }
-
-  return { Authorization: `Bearer ${idToken}` };
+  return await apiFetch({ apiBaseUrl: input.apiBaseUrl, fetcher }, path, init);
 }
 
 async function expenseApiError(

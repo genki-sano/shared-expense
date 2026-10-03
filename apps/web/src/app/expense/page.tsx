@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { ExpenseDetailClient } from "../../features/expenses/expense-detail-client";
+import { ExpenseDetailClient } from "../../features/expenses/components/expense-detail-client";
 
 export default function ExpenseDetailPage() {
   return (

@@ -47,6 +47,12 @@ describe("getLiffIdToken", () => {
     expect(liffMock.login).not.toHaveBeenCalled();
   });
 
+  it("initializes once for concurrent calls and subsequent token reads", async () => {
+    await Promise.all([initializeLiff("liff-id"), initializeLiff("liff-id")]);
+    await getLiffIdToken({ liffId: "liff-id", now: new Date(1_000_000) });
+    expect(liffMock.init).toHaveBeenCalledTimes(1);
+  });
+
   it("can initialize LIFF without reading an ID token", async () => {
     await expect(initializeLiff("liff-id")).resolves.toBeUndefined();
 
