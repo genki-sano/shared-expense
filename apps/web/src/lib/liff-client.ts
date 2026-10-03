@@ -100,3 +100,16 @@ function markExpiredIdTokenRefreshInProgress(): void {
 function clearExpiredIdTokenRefresh(): void {
   globalThis.sessionStorage?.removeItem(EXPIRED_ID_TOKEN_REFRESH_KEY);
 }
+
+type SearchParamsLike = {
+  get(name: string): string | null;
+};
+
+export function hasLiffPrimaryRedirectParams(
+  searchParams: SearchParamsLike,
+): boolean {
+  return (
+    searchParams.get("liff.state") !== null ||
+    searchParams.get("access_token") !== null
+  );
+}

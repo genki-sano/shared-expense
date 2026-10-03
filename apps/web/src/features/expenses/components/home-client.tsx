@@ -1,14 +1,14 @@
 "use client";
 
+import { hasLiffPrimaryRedirectParams } from "../../../lib/liff-client";
 import { useSearchParams } from "next/navigation";
 import { errorMessageForUser } from "../error-message";
 import { ExpenseDashboard } from "./expense-dashboard";
 import {
-  hasLiffPrimaryRedirectParams,
   LiffPrimaryRedirectGate,
-} from "../../../lib/liff-primary-redirect-gate";
+} from "../../../components/liff-primary-redirect-gate";
 import { currentMonthInJst, normalizeMonthParam } from "../month";
-import { ApiSessionBoundary } from "../../../lib/api-session";
+import { ApiSessionBoundary } from "../../../components/api-session";
 import { QueryBoundary } from "../../../components/query-boundary";
 
 export function HomeClient() {

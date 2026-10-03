@@ -3318,3 +3318,36 @@ Frontend dashboard/routes/detail query parsing, corresponding frontend tests, LI
 - node /private/tmp/shared-expense-browser-check/static-navigation.cjs: PASS on mobile 390x844 and desktop 1280x800. Plain static HTTP server (no Next runtime), actual plus/row clicks, URLs/new/detail rendering, list return and browser back, no browser errors; expense.html absent.
 - node /private/tmp/shared-expense-browser-check/navigation.cjs: PASS with mocked API/Bearer local-dev. Actual plus -> create -> correct-month list, invalidation-triggered list refetch, row -> detail update/delete/restore -> list, cancel, browser back, desktop keyboard Enter, previous month carried into creation date. Initial browser assertion raced loading; added explicit form-ready wait and reran successfully.
 - git diff --check: PASS. Local dev server stopped. Real LINE login/production Spreadsheet not used for this verification.
+
+## Task: Consistent shared React component placement (2026-10-03)
+- [x] Inspect lib TSX and consumers
+- [x] Move QueryProvider, ApiSessionBoundary and LiffPrimaryRedirectGate to components; update imports and source tests
+- [x] Keep plain token/session types and LIFF redirect detection in lib; avoid type imports through React components
+- [x] Web typecheck passed; run web lint and related tests, then check diff
+- Behavior, authentication, caching and routing unchanged.
+- Verification: pnpm --filter @shared-expense/web typecheck PASS; web lint PASS; pnpm test apps/web apps/web-dev-config.test.ts PASS (8 files / 56 tests); git diff --check PASS after trimming an extra EOF blank line.
+
+## Task: Document web directory conventions (2026-10-03)
+- [x] Inspect current web tree, route composition, imports, API/query/auth responsibilities and existing documentation
+- [x] Write apps/web/README.md with current structure, placement rules, dependency direction, naming/tests/generated files and known exceptions
+- [x] Verify documented paths and commands against current source; check diff; report
+- Documentation only. Preserve pending shared-component moves; no runtime cleanup or unrelated restructuring.
+- Verification: confirmed all 30 documented source/config paths, script names, canonical route layout, no TSX in lib, Static Export setting and OpenAPI source. git diff --check PASS. No runtime code changes or test reruns needed for this documentation change.
+
+## Task: Finalize web conventions and remove unused code (2026-10-03)
+- [x] Confirm page-data is referenced only by its tests; ExpenseForm delete props have no callers
+- [x] Adopt user-provided README rules, update tree for removals, add scoped AGENTS README review/update instruction
+- [x] Remove obsolete page-data module/tests and unused create-form deletion controls; merge LIFF redirect tests into tested module
+- [x] Run full tests, typecheck, web lint, Static Export; verify README tree and record results
+- Preserve pending component relocations. No API contract or UI behavior changes.
+
+### Verification / result
+- Removed page-data.ts and its 3 obsolete tests after confirming no runtime callers. Removed unused ExpenseForm onDelete/deleteLabel and associated delete button; detail deletion remains unchanged.
+- Merged 3 redirect-parameter tests into liff-client.test.ts and removed misleading old test filename; LIFF coverage retained.
+- Adopted supplied README rules; updated tree for actual files/removals, removed resolved legacy cleanup list, included scoped AGENTS and documentation update rule.
+- Added apps/web/AGENTS.md requiring README review before changes, assessment on every change, updates in same task when needed, and reporting update/no-update reasoning.
+- pnpm test: PASS 29 files / 171 tests (3 tests removed with obsolete page-data module).
+- pnpm --filter @shared-expense/web lint: PASS. pnpm build:web: PASS static list/new/detail/root output.
+- pnpm typecheck: PASS all workspaces; pre-existing OpenAPI license/localhost warnings only. Restored build-generated next-env.d.ts noise and reran web typecheck: PASS.
+- README tree checked against filesystem: PASS all 31 listed files. Confirmed no lib TSX or removed-module references in current web source. git diff --check: PASS.
+- README updated because placement rules, scoped agent instructions and cleanup changed documented structure.

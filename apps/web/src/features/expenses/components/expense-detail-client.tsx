@@ -3,6 +3,7 @@
 import { errorMessageForUser } from "../error-message";
 import type { Expense } from "@shared-expense/shared";
 import Link from "next/link";
+import { hasLiffPrimaryRedirectParams } from "../../../lib/liff-client";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import {
@@ -17,16 +18,16 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { ApiSessionBoundary, type ApiSession } from "../../../lib/api-session";
+import { ApiSessionBoundary } from "../../../components/api-session";
+import type { ApiSession } from "../../../lib/api-auth";
 import { QueryBoundary } from "../../../components/query-boundary";
 import {
   expenseQuery,
   expenseMutationOptions,
 } from "../queries/expense-queries";
 import {
-  hasLiffPrimaryRedirectParams,
   LiffPrimaryRedirectGate,
-} from "../../../lib/liff-primary-redirect-gate";
+} from "../../../components/liff-primary-redirect-gate";
 
 type ExpenseDetailDraft = {
   date: string;

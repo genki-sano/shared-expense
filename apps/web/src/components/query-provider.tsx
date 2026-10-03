@@ -2,7 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, useSyncExternalStore, type ReactNode } from "react";
-import { StatusScreen } from "../components/query-boundary";
+import { StatusScreen } from "./query-boundary";
 
 const subscribe = () => () => {};
 const browserSnapshot = () => true;

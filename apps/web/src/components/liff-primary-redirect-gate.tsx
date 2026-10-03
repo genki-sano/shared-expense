@@ -1,20 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { initializeLiff } from "./liff-client";
-
-type SearchParamsLike = {
-  get(name: string): string | null;
-};
-
-export function hasLiffPrimaryRedirectParams(
-  searchParams: SearchParamsLike,
-): boolean {
-  return (
-    searchParams.get("liff.state") !== null ||
-    searchParams.get("access_token") !== null
-  );
-}
+import { initializeLiff } from "../lib/liff-client";
 
 export function LiffPrimaryRedirectGate(props: { liffId: string }) {
   const initialization = useQuery({

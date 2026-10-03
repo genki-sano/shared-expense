@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { QueryProvider } from "../lib/query-provider";
+import { QueryProvider } from "../components/query-provider";
 
 export const metadata: Metadata = {
   title: "Shared Expense",

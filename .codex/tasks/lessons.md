@@ -28,3 +28,10 @@
 
 ## 2026-10-03: Place feature composition components consistently
 - User noted HomeClient sits outside components although it composes React feature UI. Keep feature React components, including composition/auth wrappers, under the existing components directory; app owns route files.
+
+## 2026-10-03: Separate React boundaries from plain infrastructure
+- User pointed out TSX providers/auth screens remaining under lib. Keep common React providers and rendering boundaries in components; lib owns React-independent LIFF/HTTP/auth functions and types. Classify by responsibility rather than technical topic alone.
+
+## 2026-10-03: Keep conventions actionable and remove confirmed dead code
+- User requested ordered responsibility-based placement rules and explicit prohibited dependencies. Separate normative rules from existing exceptions; verify unused code references before removing it.
+- For every apps/web change, consult scoped AGENTS and review README impact; update documentation when responsibilities, structure, routes or verification commands change.

@@ -2,10 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
-import { resolveApiToken, type ApiSession } from "./api-auth";
-import { StatusScreen } from "../components/query-boundary";
-
-export type { ApiSession } from "./api-auth";
+import { resolveApiToken, type ApiSession } from "../lib/api-auth";
+import { StatusScreen } from "./query-boundary";
 
 export function ApiSessionBoundary({
   children,

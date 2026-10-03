@@ -104,7 +104,7 @@ describe("web dev configuration", () => {
     expect(dashboardSource).toContain("useSuspenseQuery(monthlyExpensesQuery");
     expect(dashboardSource).not.toContain("useEffect");
     expect(readText("apps/web/src/features/expenses/queries/expense-queries.ts")).toContain("signal");
-    expect(readText("apps/web/src/lib/api-session.tsx")).toContain("resolveApiToken(apiBaseUrl)");
+    expect(readText("apps/web/src/components/api-session.tsx")).toContain("resolveApiToken(apiBaseUrl)");
     expect(liffClientSource).toContain('import("@line/liff")');
     expect(liffClientSource).toContain("export async function initializeLiff");
     expect(liffClientSource).toContain("liff.init({ liffId })");
@@ -171,7 +171,7 @@ describe("web dev configuration", () => {
       "apps/web/src/features/expenses/components/expense-detail-client.tsx",
     );
     const liffGateSource = readText(
-      "apps/web/src/lib/liff-primary-redirect-gate.tsx",
+      "apps/web/src/components/liff-primary-redirect-gate.tsx",
     );
     const dashboardSource = readText("apps/web/src/features/expenses/components/expense-dashboard.tsx");
     const cssSource = readText("apps/web/src/app/globals.css");

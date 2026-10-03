@@ -6,11 +6,9 @@ const DEFAULT_EXPENSE_CATEGORY = "その他";
 
 export function ExpenseForm(props: {
   defaultDraft: ExpenseFormDraft;
-  deleteLabel?: string;
   disabled: boolean;
   submitLabel: string;
   onCancel: () => void;
-  onDelete?: () => Promise<void>;
   onSubmit: (payload: CreateExpensePayload) => Promise<void>;
 }) {
   const [draft, setDraft] = useState(props.defaultDraft);
@@ -81,17 +79,7 @@ export function ExpenseForm(props: {
         >
           キャンセル
         </button>
-        {props.onDelete === undefined ? null : (
-          <button
-            className="deleteButton"
-            type="button"
-            disabled={props.disabled}
-            aria-label="支出を削除"
-            onClick={() => void props.onDelete?.()}
-          >
-            {props.deleteLabel ?? "削除"}
-          </button>
-        )}
+
       </div>
     </form>
   );

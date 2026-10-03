@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { hasLiffPrimaryRedirectParams } from "../../../lib/liff-client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { ApiSessionBoundary, type ApiSession } from "../../../lib/api-session";
+import { ApiSessionBoundary } from "../../../components/api-session";
+import type { ApiSession } from "../../../lib/api-auth";
 import {
-  hasLiffPrimaryRedirectParams,
   LiffPrimaryRedirectGate,
-} from "../../../lib/liff-primary-redirect-gate";
+} from "../../../components/liff-primary-redirect-gate";
 import { errorMessageForUser } from "../error-message";
 import { createExpense, type CreateExpensePayload } from "../api";
 import { expenseMutationOptions } from "../queries/expense-queries";
