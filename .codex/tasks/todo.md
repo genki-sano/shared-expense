@@ -3432,3 +3432,9 @@ Frontend dashboard/routes/detail query parsing, corresponding frontend tests, LI
 - [x] Added text-align:left to shared date input and ::-webkit-date-and-time-value. Native type=date picker retained; applies to create/detail/archived forms.
 - [x] pnpm --filter @shared-expense/web lint PASS; pnpm test apps/web apps/web-dev-config.test.ts PASS (7 files / 57 tests); git diff --check PASS.
 - Verified selector scope and declarations by diff review. Physical iPhone/Safari rendering was not tested; browser unspecified by user, WebKit-specific alignment is supported by its native stylesheet behavior.
+
+## Page title review (2026-10-03)
+- [x] Reviewed user change: root metadata title Shared Expense → ふたり財布; no page overrides, routes or runtime logic affected.
+- [x] Web typecheck and lint PASS; pnpm build:web PASS.
+- [x] Exported /, /expenses, /expenses/new and /expenses/detail HTML each contains title ふたり財布; git diff --check PASS.
+- README reviewed; metadata text-only change does not affect placement/responsibilities or documented facts, so update unnecessary.

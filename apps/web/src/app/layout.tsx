@@ -3,7 +3,7 @@ import "./globals.css";
 import { QueryProvider } from "../components/query-provider";
 
 export const metadata: Metadata = {
-  title: "Shared Expense",
+  title: "ふたり財布",
   description: "Monthly shared expense list",
   robots: {
     index: false,
