@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import worker from "./index";
+import * as appModule from "./app";
 
 describe("API Worker entrypoint", () => {
   it("uses Cloudflare env to create the production app", async () => {
@@ -21,4 +22,34 @@ describe("API Worker entrypoint", () => {
       "https://liff.example.com",
     );
   });
+});
+
+it("registers background work on the original Worker execution context", async () => {
+  const original = appModule.createAppFromEnv;
+  let schedule: ((task: Promise<void>) => void) | undefined;
+  const factory = vi
+    .spyOn(appModule, "createAppFromEnv")
+    .mockImplementation((env, dependencies) => {
+      schedule = dependencies?.scheduleWebhook;
+      return original(env, dependencies);
+    });
+  const tasks: Promise<unknown>[] = [];
+  const context = {
+    tasks,
+    waitUntil(task: Promise<unknown>) {
+      this.tasks.push(task);
+    },
+  };
+  try {
+    await worker.fetch(
+      new Request("https://api.example.test/health"),
+      {},
+      context,
+    );
+    const task = Promise.resolve();
+    schedule!(task);
+    expect(tasks).toEqual([task]);
+  } finally {
+    factory.mockRestore();
+  }
 });

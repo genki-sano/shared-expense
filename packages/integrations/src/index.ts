@@ -49,6 +49,7 @@ export {
 } from "./line/id-token-verifier";
 export {
   FetchLineMessagingClient,
+  LineMessagingApiError,
   LINE_PUSH_MESSAGE_URL,
   LINE_REPLY_MESSAGE_URL,
 } from "./line/messaging-client";

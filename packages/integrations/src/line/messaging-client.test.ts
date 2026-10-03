@@ -212,3 +212,17 @@ describe("FetchLineMessagingClient", () => {
     ]);
   });
 });
+
+it("sets retry keys and recognizes previously accepted push requests", async () => {
+  const fetcher = async (_url: string | URL | Request, init?: RequestInit) => {
+    expect(init?.headers).toMatchObject({ "X-Line-Retry-Key": "123e4567-e89b-42d3-a456-426614174000" });
+    return new Response("already accepted", { status: 409, headers: { "x-line-accepted-request-id": "accepted-1" } });
+  };
+  const client = new FetchLineMessagingClient({ channelAccessToken: "test", fetcher });
+  await expect(client.pushMessage({ to: "line_user", retryKey: "123e4567-e89b-42d3-a456-426614174000", messages: [{ type: "text", text: "test" }] })).resolves.toBeUndefined();
+});
+
+it("does not suppress unrelated push conflicts", async () => {
+  const client = new FetchLineMessagingClient({ channelAccessToken: "test", fetcher: async () => new Response("conflict", { status: 409 }) });
+  await expect(client.pushMessage({ to: "line_user", retryKey: "key", messages: [{ type: "text", text: "test" }] })).rejects.toMatchObject({ status: 409 });
+});

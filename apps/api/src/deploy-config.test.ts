@@ -33,7 +33,7 @@ describe("api Cloudflare deployment configuration", () => {
       enabled: true,
       head_sampling_rate: 1,
     });
-    expect(indexSource).toContain("createAppFromEnv(env)");
+    expect(indexSource).toMatch(/createAppFromEnv\(\s*env,/);
   });
 
   it("exposes only necessary API Worker scripts", () => {
@@ -52,6 +52,7 @@ describe("api Cloudflare deployment configuration", () => {
       typecheck: "tsc -p tsconfig.json --noEmit",
       deploy: "wrangler deploy",
       "dry-run": "wrangler deploy --dry-run",
+      "generate:worker-types": "wrangler types src/worker-bindings.d.ts --env-interface ApiWorkerBindings --include-runtime false --strict-vars false",
     });
     expect(rootPackageJson).toContain(
       '"build:api": "pnpm --filter @shared-expense/api build"',

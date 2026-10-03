@@ -48,8 +48,10 @@ export class InMemoryExpenseRepository implements ExpenseRepository {
   }
 
   async create(input: CreateExpenseInput): Promise<Expense> {
+    const existing = [...this.#expenses, ...this.#deletedExpenses].find((expense) => expense.id === input.id);
+    if (existing) return existing;
     const expense: Expense = {
-      id: `exp_${this.#expenses.length + 1}`,
+      id: input.id ?? `exp_${this.#expenses.length + 1}`,
       userId: input.userId ?? input.actor.id,
       date: input.date,
       price: input.price,

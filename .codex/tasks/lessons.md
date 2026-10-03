@@ -43,3 +43,6 @@
 
 ## 2026-10-03: Account for native mobile date styling
 - Shared date-input visual review must include iOS's internal ::-webkit-date-and-time-value alignment. Explicitly align both the input and native value element; desktop/mobile viewport emulation alone does not verify actual iOS native controls.
+
+## 2026-10-03: Identify the missing notification before attributing failure
+- Clarify recipient and whether the chat message or device notification is missing. An empty partner push target is a separate defect and does not explain actor delivery when sends are isolated by Promise.allSettled. Do not infer initial-login timing as the cause without response logs.

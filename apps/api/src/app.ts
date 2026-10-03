@@ -1,3 +1,4 @@
+import { D1WebhookEventStore, type WebhookEventStore } from "./line-webhook/event-store";
 import {
   FetchGoogleSheetsValuesClient,
   FetchLineMessagingClient,
@@ -41,7 +42,7 @@ export type AppDependencies = {
   lineWebhook?: LineWebhookRoutesDependencies;
 };
 
-export type AppEnv = {
+export type AppEnv = Partial<Pick<ApiWorkerBindings, "LINE_WEBHOOK_DB">> & {
   API_ALLOWED_ORIGINS?: string | undefined;
   GOOGLE_SPREADSHEET_ID?: string | undefined;
   GOOGLE_SERVICE_ACCOUNT_EMAIL?: string | undefined;
@@ -53,6 +54,8 @@ export type AppEnv = {
 };
 
 export type AppEnvDependencies = {
+  scheduleWebhook?: (task: Promise<void>) => void;
+  webhookEventStore?: WebhookEventStore;
   authenticateToken?: ((token: string) => Promise<User>) | undefined;
   fetcher?: typeof fetch;
   signServiceAccountJwt?: ServiceAccountJwtSigner;
@@ -193,6 +196,8 @@ function optionalLineWebhookFromEnv(
 
   return {
     lineWebhook: {
+      eventStore: dependencies.webhookEventStore ?? (env.LINE_WEBHOOK_DB ? new D1WebhookEventStore(env.LINE_WEBHOOK_DB) : null),
+      ...(dependencies.scheduleWebhook ? { schedule: dependencies.scheduleWebhook } : {}),
       channelSecret: env.LINE_MESSAGING_CHANNEL_SECRET,
       expenseRepository: repositories.expenseRepository,
       ...optionalDetailBaseUrlFromEnv(env),

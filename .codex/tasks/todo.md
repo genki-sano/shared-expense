@@ -3438,3 +3438,39 @@ Frontend dashboard/routes/detail query parsing, corresponding frontend tests, LI
 - [x] Web typecheck and lint PASS; pnpm build:web PASS.
 - [x] Exported /, /expenses, /expenses/new and /expenses/detail HTML each contains title ふたり財布; git diff --check PASS.
 - README reviewed; metadata text-only change does not affect placement/responsibilities or documented facts, so update unnecessary.
+
+## First LINE expense notification investigation (2026-10-03)
+- [x] Inspect onboarding registration, Spreadsheet user mapping, reply and push branches.
+- [x] Identify empty recipient defect: Spreadsheet unclaimed users have empty lineUserId and notifyEnabled=true; webhook notifications filter only notifyEnabled.
+- [x] Existing webhook tests PASS (9 tests). Temporary offline reproduction with an unregistered partner confirms successful reply and an empty push recipient; mock push failure is logged while webhook returns 200.
+- Production cause not confirmed without Workers error log / partner registration state. No source changes made.
+- User clarified missing delivery is to the actor, not partner. Empty-partner defect does not explain actor failure: Promise.allSettled isolates recipients.
+- Actor is included in both success reply and household push; no first-message skip branch found. Reply token expiry could explain reply failure but cannot alone explain absent actor push. Requested distinction between missing chat message vs OS notification and corresponding Workers reason/recipient logs. Production root cause remains unconfirmed.
+
+## API logging inventory (2026-10-03)
+- [x] Enumerated production API and integration console calls and checked Workers observability config.
+- [x] Confirmed six explicit production error log sites: auth failure, API expense create failure, API mutation notification failure, webhook expense create failure, webhook success reply failure, webhook per-recipient push failure.
+- [x] Confirmed absence of application success/stage logs (webhook receive, onboarding, save, reply/push success, skipped recipients). Validation and known 404/409 responses lack custom logs.
+- [x] Targeted auth/webhook/API tests PASS (3 files / 39 tests). Source only reviewed; production log storage not accessed.
+- Worker observability enabled at sampling 1 in repository; Cloudflare invocation logs are separate from application console errors. Actual deployed settings remain unverified.
+
+## LINE webhook asynchronous processing implementation (2026-10-03)
+- [x] Confirm current synchronous webhook waits for Sheets and LINE before returning; no persistent webhook state exists (notification history has only shared domain types).
+- [x] Add authenticated/validated early acknowledgment and execution-context waitUntil; preserve synchronous local/test fallback explicitly.
+- [x] Add D1 atomic event claim and persistent stages (saved expense, reply, recipient delivery). Use event-derived expense identity to recover uncertain Sheets writes without re-append; serialize concurrent replay claims.
+- [x] Add structured stage/start/success/failure/skip logs with event/expense/internal-user IDs; never log message bodies, tokens or raw LINE identifiers.
+- [x] Add replay-safe push retry keys, skip unregistered recipients, and avoid repeating completed steps. No automatic background retries or queue.
+- [x] Add tests for early response, concurrency, redelivery, save/notification failures, uncertain writes and production context wiring; verify D1 SQL on local engine, typecheck/tests/build and deployment docs.
+- [x] Provide database/migration setup and log/recovery instructions; do not deploy or commit without request.
+- Design risk: D1 and Sheets have no cross-service transaction. Recover saves via deterministic event identity; ambiguous ongoing write after cancellation needs conservative handling rather than claiming exactly-once delivery.
+
+
+### Verification and deployment limits
+- pnpm typecheck PASS (all workspace packages); existing OpenAPI license/localhost warnings unchanged.
+- pnpm test PASS: 32 files / 194 tests. Added early acknowledgment, concurrent/replayed events, partial notification replay, unknown save outcomes, expired push retry keys, lease recovery and stale claims, Worker execution-context wiring and LINE 409 retry acknowledgment tests.
+- pnpm build:api PASS; pnpm --filter @shared-expense/api dry-run PASS (bundle 154.61 KiB, D1 binding recognized; no upload).
+- Local D1 migration previously applied successfully. Exact adapter SQL verified against SQLite: atomic claims, persisted progress, expired leases, stale-token rejection, failed release/reclaim and completed-event skip all PASS.
+- git diff --check PASS. No API lint script exists; frontend unchanged.
+- Deployment guide updated with D1 creation/binding/migration, logging and recovery limitations. .wrangler ignored as generated local state.
+- Real D1 must be created and placeholder database_id replaced before deployment. No remote database creation, remote migration, deployment, commit or push performed.
+- waitUntil remains best effort with a 30-second post-response limit; no automatic retries or payload retention. Unknown saves and pushes beyond the 24-hour retry-key window require manual inspection. End-to-end production LINE/Spreadsheet validation remains pending after setup/deployment.
