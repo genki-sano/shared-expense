@@ -3489,3 +3489,9 @@ Frontend dashboard/routes/detail query parsing, corresponding frontend tests, LI
 - git diff --check PASS. Production LINE/Spreadsheet validation not performed.
 - Removed progress stores/tests, migration, generated D1 binding types, configuration, event-derived IDs and replay retry-key support. Retained Workers execution-context types for waitUntil.
 - Recovery is manual via logs and Spreadsheet; no durable execution, deduplication or automatic retries. Updated deployment documentation; frontend unchanged. No deployment, remote database deletion or commit performed.
+
+## Webhook actor Reply only (2026-10-04)
+- [x] Exclude actor from all Push deliveries, including Reply failure fallback; preserve early acknowledgment and partner notification.
+- [x] Update notification tests and deployment guide; verify typecheck, tests and API build.
+
+- Verification: pnpm typecheck PASS (existing OpenAPI warnings only), pnpm test PASS (31 files / 188 tests), pnpm build:api PASS, git diff --check PASS. Tests confirm actor is never pushed on Reply success/failure, partner still receives Push on Reply failure, disabled/unregistered partner is skipped, and early acknowledgment remains. No production connection, deployment or commit.

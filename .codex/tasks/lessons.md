@@ -49,3 +49,6 @@
 
 ## 2026-10-04: Match webhook reliability scope to the requested fix
 - Early acknowledgment and waitUntil do not require persistent state. Do not add D1/deduplication infrastructure to a timeout-and-logging fix without agreement on its extra operational responsibility.
+
+## 2026-10-04: Avoid duplicate actor notifications
+- Webhook expense creation confirms to the actor using Reply only. Push recipients exclude the actor even when Reply fails; timeout mitigation should not introduce an actor Push fallback.

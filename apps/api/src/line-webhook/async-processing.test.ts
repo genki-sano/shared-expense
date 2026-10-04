@@ -96,7 +96,10 @@ describe("asynchronous LINE webhook without persistent state", () => {
     unblock();
     await Promise.all(f.tasks);
     expect(f.client.replyMessage).toHaveBeenCalledOnce();
-    expect(f.client.pushMessage).toHaveBeenCalledTimes(2);
+    expect(f.client.pushMessage).toHaveBeenCalledTimes(1);
+    expect(f.client.pushMessage.mock.calls.map(([input]) => input.to)).toEqual([
+      partner.lineUserId,
+    ]);
     expect(console.info).toHaveBeenCalledWith(
       expect.objectContaining({
         event: "line_webhook.save_completed",
@@ -129,7 +132,7 @@ describe("asynchronous LINE webhook without persistent state", () => {
       200,
     );
     await Promise.all(f.tasks);
-    expect(f.client.pushMessage).toHaveBeenCalledTimes(2);
+    expect(f.client.pushMessage).toHaveBeenCalledTimes(1);
     expect(console.error).toHaveBeenCalledWith(
       expect.objectContaining({
         event: "line_webhook.save_failed",
@@ -143,7 +146,7 @@ describe("asynchronous LINE webhook without persistent state", () => {
       }),
     );
   });
-  it("continues actor push after reply failure and skips an unregistered partner", async () => {
+  it("does not push to the actor after reply failure and skips an unregistered partner", async () => {
     const f = fixture();
     f.dependencies.userRepository = new InMemoryHouseholdUserRepository([
       actor,
@@ -152,11 +155,11 @@ describe("asynchronous LINE webhook without persistent state", () => {
     f.client.replyMessage.mockRejectedValue(new Error("expired reply token"));
     await request(f.app());
     await Promise.all(f.tasks);
-    expect(f.client.pushMessage).toHaveBeenCalledOnce();
+    expect(f.client.pushMessage).not.toHaveBeenCalled();
     expect(console.error).toHaveBeenCalledWith(
       expect.objectContaining({ event: "line_webhook.reply_failed" }),
     );
-    expect(console.error).not.toHaveBeenCalledWith(
+    expect(console.error).toHaveBeenCalledWith(
       expect.objectContaining({ event: "line_webhook.processing_failed" }),
     );
     expect(console.info).toHaveBeenCalledWith(
@@ -166,22 +169,45 @@ describe("asynchronous LINE webhook without persistent state", () => {
       }),
     );
   });
-  it("logs a push failure, continues other recipients and does not roll back the save", async () => {
+  it("logs a partner push failure without rolling back the save", async () => {
     const f = fixture();
     const save = vi.spyOn(f.repository, "create");
     f.client.pushMessage.mockRejectedValueOnce(new Error("push failed"));
     await request(f.app());
     await Promise.all(f.tasks);
     expect(save).toHaveBeenCalledOnce();
-    expect(f.client.pushMessage).toHaveBeenCalledTimes(2);
+    expect(f.client.pushMessage).toHaveBeenCalledTimes(1);
     expect(console.error).toHaveBeenCalledWith(
       expect.objectContaining({
         event: "line_webhook.push_failed",
-        recipientUserId: "woman",
+        recipientUserId: "man",
       }),
     );
     expect(console.error).toHaveBeenCalledWith(
       expect.objectContaining({ event: "line_webhook.processing_failed" }),
     );
+  });
+  it("still notifies the partner when actor Reply fails", async () => {
+    const f = fixture();
+    f.client.replyMessage.mockRejectedValue(new Error("reply failed"));
+    await request(f.app());
+    await Promise.all(f.tasks);
+    expect(f.client.pushMessage.mock.calls.map(([input]) => input.to)).toEqual([
+      partner.lineUserId,
+    ]);
+    expect(console.error).toHaveBeenCalledWith(
+      expect.objectContaining({ event: "line_webhook.reply_failed" }),
+    );
+  });
+  it("does not push when partner notifications are disabled", async () => {
+    const f = fixture();
+    f.dependencies.userRepository = new InMemoryHouseholdUserRepository([
+      actor,
+      { ...partner, notifyEnabled: false },
+    ]);
+    await request(f.app());
+    await Promise.all(f.tasks);
+    expect(f.client.replyMessage).toHaveBeenCalledOnce();
+    expect(f.client.pushMessage).not.toHaveBeenCalled();
   });
 });

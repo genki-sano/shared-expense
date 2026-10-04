@@ -208,13 +208,12 @@ async function handleTextMessage(
       reason: errorMessage(error),
     });
   }
-  const actorNotified = await notifyHouseholdUsers(dependencies, {
+  await notifyHouseholdUsers(dependencies, {
     actor,
     expense,
     webhookEventId: event.webhookEventId,
   });
-  if (replyFailed && !actorNotified)
-    throw new Error("Registration confirmation delivery failed");
+  if (replyFailed) throw new Error("Registration confirmation delivery failed");
 }
 
 async function replyOnboardingGuide(
@@ -451,23 +450,29 @@ export async function verifyLineWebhookSignature(input: {
 async function notifyHouseholdUsers(
   dependencies: LineWebhookRoutesDependencies,
   input: { actor: User; expense: Expense; webhookEventId?: string | undefined },
-): Promise<boolean> {
+): Promise<void> {
   const users = await dependencies.userRepository.listHouseholdUsers();
   let failed = false;
-  let actorNotified = false;
   for (const user of users) {
     const fields = {
       webhookEventId: input.webhookEventId,
       expenseId: input.expense.id,
       recipientUserId: user.id,
     };
-    if (!user.notifyEnabled || !user.lineUserId.trim()) {
+    if (
+      user.id === input.actor.id ||
+      !user.notifyEnabled ||
+      !user.lineUserId.trim()
+    ) {
       console.info({
         event: "line_webhook.push_skipped",
         ...fields,
-        reason: !user.notifyEnabled
-          ? "notifications disabled"
-          : "unregistered recipient",
+        reason:
+          user.id === input.actor.id
+            ? "actor receives reply only"
+            : !user.notifyEnabled
+              ? "notifications disabled"
+              : "unregistered recipient",
       });
       continue;
     }
@@ -477,7 +482,6 @@ async function notifyHouseholdUsers(
         to: user.lineUserId,
         messages: [successFlexMessage(dependencies, input)],
       });
-      if (user.id === input.actor.id) actorNotified = true;
       console.info({ event: "line_webhook.push_completed", ...fields });
     } catch (error) {
       failed = true;
@@ -490,7 +494,6 @@ async function notifyHouseholdUsers(
     }
   }
   if (failed) throw new Error("One or more household notifications failed");
-  return actorNotified;
 }
 
 function successFlexMessage(

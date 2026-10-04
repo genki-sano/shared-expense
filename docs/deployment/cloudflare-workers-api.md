@@ -84,11 +84,15 @@ logs for `line_webhook` and correlate by `webhookEventId`. The HTTP invocation l
 alone does not describe registration or notification success. Processing, save,
 reply and recipient push have start/completion logs; failures use `processing_failed`,
 `save_failed`, `reply_failed` and `push_failed`. `push_skipped` explains disabled or
-unregistered recipients. Logs omit message bodies, tokens and raw LINE identifiers.
+unregistered recipients, and the actor (who receives Reply only). Logs omit message bodies, tokens and raw LINE identifiers.
 
 ```sh
 pnpm --filter @shared-expense/api exec wrangler tail --format json
 ```
+
+The actor receives only a Reply after saving. Push is sent only to registered,
+notification-enabled partners. Reply failures are logged and do not trigger an actor
+Push fallback; partner notification is still attempted.
 
 There is no persisted processing state, deduplication or automatic retry. Failed
 notifications do not roll back saved expenses. A successful acknowledgment does not
