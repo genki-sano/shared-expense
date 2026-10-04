@@ -90,7 +90,6 @@ export type LineFlexComponent =
 export type LineMessage = LineTextMessage | LineFlexMessage;
 
 export type PushLineMessageInput = {
-  retryKey?: string;
   to: string;
   messages: LineMessage[];
 };
@@ -158,15 +157,12 @@ export class FetchLineMessagingClient implements LineMessagingClient {
       headers: {
         Authorization: `Bearer ${this.#channelAccessToken}`,
         "Content-Type": "application/json",
-        ...(input.retryKey ? { "X-Line-Retry-Key": input.retryKey } : {}),
       },
       body: JSON.stringify({
         to: input.to,
         messages: input.messages,
       }),
     });
-
-    if (input.retryKey && response.status === 409 && response.headers.get("x-line-accepted-request-id")) return;
 
     if (!response.ok) {
       const responseBody = await safeResponseText(response);

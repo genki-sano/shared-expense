@@ -45,7 +45,6 @@ export type ClaimSpreadsheetHouseholdUserInput = {
 };
 
 export type CreateSpreadsheetExpenseInput = {
-  id?: string;
   userId?: string;
   actor: { id: string };
   date: string;
@@ -201,9 +200,7 @@ export class SpreadsheetExpenseRepository {
   async create(input: CreateSpreadsheetExpenseInput): Promise<Expense> {
     const userNamesByType = await this.#userNamesByType();
     const payments = await this.#paymentRows();
-    const existing = payments.rows.find(({ row }) => row[0] === input.id);
-    if (existing) return this.#expenseFromRow(existing.row, existing.rowNumber, userNamesByType);
-    const id = input.id ?? nextPaymentId(payments.rows);
+    const id = nextPaymentId(payments.rows);
     const rowNumber = payments.rows.length + 2;
     const expense: Expense = {
       id,

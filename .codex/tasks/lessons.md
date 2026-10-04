@@ -46,3 +46,6 @@
 
 ## 2026-10-03: Identify the missing notification before attributing failure
 - Clarify recipient and whether the chat message or device notification is missing. An empty partner push target is a separate defect and does not explain actor delivery when sends are isolated by Promise.allSettled. Do not infer initial-login timing as the cause without response logs.
+
+## 2026-10-04: Match webhook reliability scope to the requested fix
+- Early acknowledgment and waitUntil do not require persistent state. Do not add D1/deduplication infrastructure to a timeout-and-logging fix without agreement on its extra operational responsibility.

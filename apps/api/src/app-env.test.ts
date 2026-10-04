@@ -1,4 +1,3 @@
-import { InMemoryWebhookEventStore } from "./line-webhook/event-store";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createAppFromEnv } from "./app";
 
@@ -434,7 +433,6 @@ describe("createAppFromEnv", () => {
         LINE_LIFF_ID: "1234567890-shared-expense",
       },
       {
-        webhookEventStore: new InMemoryWebhookEventStore(),
         signServiceAccountJwt: async () => "signed-jwt",
         fetcher: async (url, init) => {
           calls.push({ url: String(url), init });

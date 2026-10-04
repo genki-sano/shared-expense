@@ -6,7 +6,6 @@ export type ListExpensesInput = {
 };
 
 export type CreateExpenseInput = {
-  id?: string;
   userId?: string;
   actor: User;
   date: string;

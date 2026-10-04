@@ -6,12 +6,6 @@
   "vars": {
     "API_ALLOWED_ORIGINS": "https://liff.line.me,https://shared-expense.pages.dev"
   },
-  "d1_databases": [{
-    "binding": "LINE_WEBHOOK_DB",
-    "database_name": "shared-expense-line-webhooks",
-    "database_id": "00000000-0000-0000-0000-000000000000",
-    "migrations_dir": "migrations"
-  }],
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1

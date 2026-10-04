@@ -4,12 +4,9 @@ import { authenticateLocalDevToken } from "./dev-auth";
 import { loadLocalDevAppEnv } from "./dev-env";
 import { createNodeRequest } from "./dev-request";
 
-import { InMemoryWebhookEventStore } from "./line-webhook/event-store";
-
 const port = Number(process.env.PORT ?? 8787);
 const app = createAppFromEnv(loadLocalDevAppEnv(), {
   authenticateToken: authenticateLocalDevToken,
-  webhookEventStore: new InMemoryWebhookEventStore(),
 });
 
 const server = createServer(async (incoming, outgoing) => {

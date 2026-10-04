@@ -3474,3 +3474,18 @@ Frontend dashboard/routes/detail query parsing, corresponding frontend tests, LI
 - Deployment guide updated with D1 creation/binding/migration, logging and recovery limitations. .wrangler ignored as generated local state.
 - Real D1 must be created and placeholder database_id replaced before deployment. No remote database creation, remote migration, deployment, commit or push performed.
 - waitUntil remains best effort with a 30-second post-response limit; no automatic retries or payload retention. Unknown saves and pushes beyond the 24-hour retry-key window require manual inspection. End-to-end production LINE/Spreadsheet validation remains pending after setup/deployment.
+
+## Simplify webhook processing without D1 (2026-10-04)
+- [x] Remove event store, migrations, bindings, checkpoints, deterministic IDs and replay retry keys.
+- [x] Retain validated early acknowledgment, waitUntil, per-event failure isolation and stage logs.
+- [x] Update tests and operational guide for manual inspection without automatic replay.
+- [x] Verify workspace typecheck/tests, API build and dry-run; no deployment/commit.
+
+### Verification
+- pnpm typecheck PASS across workspace; existing OpenAPI license/localhost warnings unchanged.
+- pnpm test PASS: 31 files / 186 tests, including early response, invalid signature/body, empty verification payload, save/push failure isolation and reply-to-push fallback.
+- pnpm build:api PASS.
+- pnpm --filter @shared-expense/api dry-run PASS: 148.27 KiB bundle, only API_ALLOWED_ORIGINS binding, no D1.
+- git diff --check PASS. Production LINE/Spreadsheet validation not performed.
+- Removed progress stores/tests, migration, generated D1 binding types, configuration, event-derived IDs and replay retry-key support. Retained Workers execution-context types for waitUntil.
+- Recovery is manual via logs and Spreadsheet; no durable execution, deduplication or automatic retries. Updated deployment documentation; frontend unchanged. No deployment, remote database deletion or commit performed.

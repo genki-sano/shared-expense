@@ -3,8 +3,6 @@ import type {
   LineFlexMessage,
   LineMessagingClient,
 } from "@shared-expense/integrations";
-import { ExpenseRepositoryError } from "../core/expenses/repository";
-import type { WebhookClaim, WebhookEventStore } from "./event-store";
 import type { Expense, User } from "@shared-expense/shared";
 import { Hono } from "hono";
 import type { ExpenseRepository } from "../core/expenses/repository";
@@ -15,7 +13,6 @@ import type {
 } from "../core/users/repository";
 
 export type LineWebhookRoutesDependencies = {
-  eventStore?: WebhookEventStore | null;
   schedule?: (task: Promise<void>) => void;
   channelSecret: string;
   expenseRepository: ExpenseRepository;
@@ -75,23 +72,6 @@ export function createLineWebhookRoutes(
     }
 
     const events = body.events.filter(isLineWebhookEvent);
-    if (
-      dependencies.eventStore === null ||
-      (dependencies.schedule && !dependencies.eventStore)
-    ) {
-      console.error({
-        event: "line_webhook.unavailable",
-        stage: "configuration",
-        reason: "LINE_WEBHOOK_DB binding is required",
-      });
-      return c.json({ message: "Webhook storage is unavailable" }, 503);
-    }
-    if (
-      dependencies.schedule &&
-      events.some((event) => !event.webhookEventId?.trim())
-    ) {
-      return c.json({ message: "Webhook event ID is required" }, 400);
-    }
     console.info({ event: "line_webhook.received", eventCount: events.length });
     const task = processWebhookEvents(dependencies, events);
     if (dependencies.schedule) dependencies.schedule(task);
@@ -107,45 +87,17 @@ async function processWebhookEvents(
   events: LineWebhookEvent[],
 ): Promise<void> {
   for (const event of events) {
-    let claim: WebhookClaim | undefined;
     try {
-      if (dependencies.eventStore && event.webhookEventId) {
-        const acquired = await dependencies.eventStore.claim(
-          event.webhookEventId,
-        );
-        if (!acquired) {
-          logEvent("processing_skipped", event, {
-            reason: "already completed or processing",
-          });
-          continue;
-        }
-        claim = acquired;
-      }
       logEvent("processing_started", event);
-      await handleLineWebhookEvent(dependencies, event, claim);
-      if (claim) await dependencies.eventStore!.release(claim, true);
-      logEvent("processing_completed", event, {
-        expenseId: claim?.progress.expense?.id,
-      });
+      await handleLineWebhookEvent(dependencies, event);
+      logEvent("processing_completed", event);
     } catch (error) {
       console.error({
         event: "line_webhook.processing_failed",
         webhookEventId: event.webhookEventId,
         eventType: event.type,
-        expenseId: claim?.progress.expense?.id,
         reason: errorMessage(error),
       });
-      if (claim) {
-        try {
-          await dependencies.eventStore!.release(claim, false);
-        } catch (releaseError) {
-          console.error({
-            event: "line_webhook.checkpoint_failed",
-            webhookEventId: event.webhookEventId,
-            reason: errorMessage(releaseError),
-          });
-        }
-      }
     }
   }
 }
@@ -166,7 +118,6 @@ function logEvent(
 async function handleLineWebhookEvent(
   dependencies: LineWebhookRoutesDependencies,
   event: LineWebhookEvent,
-  claim?: WebhookClaim,
 ): Promise<void> {
   if (event.replyToken === undefined) {
     return;
@@ -183,14 +134,13 @@ async function handleLineWebhookEvent(
   }
 
   if (event.type === "message" && event.message?.type === "text") {
-    await handleTextMessage(dependencies, event, claim);
+    await handleTextMessage(dependencies, event);
   }
 }
 
 async function handleTextMessage(
   dependencies: LineWebhookRoutesDependencies,
   event: LineWebhookEvent,
-  claim?: WebhookClaim,
 ): Promise<void> {
   if (event.replyToken === undefined) return;
   const actor = await findUserByLineUserId(
@@ -212,100 +162,59 @@ async function handleTextMessage(
     return;
   }
 
-  const expenseId = claim ? `line_${claim.eventId}` : undefined;
-  let expense = claim?.progress.expense;
-  if (!expense && claim?.progress.saving && expenseId) {
-    // An append may have succeeded before interruption. Never blindly append again.
-    try {
-      expense = (
-        await dependencies.expenseRepository.getById({ id: expenseId, actor })
-      ).expense;
-      logEvent("save_recovered", event, { expenseId });
-    } catch (error) {
-      if (isExpenseNotFound(error))
-        throw new Error(
-          "Previous Spreadsheet save outcome is uncertain; inspect payments before retrying this event",
-        );
-      throw error;
-    }
+  let expense: Expense;
+  logEvent("save_started", event, { actorId: actor.id });
+  try {
+    expense = await dependencies.expenseRepository.create({
+      actor,
+      date: todayInJst(dependencies.now?.() ?? new Date()),
+      price: parsedText.price,
+      category: WEBHOOK_CATEGORY,
+      memo: parsedText.memo,
+    });
+  } catch (error) {
+    console.error({
+      event: "line_webhook.save_failed",
+      webhookEventId: event.webhookEventId,
+      stage: "save",
+      reason: errorMessage(error),
+    });
+    await replyText(
+      dependencies.lineMessagingClient,
+      event.replyToken,
+      "登録結果を確認できませんでした。一覧を確認し、支出がない場合は管理者に連絡してください。",
+    );
+    throw error;
   }
-  if (!expense) {
-    if (claim) {
-      claim.progress.saving = true;
-      await dependencies.eventStore!.checkpoint(claim);
-    }
-    logEvent("save_started", event, { expenseId, actorId: actor.id });
-    try {
-      expense = await dependencies.expenseRepository.create({
-        ...(expenseId ? { id: expenseId } : {}),
-        actor,
-        date: todayInJst(dependencies.now?.() ?? new Date()),
-        price: parsedText.price,
-        category: WEBHOOK_CATEGORY,
-        memo: parsedText.memo,
-      });
-    } catch (error) {
-      console.error({
-        event: "line_webhook.save_failed",
-        stage: "save",
-        reason: errorMessage(error),
-        webhookEventId: event.webhookEventId,
-      });
-      await replyText(
-        dependencies.lineMessagingClient,
-        event.replyToken,
-        "登録結果を確認できませんでした。一覧を確認し、支出がない場合は管理者に連絡してください。",
-      );
-      throw error;
-    }
-    logEvent("save_completed", event, {
+  logEvent("save_completed", event, {
+    expenseId: expense.id,
+    actorId: actor.id,
+  });
+  let replyFailed = false;
+  logEvent("reply_started", event, { expenseId: expense.id });
+  try {
+    await dependencies.lineMessagingClient.replyMessage({
+      replyToken: event.replyToken,
+      messages: [successFlexMessage(dependencies, { actor, expense })],
+    });
+    logEvent("reply_completed", event, { expenseId: expense.id });
+  } catch (error) {
+    replyFailed = true;
+    console.error({
+      event: "line_webhook.reply_failed",
+      webhookEventId: event.webhookEventId,
       expenseId: expense.id,
-      actorId: actor.id,
+      stage: "reply",
+      reason: errorMessage(error),
     });
   }
-  if (claim) {
-    claim.progress.expense = expense;
-    await dependencies.eventStore!.checkpoint(claim);
-  }
-
-  let replyFailed = false;
-  if (!claim?.progress.replyComplete) {
-    logEvent("reply_started", event, { expenseId: expense.id });
-    try {
-      await dependencies.lineMessagingClient.replyMessage({
-        replyToken: event.replyToken,
-        messages: [successFlexMessage(dependencies, { actor, expense })],
-      });
-      if (claim) {
-        claim.progress.replyComplete = true;
-        await dependencies.eventStore!.checkpoint(claim);
-      }
-      logEvent("reply_completed", event, { expenseId: expense.id });
-    } catch (error) {
-      replyFailed = true;
-      console.error({
-        event: "line_webhook.reply_failed",
-        stage: "reply",
-        reason: errorMessage(error),
-        webhookEventId: event.webhookEventId,
-        expenseId: expense.id,
-      });
-    }
-  }
-  await notifyHouseholdUsers(
-    dependencies,
-    { actor, expense, webhookEventId: event.webhookEventId },
-    claim,
-  );
-  // A successful actor push is also a registration confirmation if the reply token expired.
-  if (replyFailed && !claim?.progress.sentTo?.includes(actor.id))
+  const actorNotified = await notifyHouseholdUsers(dependencies, {
+    actor,
+    expense,
+    webhookEventId: event.webhookEventId,
+  });
+  if (replyFailed && !actorNotified)
     throw new Error("Registration confirmation delivery failed");
-}
-
-function isExpenseNotFound(error: unknown): boolean {
-  return error instanceof ExpenseRepositoryError
-    ? error.code === "not_found"
-    : error instanceof Error && error.message.startsWith("Expense not found: ");
 }
 
 async function replyOnboardingGuide(
@@ -542,93 +451,46 @@ export async function verifyLineWebhookSignature(input: {
 async function notifyHouseholdUsers(
   dependencies: LineWebhookRoutesDependencies,
   input: { actor: User; expense: Expense; webhookEventId?: string | undefined },
-  claim?: WebhookClaim,
-): Promise<void> {
+): Promise<boolean> {
   const users = await dependencies.userRepository.listHouseholdUsers();
   let failed = false;
+  let actorNotified = false;
   for (const user of users) {
     const fields = {
       webhookEventId: input.webhookEventId,
       expenseId: input.expense.id,
       recipientUserId: user.id,
     };
-    if (
-      !user.notifyEnabled ||
-      !user.lineUserId.trim() ||
-      claim?.progress.sentTo?.includes(user.id)
-    ) {
+    if (!user.notifyEnabled || !user.lineUserId.trim()) {
       console.info({
         event: "line_webhook.push_skipped",
         ...fields,
         reason: !user.notifyEnabled
           ? "notifications disabled"
-          : !user.lineUserId.trim()
-            ? "unregistered recipient"
-            : "already sent",
+          : "unregistered recipient",
       });
       continue;
     }
     console.info({ event: "line_webhook.push_started", ...fields });
     try {
-      if (claim) {
-        const startedAt = claim.progress.pushStartedAt?.[user.id];
-        if (
-          startedAt !== undefined &&
-          Date.now() - startedAt >= 24 * 60 * 60 * 1000
-        ) {
-          throw new Error(
-            "LINE retry key expired; delivery outcome requires manual verification",
-          );
-        }
-        if (startedAt === undefined) {
-          claim.progress.pushStartedAt = {
-            ...claim.progress.pushStartedAt,
-            [user.id]: Date.now(),
-          };
-          await dependencies.eventStore!.checkpoint(claim);
-        }
-      }
       await dependencies.lineMessagingClient.pushMessage({
         to: user.lineUserId,
-        ...(claim
-          ? { retryKey: await webhookPushRetryKey(claim.eventId, user.id) }
-          : {}),
         messages: [successFlexMessage(dependencies, input)],
       });
-      if (claim) {
-        claim.progress.sentTo = [...(claim.progress.sentTo ?? []), user.id];
-        await dependencies.eventStore!.checkpoint(claim);
-      }
+      if (user.id === input.actor.id) actorNotified = true;
       console.info({ event: "line_webhook.push_completed", ...fields });
     } catch (error) {
       failed = true;
       console.error({
         event: "line_webhook.push_failed",
-        stage: "push",
         ...fields,
+        stage: "push",
         reason: errorMessage(error),
       });
     }
   }
   if (failed) throw new Error("One or more household notifications failed");
-}
-
-export async function webhookPushRetryKey(
-  eventId: string,
-  userId: string,
-): Promise<string> {
-  const hash = new Uint8Array(
-    await crypto.subtle.digest(
-      "SHA-256",
-      new TextEncoder().encode(JSON.stringify([eventId, userId])),
-    ),
-  );
-  hash[6] = (hash[6]! & 15) | 64;
-  hash[8] = (hash[8]! & 63) | 128;
-  const hex = [...hash.slice(0, 16)]
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("");
-  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  return actorNotified;
 }
 
 function successFlexMessage(
