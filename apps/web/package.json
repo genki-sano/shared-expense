@@ -10,7 +10,7 @@
     "generate:api-types": "openapi-typescript ../../packages/api-contract/openapi.yaml -o src/lib/api-schema.d.ts"
   },
   "dependencies": {
-    "@line/liff": "^2.29.1",
+    "@line/liff": "^2.31.2",
     "@shared-expense/shared": "workspace:*",
     "@tanstack/react-query": "^5",
     "next": "^16.2.12",

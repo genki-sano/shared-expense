@@ -3495,3 +3495,13 @@ Frontend dashboard/routes/detail query parsing, corresponding frontend tests, LI
 - [x] Update notification tests and deployment guide; verify typecheck, tests and API build.
 
 - Verification: pnpm typecheck PASS (existing OpenAPI warnings only), pnpm test PASS (31 files / 188 tests), pnpm build:api PASS, git diff --check PASS. Tests confirm actor is never pushed on Reply success/failure, partner still receives Push on Reply failure, disabled/unregistered partner is skipped, and early acknowledgment remains. No production connection, deployment or commit.
+
+## LIFF SDK security update (2026-10-26)
+- [x] Confirm advisory and official release notes: 2.29.1 is affected; fixed >=2.31.1; current 2.31.2.
+- [ ] Update web SDK and lockfile to 2.31.2 without unrelated dependency updates.
+- [ ] Verify web typecheck/lint, existing tests, build and dependency diff.
+- README reviewed: version-only update does not change documented structure/responsibilities.
+- [x] Updated @line/liff ^2.29.1 -> ^2.31.2 and all SDK transitive packages; installed version verified as 2.31.2. Unrelated ESLint snapshot churn and generated next-env.d.ts changes removed.
+- [x] Verification PASS: web typecheck, web lint, pnpm test (31 files / 188 tests), pnpm build:web (static export), frozen/offline lockfile validation, git diff --check.
+- Reviewed 2.31.2 query-value question-mark behavior change: application links use expense ID/month parameters; existing LIFF primary redirect/authentication tests pass. Actual LINE browser login/navigation remains untested.
+- README unchanged because documented layout, responsibilities and commands are unaffected. No deployment or commit performed; frontend deployment and real LINE smoke test remain operational follow-up.
